@@ -1,0 +1,56 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+@import "tailwindcss";
+@layer base {
+  body {
+    font-family: 'Inter', sans-serif;
+  }
+}
+@theme {
+  --color-brand: var(--brand);         
+  --color-success: var(--success);     
+  --color-bg-app: var(--bg-app);       
+  --color-surface: var(--surface);     
+  --color-border-ui: var(--border-ui); 
+  --color-text-main: var(--text-main); 
+  --color-text-muted: var(--text-muted); 
+
+  --shadow-clay-card: 
+    inset 2px 2px 4px rgba(255, 255, 255, 0.4), 
+    inset -2px -2px 4px rgba(165, 180, 252, 0.05), 
+    0px 8px 24px -4px rgba(79, 70, 229, 0.04);
+
+  --shadow-clay-btn: 
+    inset 1px 1px 2px rgba(255, 255, 255, 0.5), 
+    inset -1px -1px 2px rgba(0, 0, 0, 0.04),
+    0px 4px 12px -2px rgba(79, 70, 229, 0.08);
+
+  --shadow-clay-btn-hover: 
+    inset 1px 1px 2px rgba(255, 255, 255, 0.6), 
+    inset -1px -1px 2px rgba(0, 0, 0, 0.06),
+    0px 6px 16px -2px rgba(79, 70, 229, 0.12);
+}
+
+
+:root, .light {
+  --brand: #4f46e5;      
+  --success: #10b981;    
+  --bg-app: #f9fafb;      
+  --surface: #ffffff;     
+  --border-ui: #f1f5f9;   
+  --text-main: #0f172a; 
+  --text-muted: #64748b; 
+}
+
+.dark {
+  --brand: #818cf8;      
+  --success: #34d399;    
+  --bg-app: #090d16;      
+  --surface: #111827;    
+  --border-ui: #1f2937;  
+  --text-main: #f8fafc;  
+  --text-muted: #94a3b8; 
+}
+
+@variant dark (.dark &);
+@variant light (.light &);
+

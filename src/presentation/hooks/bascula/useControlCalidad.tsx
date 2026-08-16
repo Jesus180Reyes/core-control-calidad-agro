@@ -1,0 +1,102 @@
+import type { InfoDesconexion } from "#/presentation/types/control-calidad/bascula.types"
+import type { Muestra, OperacionData, ParametrosData } from "#/presentation/types/control-calidad/control-calidad.types"
+import { useEffect, useRef, useState } from "react"
+import { useSerialScale } from "./useSerialScale"
+
+const MAX_MUESTRAS_VISIBLES = 8
+
+export function useControlCalidad() {
+    const [operacion] = useState<OperacionData>({
+        cliente: 'Azucarera La Grecia',
+        etapa: 'En Proceso',
+        lote: 'S-88',
+    })
+
+    const [parametros] = useState<ParametrosData>({
+        minimo: 220,
+        ideal: 230,
+        maximo: 252,
+    })
+
+    /** Consecutivo local de muestras (hasta que exista el ID del servidor). */
+    const consecutivoRef = useRef<number>(1843)
+
+    const [ultimasMuestras, setUltimasMuestras] = useState<Muestra[]>([
+        { id: '#1842', hora: '14:22:10', peso: 50012, estado: 'DENTRO DE RANGO' },
+        { id: '#1841', hora: '14:18:05', peso: 49998, estado: 'DENTRO DE RANGO' },
+    ])
+
+    const scale = useSerialScale({
+        baudRate: 9600,
+        umbralCero: 5,
+        segundosEstabilizacion: 5,
+        // Tolerancia de ruido durante la ventana de estabilización.
+        toleranciaEstabilidad: 5,
+        // Aviso si el indicador deja de transmitir con el puerto abierto.
+        timeoutSinDatosMs: 4000,
+        autoReconectar: true,
+        onPesajeEstable: (peso) => {
+            const dentroDeRango = peso >= parametros.minimo && peso <= parametros.maximo
+            const muestra: Muestra = {
+                id: `#${consecutivoRef.current++}`,
+                hora: new Date().toLocaleTimeString('es-HN', { hour12: false }),
+                peso,
+                estado: dentroDeRango ? 'DENTRO DE RANGO' : 'DESVIADO',
+            }
+            setUltimasMuestras((previas) => [muestra, ...previas].slice(0, MAX_MUESTRAS_VISIBLES))
+        },
+        onDesconexion: (info: InfoDesconexion) => {
+            console.warn(`⚠️ Báscula (${info.motivo}) a las ${info.hora}: ${info.mensaje}`)
+        },
+    })
+
+    const diferencia = scale.pesoActual - parametros.ideal
+    const esBajoRango = scale.pesoActual < parametros.minimo
+    const esAltoRango = scale.pesoActual > parametros.maximo
+    const requiereReajuste = scale.pesoActual > 0 && (esBajoRango || esAltoRango)
+
+    const [mostrarBloqueo, setMostrarBloqueo] = useState<boolean>(false)
+
+    useEffect(() => {
+        // Solo se bloquea con lecturas confiables: la báscula debe estar
+        // transmitiendo y el peso ya estabilizado (evita disparos durante la carga).
+        setMostrarBloqueo(esAltoRango && scale.hayFlujoDatos && !scale.isStabilizing)
+    }, [esAltoRango, scale.hayFlujoDatos, scale.isStabilizing])
+
+    const handleRechazarPesaje = () => {
+        console.log("❌ Pesaje rechazado por el operario")
+        setMostrarBloqueo(false)
+        scale.reiniciarPesaje()
+    }
+
+    const handleAutorizarConPin = async (pinIngresado: string): Promise<boolean> => {
+        console.log("🔑 Procesando validación de PIN en el servidor:", pinIngresado)
+        try {
+            const pinCorrecto = "1234"
+            if (pinIngresado !== pinCorrecto) return false
+
+            console.log("✅ PIN de supervisor aprobado.")
+            setMostrarBloqueo(false)
+            return true
+        } catch (err) {
+            console.error("Error al autorizar lote:", err)
+            return false
+        }
+    }
+
+    return {
+        operacion,
+        parametros,
+        ultimasMuestras,
+        scale,
+        pesajeInfo: {
+            diferencia,
+            requiereReajuste,
+        },
+        bloqueo: {
+            mostrar: mostrarBloqueo,
+            handleRechazar: handleRechazarPesaje,
+            handleAutorizar: handleAutorizarConPin,
+        }
+    }
+}

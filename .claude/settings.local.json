@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node -e \"console.log\\(require\\('typescript/package.json'\\).version\\)\")",
+      "Bash(echo \"exit=$?\")",
+      "Bash(node -e ' *)",
+      "Bash(rm .tmp-parse-snippet.txt)",
+      "Bash(npx tsc *)",
+      "Bash(npx vitest *)"
+    ]
+  }
+}
