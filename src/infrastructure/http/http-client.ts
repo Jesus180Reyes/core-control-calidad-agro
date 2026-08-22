@@ -1,117 +1,62 @@
-import { leerToken, limpiarSesion } from '#/presentation/hooks/auth/almacenamientoSesion'
-
-const BASE_URL = import.meta.env.VITE_API_URL ?? ''
-
-export class HttpError extends Error {
-  constructor(
-    message: string,
-    public readonly status: number,
-    public readonly body: unknown,
-  ) {
-    super(message)
-    this.name = 'HttpError'
-  }
-}
-
-export function mensajeDelServidor(body: unknown): string | null {
-  if (typeof body === 'object' && body !== null && 'message' in body) {
-    const { message } = body as { message: unknown }
-    if (typeof message === 'string' && message.length > 0) return message
-  }
-  return null
-}
-
-export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE'
-
-export type QueryParams = Record<string, string | number | boolean | undefined | null>
-
-interface HttpRequestOptions {
-  method: HttpMethod
-  body?: unknown
-  params?: QueryParams
-  headers?: HeadersInit
-  signal?: AbortSignal
-}
-
-type QueryRequestOptions = Pick<HttpRequestOptions, 'params' | 'headers' | 'signal'>
-type MutationRequestOptions = Pick<HttpRequestOptions, 'headers' | 'signal'>
-
-async function parseResponse<T>(response: Response, llevabaToken: boolean): Promise<T> {
-  const contentType = response.headers.get('content-type') ?? ''
-  const body = contentType.includes('application/json')
-    ? await response.json().catch(() => null)
-    : await response.text()
-
-  if (!response.ok) {
-    if (response.status === 401 && llevabaToken) {
-      limpiarSesion()
-      window.location.assign('/login')
-    }
-    throw new HttpError(`${response.status} ${response.statusText}`, response.status, body)
-  }
-
-  return body as T
-}
-
-function tieneAuthorization(headers?: HeadersInit): boolean {
-  if (!headers) return false
-  if (headers instanceof Headers) return headers.has('Authorization')
-  if (Array.isArray(headers)) return headers.some(([key]) => key.toLowerCase() === 'authorization')
-  return Object.keys(headers).some((key) => key.toLowerCase() === 'authorization')
-}
-
-function buildUrl(endpoint: string, params?: QueryParams): string {
-  const url = `${BASE_URL}${endpoint}`
-  if (!params) return url
-
-  const query = new URLSearchParams()
-  for (const [key, value] of Object.entries(params)) {
-    if (value !== undefined && value !== null) query.append(key, String(value))
-  }
-
-  const queryString = query.toString()
-  return queryString ? `${url}?${queryString}` : url
-}
+import { createHttpClient } from '#/infrastructure/http/create-http-client'
+import { registrarInterceptoresAuth } from '#/infrastructure/http/interceptores-auth'
 
 /**
- * Base de todos los helpers http*. Serializa el body a JSON salvo que sea
- * FormData (en cuyo caso deja que el navegador ponga el boundary).
+ * Instancia única del cliente HTTP de la app, ya cableada a la sesión.
+ *
+ * El registro de los interceptores vive acá, junto a la creación: así la
+ * instancia no puede existir sin token ni sin el manejo del 401, y nadie tiene
+ * que acordarse de encenderla desde otro archivo.
+ *
+ * `createHttpClient` queda disponible para instanciar un cliente contra **otro**
+ * API. Ese cliente no lleva los interceptores de auth: hay que registrárselos a
+ * mano si los necesita.
  */
-export function httpRequest<T>(endpoint: string, options: HttpRequestOptions): Promise<T> {
-  const { method, body, params, headers, signal } = options
-  const isFormData = body instanceof FormData
+export const api = createHttpClient({
+  baseUrl: import.meta.env.VITE_API_URL ?? '',
+  timeoutMs: 15_000,
+})
 
-  const token = leerToken()
-  const llevaToken = Boolean(token) && !tieneAuthorization(headers)
+registrarInterceptoresAuth(api)
 
-  return fetch(buildUrl(endpoint, params), {
-    method,
-    headers: {
-      ...(isFormData ? {} : { 'Content-Type': 'application/json' }),
-      ...(llevaToken ? { Authorization: `Bearer ${token}` } : {}),
-      ...headers,
-    },
-    body: isFormData ? body : body !== undefined ? JSON.stringify(body) : undefined,
-    signal,
-  }).then((response) => parseResponse<T>(response, llevaToken))
-}
+export const httpRequest = api.request
+export const httpGet = api.get
+export const httpPost = api.post
+export const httpPut = api.put
+export const httpPatch = api.patch
+export const httpDelete = api.delete
 
-export function httpGet<T>(endpoint: string, options?: QueryRequestOptions): Promise<T> {
-  return httpRequest<T>(endpoint, { method: 'GET', ...options })
-}
+export {
+  ErrorHttpBase,
+  HttpError,
+  NetworkError,
+  RequestCancelado,
+  TimeoutError,
+  esCancelado,
+  esDeRed,
+  esHttpError,
+  esNoAutorizado,
+  esNoEncontrado,
+  esProhibido,
+  esReintentable,
+  esTimeout,
+  esValidacion,
+  mensajeDelServidor,
+} from '#/infrastructure/http/http-errors'
 
-export function httpPost<T>(endpoint: string, body?: unknown, options?: MutationRequestOptions): Promise<T> {
-  return httpRequest<T>(endpoint, { method: 'POST', body, ...options })
-}
+export { createHttpClient } from '#/infrastructure/http/create-http-client'
 
-export function httpPut<T>(endpoint: string, body?: unknown, options?: MutationRequestOptions): Promise<T> {
-  return httpRequest<T>(endpoint, { method: 'PUT', body, ...options })
-}
+export type {
+  ContextoPeticion,
+  HttpClient,
+  HttpClientConfig,
+  HttpMethod,
+  HttpRequestOptions,
+  InterceptorError,
+  InterceptorPeticion,
+  InterceptorRespuesta,
+  MutationRequestOptions,
+  QueryRequestOptions,
+} from '#/infrastructure/http/create-http-client'
 
-export function httpPatch<T>(endpoint: string, body?: unknown, options?: MutationRequestOptions): Promise<T> {
-  return httpRequest<T>(endpoint, { method: 'PATCH', body, ...options })
-}
-
-export function httpDelete<T>(endpoint: string, body?: unknown, options?: MutationRequestOptions): Promise<T> {
-  return httpRequest<T>(endpoint, { method: 'DELETE', body, ...options })
-}
+export type { QueryParams, ValorParam } from '#/infrastructure/http/query-params'
