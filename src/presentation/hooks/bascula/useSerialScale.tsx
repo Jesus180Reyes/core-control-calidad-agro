@@ -46,6 +46,13 @@ export interface UseSerialScaleProps {
     autoReconectar?: boolean
     maxIntentosReconexion?: number
     /**
+     * Resuelve qué puerto usar al reconectar. Si se omite, se mantiene la
+     * búsqueda actual (huella del último puerto y, en último caso, el primero
+     * autorizado). Lo provee el selector de básculas para anclar la reconexión
+     * a la báscula que eligió el operario.
+     */
+    resolverPuertoAutorizado?: () => Promise<SerialPort | null>
+    /**
      * Respeta el indicador de estabilidad del propio equipo (tramas tipo
      * `ST,GS,+00123.4kg` / `US,...`). Desactivado por defecto porque hay
      * indicadores que envían `US` de forma permanente.
@@ -149,6 +156,7 @@ export function useSerialScale({
     autoReconectar = true,
     maxIntentosReconexion = 6,
     usarFlagEstabilidad = false,
+    resolverPuertoAutorizado,
     onPesajeEstable,
     onDesconexion,
     onConexion,
@@ -172,6 +180,7 @@ export function useSerialScale({
         umbralCero, segundosEstabilizacion, toleranciaEstabilidad,
         factorConversion, normalizarCero, timeoutSinDatosMs,
         autoReconectar, maxIntentosReconexion, usarFlagEstabilidad,
+        resolverPuertoAutorizado,
     })
     const callbacksRef = useRef({ onPesajeEstable, onDesconexion, onConexion })
 
@@ -181,6 +190,7 @@ export function useSerialScale({
             umbralCero, segundosEstabilizacion, toleranciaEstabilidad,
             factorConversion, normalizarCero, timeoutSinDatosMs,
             autoReconectar, maxIntentosReconexion, usarFlagEstabilidad,
+            resolverPuertoAutorizado,
         }
         callbacksRef.current = { onPesajeEstable, onDesconexion, onConexion }
     })
@@ -451,6 +461,19 @@ export function useSerialScale({
     // ── Reconexión automática ─────────────────────────────────────────────────
     const buscarPuertoAutorizado = useCallback(async (): Promise<SerialPort | null> => {
         if (!soportaWebSerial()) return null
+
+        // Si hay un resolvedor externo (el selector de básculas), su respuesta
+        // manda: sin respaldo a puertos[0], que con dos básculas autorizadas
+        // reconectaría contra la equivocada.
+        const { resolverPuertoAutorizado: resolver } = configRef.current
+        if (resolver) {
+            try {
+                return await resolver()
+            } catch {
+                return null
+            }
+        }
+
         try {
             const puertos = await navigator.serial.getPorts()
             if (!puertos.length) return null
