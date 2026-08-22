@@ -1,4 +1,4 @@
-import { Link } from '@tanstack/react-router'
+import { Link, useLocation } from '@tanstack/react-router'
 
 import { useAuth } from '#/presentation/hooks/auth/useAuth'
 
@@ -6,7 +6,15 @@ interface NavItem {
     label: string
     to: string
     icon: React.ReactNode
+    /** Rutas que también dejan el item resaltado, además de su propio `to`. */
+    rutasActivas?: string[]
 }
+
+const CLASES_ITEM = 'group flex items-center gap-4 px-4.5 py-3 rounded-xl transition-all duration-200 text-sm font-semibold cursor-pointer'
+
+const CLASES_ACTIVO = 'bg-indigo-50/70 dark:bg-indigo-950/20 text-indigo-600 dark:text-indigo-400 font-bold border-r-[3.5px] border-indigo-600 dark:border-indigo-500 shadow-sm'
+
+const CLASES_INACTIVO = 'text-text-muted hover:bg-slate-50 dark:hover:bg-slate-900/40 hover:text-text-main'
 
 function inicialesDe(nombreCompleto: string): string {
     const palabras = nombreCompleto.trim().split(/\s+/)
@@ -17,6 +25,7 @@ function inicialesDe(nombreCompleto: string): string {
 
 export function Sidebar() {
     const { usuario, logout } = useAuth()
+    const { pathname } = useLocation()
     // 💡 Rutas alineadas a la nueva arquitectura y estructura plana del enrutador
     const menuItems: NavItem[] = [
         {
@@ -29,8 +38,11 @@ export function Sidebar() {
             ),
         },
         {
+            // La entrada del flujo es la lista de clientes: no se pesa sin
+            // saber para quién. El item sigue resaltado durante el pesaje.
             label: 'Control de Calidad',
-            to: '/control-calidad',
+            to: '/clientes',
+            rutasActivas: ['/control-calidad'],
             icon: (
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2.2} viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
@@ -79,24 +91,22 @@ export function Sidebar() {
                 </div>
 
                 <nav className="space-y-1">
-                    {menuItems.map((item) => (
-                        <Link
-                            key={item.to}
-                            to={item.to}
-                            activeProps={{
-                                className: 'bg-indigo-50/70 dark:bg-indigo-950/20 text-indigo-600 dark:text-indigo-400 font-bold border-r-[3.5px] border-indigo-600 dark:border-indigo-500 shadow-sm',
-                            }}
-                            inactiveProps={{
-                                className: 'text-text-muted hover:bg-slate-50 dark:hover:bg-slate-900/40 hover:text-text-main',
-                            }}
-                            className="group flex items-center gap-4 px-4.5 py-3 rounded-xl transition-all duration-200 text-sm font-semibold cursor-pointer"
-                        >
-                            <span className="shrink-0 transition-colors duration-200">
-                                {item.icon}
-                            </span>
-                            <span>{item.label}</span>
-                        </Link>
-                    ))}
+                    {menuItems.map((item) => {
+                        const activo = pathname === item.to || (item.rutasActivas?.includes(pathname) ?? false)
+
+                        return (
+                            <Link
+                                key={item.to}
+                                to={item.to}
+                                className={`${CLASES_ITEM} ${activo ? CLASES_ACTIVO : CLASES_INACTIVO}`}
+                            >
+                                <span className="shrink-0 transition-colors duration-200">
+                                    {item.icon}
+                                </span>
+                                <span>{item.label}</span>
+                            </Link>
+                        )
+                    })}
                 </nav>
             </div>
 

@@ -58,6 +58,7 @@ function ControlCalidadPage() {
                 onConnect={() => selector.abrir()}
                 onDisconnect={() => void scale.disconnectSerial()}
                 onReintentar={() => void scale.reconectar()}
+                onVolver={() => navigate({ to: '/clientes' })}
             />
 
             <BannerEstadoBascula
