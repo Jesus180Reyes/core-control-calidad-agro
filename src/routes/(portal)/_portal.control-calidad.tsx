@@ -25,7 +25,8 @@ function ControlCalidadPage() {
         pesajeInfo,
         bloqueo,
 
-    } = useControlCalidad()
+        // Puente temporal: el paso 8 lo reemplaza por el cliente del `state`.
+    } = useControlCalidad(null)
 
     return (
         <div className="flex-1 min-h-screen bg-[#F8FAFC] dark:bg-zinc-950 p-6 space-y-6 overflow-y-auto">

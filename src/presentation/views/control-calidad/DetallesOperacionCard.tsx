@@ -4,7 +4,13 @@ interface DetallesOperacionProps {
     operacion: OperacionData
 }
 
+/** Un valor vacío significa "todavía no hay pantalla que lo elija", no "sin dato". */
+const VACIO = '—'
+
 export function DetallesOperacionCard({ operacion }: DetallesOperacionProps) {
+    const hayEtapa = operacion.etapa.length > 0
+    const hayLote = operacion.lote.length > 0
+
     return (
         <div className="animate-pulse bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-3xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.015)] space-y-5">
             <div className="flex items-center gap-3">
@@ -27,14 +33,16 @@ export function DetallesOperacionCard({ operacion }: DetallesOperacionProps) {
                 <div className="flex justify-between items-center text-sm">
                     <span className="text-slate-400 font-semibold">Etapa</span>
                     <div className="flex items-center gap-2">
-                        <span className="w-2.5 h-2.5 bg-indigo-600 rounded-full"></span>
-                        <span className="text-indigo-950 dark:text-white font-extrabold">{operacion.etapa}</span>
+                        {hayEtapa && <span className="w-2.5 h-2.5 bg-indigo-600 rounded-full"></span>}
+                        <span className={hayEtapa ? 'text-indigo-950 dark:text-white font-extrabold' : 'text-text-muted'}>
+                            {hayEtapa ? operacion.etapa : VACIO}
+                        </span>
                     </div>
                 </div>
                 <div className="flex justify-between items-center text-sm">
                     <span className="text-slate-400 font-semibold">Lote</span>
-                    <span className="text-indigo-950 dark:text-white font-extrabold bg-slate-50 dark:bg-zinc-800 px-3 py-1 rounded-lg">
-                        {operacion.lote}
+                    <span className={`bg-slate-50 dark:bg-zinc-800 px-3 py-1 rounded-lg ${hayLote ? 'text-indigo-950 dark:text-white font-extrabold' : 'text-text-muted'}`}>
+                        {hayLote ? operacion.lote : VACIO}
                     </span>
                 </div>
             </div>
