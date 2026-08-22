@@ -1,6 +1,6 @@
 # SPEC 02 — Login y sesión contra el backend
 
-> **Estado:** Approved
+> **Estado:** Implemented
 > **Depende de:** —
 > **Fecha:** 2026-08-21
 > **Objetivo:** Reemplazar el placeholder de `/login` por una pantalla real que autentique contra `POST /auth/login`, persista la sesión y proteja el portal, para que el operario entre con su usuario y contraseña en vez de con el guard falso `isLogged = true`.
@@ -230,21 +230,21 @@ Solo obligatoriedad. Sin `.email()`, sin mínimo de longitud, sin regex: las reg
 
 - [X] Abrir `/control-calidad` sin sesión redirige a `/login`.
 - [X] `/login` muestra la card con logo, campos Usuario y Contraseña, y botón de ingresar.
-- [ ] Enviar el formulario vacío marca los dos campos con su mensaje de zod y **no** dispara ninguna petición HTTP.
-- [ ] Credenciales correctas guardan `auth_token` y `auth_user` en `localStorage` y llevan al dashboard `/`.
-- [ ] Credenciales incorrectas (401) muestran "Usuario o contraseña incorrectos" en la card, **sin** recargar la página ni redirigir, y `localStorage` sigue vacío.
-- [ ] Con el backend apagado, el formulario muestra "No se pudo contactar al servidor." y no queda colgado en "Ingresando…".
-- [ ] Mientras la petición está en vuelo el botón está deshabilitado y dice "Ingresando…".
-- [ ] El botón de ojo alterna el `type` del campo de contraseña entre `password` y `text`.
-- [ ] Tras el login, el Sidebar muestra "Luis de Jesus Reyes Nolasco" y "OPERADOR".
-- [ ] Recargar la página con sesión abierta mantiene al usuario dentro y el Sidebar sigue mostrando su nombre.
-- [ ] Entrar a `/login` con sesión abierta redirige a `/`.
-- [ ] "Cerrar Sesión" borra `auth_token` y `auth_user` y deja al usuario en `/login`; volver atrás con el botón del navegador no reingresa al portal.
-- [ ] Cualquier petición hecha con `httpGet`/`httpPost` después del login lleva el header `Authorization: Bearer <token>` (verificable en la pestaña Network).
-- [ ] Un `401` en una petición autenticada limpia la sesión y deja al usuario en `/login`.
-- [ ] La pantalla de login se ve correcta en modo claro y oscuro, y a 360 px de ancho.
-- [ ] `npx vitest run` pasa completo, incluyendo `useLogin.test.tsx`.
-- [ ] `npx tsc --noEmit` pasa sin errores.
+- [X] Enviar el formulario vacío marca los dos campos con su mensaje de zod y **no** dispara ninguna petición HTTP.
+- [X] Credenciales correctas guardan `auth_token` y `auth_user` en `localStorage` y llevan al dashboard `/`.
+- [X] Credenciales incorrectas (401) muestran "Usuario o contraseña incorrectos" en la card, **sin** recargar la página ni redirigir, y `localStorage` sigue vacío.
+- [X] Con el backend apagado, el formulario muestra "No se pudo contactar al servidor." y no queda colgado en "Ingresando…".
+- [X] Mientras la petición está en vuelo el botón está deshabilitado y dice "Ingresando…".
+- [X] El botón de ojo alterna el `type` del campo de contraseña entre `password` y `text`.
+- [X] Tras el login, el Sidebar muestra "Luis de Jesus Reyes Nolasco" y "OPERADOR".
+- [X] Recargar la página con sesión abierta mantiene al usuario dentro y el Sidebar sigue mostrando su nombre.
+- [X] Entrar a `/login` con sesión abierta redirige a `/`.
+- [X] "Cerrar Sesión" borra `auth_token` y `auth_user` y deja al usuario en `/login`; volver atrás con el botón del navegador no reingresa al portal.
+- [X] Cualquier petición hecha con `httpGet`/`httpPost` después del login lleva el header `Authorization: Bearer <token>` (verificable en la pestaña Network).
+- [X] Un `401` en una petición autenticada limpia la sesión y deja al usuario en `/login`.
+- [X] La pantalla de login se ve correcta en modo claro y oscuro, y a 360 px de ancho.
+- [X] `npx vitest run` pasa completo, incluyendo `useLogin.test.tsx`.
+- [X] `npx tsc --noEmit` pasa sin errores.
 
 ---
 
