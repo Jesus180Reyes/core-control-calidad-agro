@@ -189,22 +189,22 @@ El tipo no cambia de forma: `cliente`, `etapa` y `lote` siguen siendo `string`. 
 
 ## Criterios de aceptación
 
-- [ ] `npx tsc --noEmit` pasa sin errores.
-- [ ] `npx vitest run` pasa completo, con los mismos tests que hoy.
-- [ ] El item "Control de Calidad" del Sidebar lleva a `/clientes`.
-- [ ] `/clientes` muestra 3 tarjetas, cada una con ícono, nombre, dirección de planta y badge de estado.
-- [ ] La tarjeta cuyo `direccion_planta` es `null` muestra "Sin dirección registrada" y no un hueco ni "null".
-- [ ] La tarjeta cuyo `isActive` es `0` muestra el badge "INACTIVO"; las de `isActive: 1` muestran "ACTIVO".
-- [ ] Hacer click en una tarjeta lleva a `/control-calidad`.
-- [ ] Tras elegir "Agrolibano", `DetallesOperacionCard` muestra "Agrolibano" en el renglón Cliente.
-- [ ] Los renglones Etapa y Lote muestran `—`, sin el punto indigo en Etapa.
-- [ ] Las tarjetas se recorren con Tab y se activan con Enter y con Espacio.
-- [ ] Escribir `/control-calidad` directo en la barra de direcciones redirige a `/clientes`.
-- [ ] Recargar con F5 estando en `/control-calidad` termina en `/clientes`, sin pantalla rota ni cliente vacío.
-- [ ] La flecha de la esquina superior izquierda de `/control-calidad` lleva a `/clientes`.
-- [ ] El item del Sidebar queda resaltado tanto en `/clientes` como en `/control-calidad`.
-- [ ] La báscula sigue funcionando igual: conectar, estabilizar, bloqueo crítico e historial de muestras no cambian.
-- [ ] `/clientes` se ve correcta en modo claro y oscuro, y a 360 px de ancho.
+- [X] `npx tsc --noEmit` pasa sin errores.
+- [X] `npx vitest run` pasa completo, con los mismos tests que hoy.
+- [X] El item "Control de Calidad" del Sidebar lleva a `/clientes`.
+- [X] `/clientes` muestra 3 tarjetas, cada una con ícono, nombre, dirección de planta y badge de estado.
+- [X] La tarjeta cuyo `direccion_planta` es `null` muestra "Sin dirección registrada" y no un hueco ni "null".
+- [X] La tarjeta cuyo `isActive` es `0` muestra el badge "INACTIVO"; las de `isActive: 1` muestran "ACTIVO".
+- [X] Hacer click en una tarjeta lleva a `/control-calidad`.
+- [X] Tras elegir "Agrolibano", `DetallesOperacionCard` muestra "Agrolibano" en el renglón Cliente.
+- [X] Los renglones Etapa y Lote muestran `—`, sin el punto indigo en Etapa.
+- [X] Las tarjetas se recorren con Tab y se activan con Enter y con Espacio.
+- [X] Escribir `/control-calidad` directo en la barra de direcciones redirige a `/clientes`.
+- [X] Recargar con F5 estando en `/control-calidad` termina en `/clientes`, sin pantalla rota ni cliente vacío.
+- [X] La flecha de la esquina superior izquierda de `/control-calidad` lleva a `/clientes`.
+- [X] El item del Sidebar queda resaltado tanto en `/clientes` como en `/control-calidad`.
+- [X] La báscula sigue funcionando igual: conectar, estabilizar, bloqueo crítico e historial de muestras no cambian.
+- [X] `/clientes` se ve correcta en modo claro y oscuro, y a 360 px de ancho.
 
 ---
 
