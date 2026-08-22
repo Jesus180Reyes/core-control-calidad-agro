@@ -1,6 +1,6 @@
 # SPEC 03 — Cliente HTTP instanciable con interceptores y errores tipados
 
-> **Estado:** Approved
+> **Estado:** Implemented
 > **Depende de:** SPEC 02
 > **Fecha:** 2026-08-22
 > **Objetivo:** Reemplazar el módulo de funciones sueltas de `http-client.ts` por un cliente creado con un factory configurable, con timeout, interceptores registrables desde fuera y errores tipados, sin cambiar la firma de `httpGet`/`httpPost`/... que ya consumen los hooks.
@@ -230,24 +230,24 @@ Hoy un array cae en `String(value)` y produce `"1,2"`, que ningún backend está
 
 ## Criterios de aceptación
 
-- [ ] `npx tsc --noEmit` pasa sin errores.
-- [ ] `npx vitest run` pasa completo, con los mismos tests que hoy.
-- [ ] `useExecuteQuery.ts`, `useExecuteMutation.ts` y `useLogin.tsx` siguen importando desde `#/infrastructure/http/http-client` (los tres imports no cambian de ruta).
-- [ ] `create-http-client.ts`, `http-errors.ts` y `query-params.ts` no contienen ningún import de `#/presentation` ni de `@tanstack/react-router` (verificable con un grep).
-- [ ] Login correcto guarda la sesión y entra al dashboard, igual que antes del cambio.
-- [ ] Login con credenciales incorrectas muestra el mensaje del servidor en la card, **sin** recargar la página ni redirigir.
-- [ ] Con el backend apagado, el login muestra "No se pudo contactar al servidor." y el error que llega a `onError` es una instancia de `NetworkError`.
-- [ ] Toda petición posterior al login lleva `Authorization: Bearer <token>` (pestaña Network).
-- [ ] Un 401 en una petición **con** token limpia `localStorage` y deja al usuario en `/login`.
-- [ ] Una petición que supera 15 s se corta sola y rechaza con `TimeoutError`, no con un cuelgue indefinido.
-- [ ] Cancelar una query en vuelo (desmontar el componente) rechaza con `RequestCancelado`, **no** con `TimeoutError` ni con `NetworkError`.
-- [ ] `httpGet('/x', { params: { ids: [1, 2], desde: new Date(), vacio: undefined } })` produce `?ids=1&ids=2&desde=2026-08-22T…` y omite `vacio`.
-- [ ] `httpGet('https://otro-host/api/x')` va a `https://otro-host/api/x` y no antepone `VITE_API_URL`.
-- [ ] Una query contra un endpoint inexistente (404) falla al primer intento, sin reintentos.
-- [ ] Una query contra el backend apagado se reintenta dos veces antes de llegar al `ErrorBoundary`.
-- [ ] `createHttpClient({ baseUrl: 'http://x', fetch: fetchFalso })` usa `fetchFalso` y nunca el `fetch` global.
-- [ ] Registrar un interceptor devuelve una función que, al llamarse, lo da de baja.
-- [ ] `registrarInterceptoresAuth(api)` llamado dos veces no duplica el header ni el manejo del 401.
+- [X] `npx tsc --noEmit` pasa sin errores.
+- [X] `npx vitest run` pasa completo, con los mismos tests que hoy.
+- [X] `useExecuteQuery.ts`, `useExecuteMutation.ts` y `useLogin.tsx` siguen importando desde `#/infrastructure/http/http-client` (los tres imports no cambian de ruta).
+- [X] `create-http-client.ts`, `http-errors.ts` y `query-params.ts` no contienen ningún import de `#/presentation` ni de `@tanstack/react-router` (verificable con un grep).
+- [X] Login correcto guarda la sesión y entra al dashboard, igual que antes del cambio.
+- [X] Login con credenciales incorrectas muestra el mensaje del servidor en la card, **sin** recargar la página ni redirigir.
+- [X] Con el backend apagado, el login muestra "No se pudo contactar al servidor." y el error que llega a `onError` es una instancia de `NetworkError`.
+- [X] Toda petición posterior al login lleva `Authorization: Bearer <token>` (pestaña Network).
+- [X] Un 401 en una petición **con** token limpia `localStorage` y deja al usuario en `/login`.
+- [X] Una petición que supera 15 s se corta sola y rechaza con `TimeoutError`, no con un cuelgue indefinido.
+- [X] Cancelar una query en vuelo (desmontar el componente) rechaza con `RequestCancelado`, **no** con `TimeoutError` ni con `NetworkError`.
+- [X] `httpGet('/x', { params: { ids: [1, 2], desde: new Date(), vacio: undefined } })` produce `?ids=1&ids=2&desde=2026-08-22T…` y omite `vacio`.
+- [X] `httpGet('https://otro-host/api/x')` va a `https://otro-host/api/x` y no antepone `VITE_API_URL`.
+- [X] Una query contra un endpoint inexistente (404) falla al primer intento, sin reintentos.
+- [X] Una query contra el backend apagado se reintenta dos veces antes de llegar al `ErrorBoundary`.
+- [X] `createHttpClient({ baseUrl: 'http://x', fetch: fetchFalso })` usa `fetchFalso` y nunca el `fetch` global.
+- [X] Registrar un interceptor devuelve una función que, al llamarse, lo da de baja.
+- [X] `registrarInterceptoresAuth(api)` llamado dos veces no duplica el header ni el manejo del 401.
 
 ---
 
