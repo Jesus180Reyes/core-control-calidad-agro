@@ -2,6 +2,7 @@ import type { InfoDesconexion } from "#/presentation/types/control-calidad/bascu
 import type { Muestra, OperacionData, ParametrosData } from "#/presentation/types/control-calidad/control-calidad.types"
 import { useEffect, useRef, useState } from "react"
 import { useSerialScale } from "./useSerialScale"
+import { useSelectorBascula } from "./useSelectorBascula"
 
 const MAX_MUESTRAS_VISIBLES = 8
 
@@ -26,6 +27,17 @@ export function useControlCalidad() {
         { id: '#1841', hora: '14:18:05', peso: 49998, estado: 'DENTRO DE RANGO' },
     ])
 
+    /**
+     * El selector necesita abrir el puerto y la báscula necesita al selector
+     * para saber a cuál reconectar. La conexión se pasa por ref para romper esa
+     * dependencia circular, igual que hace `useSerialScale` con su reconexión.
+     */
+    const conectarPuertoRef = useRef<(puerto: SerialPort) => Promise<boolean>>(async () => false)
+
+    const selector = useSelectorBascula({
+        onSeleccionar: (puerto) => conectarPuertoRef.current(puerto),
+    })
+
     const scale = useSerialScale({
         baudRate: 9600,
         umbralCero: 5,
@@ -35,6 +47,8 @@ export function useControlCalidad() {
         // Aviso si el indicador deja de transmitir con el puerto abierto.
         timeoutSinDatosMs: 4000,
         autoReconectar: true,
+        // Ancla la reconexión automática a la báscula que eligió el operario.
+        resolverPuertoAutorizado: selector.resolverPuertoPreferido,
         onPesajeEstable: (peso) => {
             const dentroDeRango = peso >= parametros.minimo && peso <= parametros.maximo
             const muestra: Muestra = {
@@ -48,6 +62,10 @@ export function useControlCalidad() {
         onDesconexion: (info: InfoDesconexion) => {
             console.warn(`⚠️ Báscula (${info.motivo}) a las ${info.hora}: ${info.mensaje}`)
         },
+    })
+
+    useEffect(() => {
+        conectarPuertoRef.current = (puerto) => scale.connectSerial({ puerto })
     })
 
     const diferencia = scale.pesoActual - parametros.ideal
@@ -89,6 +107,7 @@ export function useControlCalidad() {
         parametros,
         ultimasMuestras,
         scale,
+        selector,
         pesajeInfo: {
             diferencia,
             requiereReajuste,
