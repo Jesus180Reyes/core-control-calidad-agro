@@ -8,7 +8,7 @@ interface UseAuthResult {
     sesion: Sesion | null
     usuario: Usuario | null
     estaAutenticado: boolean
-    iniciarSesion: (respuesta: LoginResponse) => void
+    iniciarSesion: (respuesta: LoginResponse) => boolean
     logout: () => void
 }
 
@@ -16,8 +16,10 @@ export function useAuth(): UseAuthResult {
     const navigate = useNavigate()
     const sesion = useSyncExternalStore(suscribir, snapshot, () => null)
 
-    function iniciarSesion(respuesta: LoginResponse): void {
+    function iniciarSesion(respuesta: LoginResponse): boolean {
+        if (!respuesta.accessToken || !respuesta.user?.id) return false
         guardarSesion({ accessToken: respuesta.accessToken, usuario: respuesta.user })
+        return true
     }
 
     function logout(): void {
