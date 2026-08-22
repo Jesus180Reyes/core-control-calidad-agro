@@ -2,6 +2,7 @@ import { AlertaDesconexionBascula, BannerEstadoBascula } from '#/presentation/co
 import { BannerEstabilizacion } from '#/presentation/components/control-calidad/BannerEstabilizacion'
 import { BloqueoCriticoDialog } from '#/presentation/components/control-calidad/BloqueoCriticoDialog'
 import { HeaderControlCalidad } from '#/presentation/components/control-calidad/HeaderControlCalidad'
+import { SelectorBasculaDialog } from '#/presentation/components/control-calidad/SelectorBasculaDialog'
 import { useControlCalidad } from '#/presentation/hooks/bascula/useControlCalidad'
 import { AyudaVisualCard } from '#/presentation/views/control-calidad/AyudaVisualCard'
 import { DetallesOperacionCard } from '#/presentation/views/control-calidad/DetallesOperacionCard'
@@ -20,6 +21,7 @@ function ControlCalidadPage() {
         parametros,
         ultimasMuestras,
         scale,
+        selector,
         pesajeInfo,
         bloqueo,
 
@@ -33,7 +35,7 @@ function ControlCalidadPage() {
                 error={scale.error}
                 intentoReconexion={scale.intentoReconexion}
                 maxIntentos={scale.maxIntentosReconexion}
-                onConnect={() => void scale.connectSerial()}
+                onConnect={() => selector.abrir()}
                 onDisconnect={() => void scale.disconnectSerial()}
                 onReintentar={() => void scale.reconectar()}
             />
@@ -78,6 +80,17 @@ function ControlCalidadPage() {
                 isOpen={bloqueo.mostrar}
                 onAutorizar={bloqueo.handleAutorizar}
                 onRechazar={bloqueo.handleRechazar}
+            />
+
+            <SelectorBasculaDialog
+                abierto={selector.abierto}
+                basculas={selector.basculas}
+                cargando={selector.cargando}
+                pendienteDeAlias={selector.pendienteDeAlias}
+                onCerrar={selector.cerrar}
+                onSeleccionar={(clave) => void selector.seleccionar(clave)}
+                onAutorizarNueva={selector.autorizarNueva}
+                onConfirmarAlias={(alias) => void selector.confirmarAlias(alias)}
             />
 
             <AlertaDesconexionBascula

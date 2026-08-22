@@ -13,7 +13,9 @@
       "Bash(git *)",
       "Bash(echo \"exit: $?\")",
       "PowerShell(Get-CimInstance *)",
-      "PowerShell(Stop-Process *)"
+      "PowerShell(Stop-Process *)",
+      "PowerShell(npx tsc --noEmit)",
+      "PowerShell(npx vitest run src/presentation/hooks/bascula/useSelectorBascula.test.tsx)"
     ]
   }
 }
