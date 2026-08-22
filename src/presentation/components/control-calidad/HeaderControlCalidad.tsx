@@ -9,6 +9,7 @@ interface HeaderProps {
     onConnect: () => void
     onDisconnect: () => void
     onReintentar: () => void
+    onVolver: () => void
 }
 
 interface DescriptorEstado {
@@ -63,6 +64,7 @@ export function HeaderControlCalidad({
     onConnect,
     onDisconnect,
     onReintentar,
+    onVolver,
 }: HeaderProps) {
 
     const descriptor = DESCRIPTORES[estado]
@@ -72,7 +74,12 @@ export function HeaderControlCalidad({
     return (
         <header className="flex flex-wrap items-center justify-between gap-4">
             <div className="flex items-center gap-3">
-                <button className="p-2 cursor-pointer hover:bg-slate-100 dark:hover:bg-zinc-900 rounded-lg text-slate-500 transition-colors">
+                <button
+                    type="button"
+                    onClick={onVolver}
+                    aria-label="Volver a clientes"
+                    className="p-2 cursor-pointer hover:bg-slate-100 dark:hover:bg-zinc-900 rounded-lg text-slate-500 transition-colors"
+                >
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
                     </svg>

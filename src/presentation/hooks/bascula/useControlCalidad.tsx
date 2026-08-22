@@ -1,17 +1,26 @@
 import type { InfoDesconexion } from "#/presentation/types/control-calidad/bascula.types"
 import type { Muestra, OperacionData, ParametrosData } from "#/presentation/types/control-calidad/control-calidad.types"
-import { useEffect, useRef, useState } from "react"
+import type { Cliente } from "#/presentation/types/clientes/clientes.types"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { useSerialScale } from "./useSerialScale"
 import { useSelectorBascula } from "./useSelectorBascula"
 
 const MAX_MUESTRAS_VISIBLES = 8
 
-export function useControlCalidad() {
-    const [operacion] = useState<OperacionData>({
-        cliente: 'Azucarera La Grecia',
-        etapa: 'En Proceso',
-        lote: 'S-88',
-    })
+export function useControlCalidad(cliente: Cliente | null) {
+    /**
+     * La operación se deriva del cliente que llega de `/clientes`; ya no es un
+     * estado propio con un cliente inventado.
+     *
+     * `etapa` y `lote` quedan vacíos a propósito: no están en la tabla de
+     * clientes y todavía no existe la pantalla que los elija. La cadena vacía
+     * es lo que `DetallesOperacionCard` pinta como `—`.
+     */
+    const operacion = useMemo<OperacionData>(() => ({
+        cliente: cliente?.nombre ?? '',
+        etapa: '',
+        lote: '',
+    }), [cliente?.nombre])
 
     const [parametros] = useState<ParametrosData>({
         minimo: 220,

@@ -9,13 +9,33 @@ import { DetallesOperacionCard } from '#/presentation/views/control-calidad/Deta
 import { HistorialMuestrasCard } from '#/presentation/views/control-calidad/HistorialMuestrasCard'
 import { MonitoreoBasculaCard } from '#/presentation/views/control-calidad/MonitoreoBasculaCard'
 import { ParametrosReferenciaCard } from '#/presentation/views/control-calidad/ParametrosReferenciaCard'
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, redirect, useLocation, useNavigate } from '@tanstack/react-router'
+import { useEffect } from 'react'
 
 export const Route = createFileRoute('/(portal)/_portal/control-calidad')({
+    // Sin cliente no se pesa: la entrada directa por URL rebota a la lista.
+    beforeLoad: ({ location }) => {
+        if (!location.state.cliente) {
+            throw redirect({ to: '/clientes' })
+        }
+    },
     component: ControlCalidadPage,
 })
 
 function ControlCalidadPage() {
+    const navigate = useNavigate()
+    const cliente = useLocation({ select: (location) => location.state.cliente }) ?? null
+
+    // Respaldo del lado del cliente, por el mismo motivo documentado en
+    // `_portal.tsx`: cuando el HTML llega ya renderizado por el SSR, TanStack
+    // Start no repite `router.load()` al hidratar y el `beforeLoad` de arriba
+    // no vuelve a correr.
+    useEffect(() => {
+        if (!cliente) {
+            navigate({ to: '/clientes', replace: true })
+        }
+    }, [cliente, navigate])
+
     const {
         operacion,
         parametros,
@@ -25,7 +45,7 @@ function ControlCalidadPage() {
         pesajeInfo,
         bloqueo,
 
-    } = useControlCalidad()
+    } = useControlCalidad(cliente)
 
     return (
         <div className="flex-1 min-h-screen bg-[#F8FAFC] dark:bg-zinc-950 p-6 space-y-6 overflow-y-auto">
@@ -38,6 +58,7 @@ function ControlCalidadPage() {
                 onConnect={() => selector.abrir()}
                 onDisconnect={() => void scale.disconnectSerial()}
                 onReintentar={() => void scale.reconectar()}
+                onVolver={() => navigate({ to: '/clientes' })}
             />
 
             <BannerEstadoBascula
