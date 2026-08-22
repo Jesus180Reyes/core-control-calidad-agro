@@ -68,6 +68,23 @@ export function useControlCalidad() {
         conectarPuertoRef.current = (puerto) => scale.connectSerial({ puerto })
     })
 
+    /** Evita un segundo intento con el doble montaje de React en desarrollo. */
+    const autoConexionIntentadaRef = useRef<boolean>(false)
+
+    // Auto-conexión al montar: si la báscula recordada sigue presente se abre
+    // sola, sin abrir ningún dialog. Si no está, el header se queda en
+    // "Desconectada" con su botón.
+    useEffect(() => {
+        if (autoConexionIntentadaRef.current) return
+        autoConexionIntentadaRef.current = true
+
+        void (async () => {
+            const puerto = await selector.resolverPuertoPreferido()
+            if (!puerto) return
+            await conectarPuertoRef.current(puerto)
+        })()
+    }, [selector.resolverPuertoPreferido])
+
     const diferencia = scale.pesoActual - parametros.ideal
     const esBajoRango = scale.pesoActual < parametros.minimo
     const esAltoRango = scale.pesoActual > parametros.maximo
