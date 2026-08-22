@@ -5,6 +5,15 @@ const CLAVE_USUARIO = 'auth_user'
 
 const suscriptores = new Set<() => void>()
 
+// `useSyncExternalStore` compara el snapshot por referencia: cachear evita que
+// cada llamada devuelva un objeto nuevo y dispare un loop de rerenders.
+let cacheValida = false
+let sesionCacheada: Sesion | null = null
+
+function invalidarCache(): void {
+    cacheValida = false
+}
+
 function almacen(): Storage | null {
     if (typeof window === 'undefined') return null
     try {
@@ -50,6 +59,7 @@ export function leerSesion(): Sesion | null {
 export function guardarSesion(sesion: Sesion): void {
     const storage = almacen()
     if (!storage) {
+        invalidarCache()
         notificar()
         return
     }
@@ -60,12 +70,14 @@ export function guardarSesion(sesion: Sesion): void {
     } catch {
         // Cuota llena o escritura denegada: se sigue sin persistir.
     }
+    invalidarCache()
     notificar()
 }
 
 export function limpiarSesion(): void {
     const storage = almacen()
     if (storage) limpiarStorage(storage)
+    invalidarCache()
     notificar()
 }
 
@@ -86,5 +98,9 @@ export function suscribir(fn: () => void): () => void {
 }
 
 export function snapshot(): Sesion | null {
-    return leerSesion()
+    if (!cacheValida) {
+        sesionCacheada = leerSesion()
+        cacheValida = true
+    }
+    return sesionCacheada
 }
