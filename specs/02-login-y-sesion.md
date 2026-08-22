@@ -228,8 +228,8 @@ Solo obligatoriedad. Sin `.email()`, sin mínimo de longitud, sin regex: las reg
 
 ## Criterios de aceptación
 
-- [] Abrir `/control-calidad` sin sesión redirige a `/login`.
-- [ ] `/login` muestra la card con logo, campos Usuario y Contraseña, y botón de ingresar.
+- [X] Abrir `/control-calidad` sin sesión redirige a `/login`.
+- [X] `/login` muestra la card con logo, campos Usuario y Contraseña, y botón de ingresar.
 - [ ] Enviar el formulario vacío marca los dos campos con su mensaje de zod y **no** dispara ninguna petición HTTP.
 - [ ] Credenciales correctas guardan `auth_token` y `auth_user` en `localStorage` y llevan al dashboard `/`.
 - [ ] Credenciales incorrectas (401) muestran "Usuario o contraseña incorrectos" en la card, **sin** recargar la página ni redirigir, y `localStorage` sigue vacío.
