@@ -16,10 +16,6 @@ export const Route = createFileRoute('/(auth)/_auth')({
 function AuthLayout() {
     const navigate = useNavigate()
     const { estaAutenticado } = useAuth()
-
-    // Mismo respaldo que en `(portal)/_portal.tsx`: en una carga directa de
-    // `/login` el `beforeLoad` no vuelve a correr al hidratar, así que la
-    // sesión ya abierta no redirige sin este efecto del lado del cliente.
     useEffect(() => {
         if (estaAutenticado) {
             navigate({ to: '/', replace: true })
