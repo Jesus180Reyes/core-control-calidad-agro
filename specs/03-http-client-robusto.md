@@ -32,12 +32,13 @@ Este spec no persigue features nuevas: persigue que el archivo más crítico de 
 - Timeout de 15 s por defecto, sobreescribible por petición, combinado con el `AbortSignal` de quien llama.
 - Sistema de interceptores: `onPeticion`, `onRespuesta`, `onError`, cada registro devuelve su función de baja.
 - Jerarquía de errores tipados: `ErrorHttpBase`, `HttpError`, `NetworkError`, `TimeoutError`, `RequestCancelado`, más helpers de discriminación.
-- Módulo `interceptores-auth.ts` con la inyección del `Bearer` y el manejo del 401, importado desde `__root.tsx`.
+- Módulo `interceptores-auth.ts` con la inyección del `Bearer` y el manejo del 401, registrado sobre la instancia `api` en `http-client.ts`.
 - Construcción de query params con arrays, `Date` y omisión de `undefined`/`null`.
 - URLs absolutas (`http://…`) pasan sin prefijo de `baseUrl`, y la unión `baseUrl` + `endpoint` no produce barras dobles.
 - Política de reintentos en `query-client.ts` basada en los helpers de error: nunca ante 4xx, sí ante fallo de red, timeout, 408, 429 y 5xx.
 - `useLogin.tsx` migrado a los helpers tipados en vez del descarte por `instanceof`.
 - Actualización de la sección `infrastructure/` de `CLAUDE.md`.
+- `src/routes/__root.tsx` no se toca.
 
 **Fuera de alcance (para specs futuros):**
 
@@ -207,7 +208,7 @@ Hoy un array cae en `String(value)` y produce `"1,2"`, que ningún backend está
    - Orden de ejecución: `onPeticion` (secuencial, en orden de registro) → `fetch` → `onRespuesta` → parseo, y `onError` ante cualquier `ErrorHttpBase` antes de relanzarlo.
    Este archivo **no importa nada de `#/presentation`**. Verificación: `npx tsc --noEmit` pasa.
 
-4. **Crear `src/infrastructure/http/interceptores-auth.ts`** con `registrarInterceptoresAuth(cliente)`, idempotente mediante una bandera de módulo. Registra dos interceptores:
+4. **Crear `src/infrastructure/http/interceptores-auth.ts`** con `registrarInterceptoresAuth(cliente)`, idempotente mediante un `WeakSet` de clientes ya cableados. Registra dos interceptores:
    - `onPeticion`: si hay `leerToken()` y el contexto **no** trae ya `Authorization`, lo agrega y marca `ctx.meta.llevabaToken = true`.
    - `onError`: si el error es `HttpError` con status 401 **y** `ctx.meta.llevabaToken === true`, llama `limpiarSesion()` y, con guarda de `typeof window !== 'undefined'`, `window.location.assign('/login')`.
    Es el único archivo de `infrastructure/http/` que importa de `#/presentation`. Verificación: `npx tsc --noEmit` pasa; todavía no lo llama nadie.
@@ -216,7 +217,7 @@ Hoy un array cae en `String(value)` y produce `"1,2"`, que ningún backend está
    - `http-client.ts` pasa a crear `api = createHttpClient({ baseUrl: import.meta.env.VITE_API_URL ?? '', timeoutMs: 15000 })`, llamar `registrarInterceptoresAuth(api)` y exportar `httpRequest`/`httpGet`/`httpPost`/`httpPut`/`httpPatch`/`httpDelete` como atajos de esa instancia, **con las mismas firmas de hoy**.
    - Re-exporta `HttpError`, `mensajeDelServidor`, `HttpMethod` y `QueryParams` desde su nueva ubicación, para que `useExecuteQuery.ts:2`, `useExecuteMutation.ts:2` y `useLogin.tsx:9` sigan importando de `#/infrastructure/http/http-client` sin tocarse.
    - Se borran de `http-client.ts` el `import` de `almacenamientoSesion`, `tieneAuthorization`, `buildUrl` y la clase `HttpError` (ahora viven en los archivos nuevos).
-   - Se agrega en `src/routes/__root.tsx` el import del módulo de arranque, con un comentario explicando que sin él el 401 deja de cerrar sesión.
+   - `src/routes/__root.tsx` **no se toca**: el registro vive junto a la creación de la instancia, no en el arranque de las rutas (ver Decisiones).
    Verificación manual: login correcto, login con credenciales malas (mensaje en la card, sin recarga), y navegar por el portal viendo el header `Authorization` en la pestaña Network.
 
 6. **Ajustar `src/infrastructure/query-client/query-client.ts`**: `retry: (intento, error) => intento < 2 && esReintentable(error)` y `retryDelay: (intento) => Math.min(300 * 2 ** intento, 4000)`; agregar `mutations: { retry: 0 }` explícito para dejar escrito que una mutación no se reintenta sola. Verificación: con el backend apagado, una query falla tras tres intentos espaciados; un 404 falla al primero.
@@ -259,8 +260,9 @@ Hoy un array cae en `String(value)` y produce `"1,2"`, que ningún backend está
 - **Sí:** `query-client.ts` cambia `retry: 1` por una función. Hoy un 401 o un 404 se reintentan, lo que retrasa el error medio segundo sin ninguna posibilidad de éxito.
 - **Sí:** `mutations: { retry: 0 }` explícito, aunque ya sea el valor por defecto de TanStack Query. Deja escrito que la ausencia de reintentos en un POST es una decisión, no un olvido.
 - **Sí:** interceptores registrados desde fuera, en `interceptores-auth.ts`. `create-http-client.ts` queda sin ninguna dependencia de `#/presentation` ni de rutas, que es lo que hace que la pieza sea reutilizable y testeable.
-- **Sí:** módulo de arranque importado explícitamente desde `__root.tsx`, en vez de auto-registro en un barrel. Se ve quién enciende qué; un import mágico con efectos secundarios en un `index.ts` es exactamente el acoplamiento que veníamos a quitar.
-- **Sí:** `registrarInterceptoresAuth` idempotente con bandera de módulo. En dev, el HMR puede reejecutar el módulo y dejar dos interceptores del 401 registrados: dos `window.location.assign` y una condición de carrera.
+- **Sí:** `http-client.ts` llama a `registrarInterceptoresAuth(api)` junto a la creación de la instancia. **Decisión revertida durante la implementación**: el plan original ponía el registro en un módulo de arranque importado desde `__root.tsx`, para que se viera quién enciende qué. Se descartó porque ese diseño hace que borrar un import de una ruta deje a toda la app mandando peticiones sin token, sin ningún error de compilación que lo delate. La instancia y su cableado nacen juntos: `api` no puede existir a medias. `createHttpClient` sigue siendo puro, así que un cliente contra otro API se instancia sin auth.
+- **No:** módulo de arranque importado desde `__root.tsx`. Ver arriba: el registro explícito se paga con un modo de fallo silencioso, y el beneficio (rastrear el encendido) lo da igual de bien tener el registro en la misma línea que la creación.
+- **Sí:** `registrarInterceptoresAuth` idempotente con un `WeakSet` de clientes ya cableados, en vez de un booleano de módulo. El HMR de dev puede recargar uno solo de los dos archivos: con un booleano, recargar `http-client.ts` deja al cliente nuevo **sin token** (la bandera vieja sigue en `true`), y recargar `interceptores-auth.ts` duplica el manejo del 401. El `WeakSet` cubre las dos direcciones.
 - **No:** interceptores que puedan cortocircuitar (devolver una respuesta o tragarse el error). Habilitarían el refresh token, que está fuera de alcance, y a cambio meterían un camino en el que `request<T>` devuelve algo que nunca vino del servidor.
 - **Sí:** `headers` y `meta` mutables en el contexto. Un interceptor que devuelve overrides parciales obliga a definir reglas de merge; mutar un `Headers` es una línea y no tiene ambigüedad.
 - **Sí:** `ctx.meta.llevabaToken` como bandera entre el interceptor de petición y el de error. Reproduce exactamente la condición de SPEC 02 que evita que el propio login dispare el cierre de sesión global ante su 401 legítimo.
@@ -283,7 +285,7 @@ Hoy un array cae en `String(value)` y produce `"1,2"`, que ningún backend está
 
 | Riesgo | Mitigación |
 | --- | --- |
-| Alguien borra el import de `interceptores-auth` en `__root.tsx` y el 401 deja de cerrar sesión, en silencio y sin error de compilación. | El import lleva un comentario explicando qué se rompe si se quita, y hay un criterio de aceptación que lo verifica. Es el precio del registro explícito frente al auto-registro. |
+| ~~Alguien borra el import de `interceptores-auth` en `__root.tsx` y el 401 deja de cerrar sesión, en silencio y sin error de compilación.~~ | **Eliminado durante la implementación.** El registro se movió junto a la creación de la instancia en `http-client.ts` (ver Decisiones), así que no hay ningún import que borrar. |
 | Reescritura completa de la capa de datos **sin un solo test automático** (decisión del usuario). Una regresión en el armado de la URL, del body o de los headers solo se descubre usando la app. | El paso 5 es un corte único y verificable a mano en cinco minutos (login OK, login KO, Network con el header). Cuando aparezca el primer bug, escribir la suite deja de ser opcional. |
 | El `204 No Content` sigue devolviendo `''` casteado a `T` (decisión del usuario). Un `DELETE` que responda 204 entrega `''` donde el tipo promete un objeto. | Queda documentado aquí. Ningún endpoint actual devuelve 204; el riesgo se materializa al conectar los hooks de dominio. |
 | Los interceptores son `async` y corren en serie: uno lento retrasa **todas** las peticiones. | Los dos de este spec (`leerToken`, `limpiarSesion`) son síncronos y leen `localStorage`. La firma admite promesas por extensibilidad, pero nada las usa hoy. |

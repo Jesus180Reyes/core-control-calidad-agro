@@ -28,7 +28,7 @@ TanStack Start (SSR) + TanStack Router (file-based) + TanStack Query + React 19 
 
 Capas bajo `src/`, con alias `#/*` y `@/*` apuntando ambos a `src/` (`#/` es el estándar del código propio; `@/` lo usan los componentes generados por shadcn):
 
-- `infrastructure/` — `http/http-client.ts` (wrapper de `fetch` con `httpGet/httpPost/...`, `HttpError`, base `VITE_API_URL`) y `query-client/query-client.ts` (instancia única de `QueryClient`).
+- `infrastructure/` — `http/` (el cliente HTTP, ver más abajo) y `query-client/query-client.ts` (instancia única de `QueryClient`, donde vive la política de reintentos).
 - `presentation/hooks/` — hooks genéricos en `shared/`, hooks de dominio por módulo (`bascula/`, `parametros/`). Los hooks de dominio concentran el estado y la lógica; las rutas y las vistas solo pintan.
 - `presentation/views/<módulo>/` — cards/tablas grandes de una pantalla. `presentation/components/` — piezas reutilizables (`shared/`) o específicas de un módulo.
 - `presentation/types/<módulo>/` — tipos de dominio.
@@ -40,6 +40,18 @@ Capas bajo `src/`, con alias `#/*` y `@/*` apuntando ambos a `src/` (`#/` es el 
 `useExecuteQuery(queryKey, endpoint, options)` usa `useSuspenseQuery` — nunca hay `isLoading`/`isError` manual. Todo componente que lo llame debe estar envuelto en `<Suspense>` y en el `ErrorBoundary` de `#/presentation/components/shared/ErrorBoundary` (recibe `fallback: (error, reset) => ReactNode`). `useExecuteMutation(endpoint, { method })` cubre el resto; `endpoint` puede ser una función de las variables para URLs con id.
 
 Varios hooks de dominio (`useControlCalidad`, `useParametros`) todavía devuelven datos mock en `useState`; al conectarlos al backend, reemplazar solo el interior del hook.
+
+### Cliente HTTP
+
+`infrastructure/http/` son cinco archivos con una frontera deliberada: los tres primeros no importan **nada** de `#/presentation` ni del router. Al tocarlos, mantener eso.
+
+- `http-errors.ts` — jerarquía con raíz `ErrorHttpBase`: `HttpError` (`status`, `body`), `NetworkError`, `TimeoutError`, `RequestCancelado`. Más los helpers `esHttpError`/`esDeRed`/`esTimeout`/`esNoAutorizado`/... Discriminar siempre con ellos, nunca por descarte. `esReintentable` es la **única** definición de qué se reintenta (red, timeout, 408, 429, 5xx) y la consume `query-client.ts`.
+- `query-params.ts` — armado de la URL. Arrays como clave repetida (`ids=1&ids=2`), `Date` a ISO, `undefined`/`null` omitidos, `''` sí se manda. Un endpoint absoluto (`https://...`) ignora la base.
+- `create-http-client.ts` — `createHttpClient(config)`: `baseUrl`, `timeoutMs` (15 s por defecto, sobreescribible por petición y combinado con el `signal` de quien llama), `fetch` inyectable, e interceptores `onPeticion`/`onRespuesta`/`onError` que observan y mutan el contexto pero **nunca** cortocircuitan. No reintenta: de eso se encarga TanStack Query.
+- `interceptores-auth.ts` — el único de la carpeta que importa de `#/presentation` y el único que conoce `/login`. Inyecta el `Bearer` y cierra sesión ante un 401 **de una petición que llevaba token** (sin esa condición, el propio login rebotaría con su 401 legítimo).
+- `http-client.ts` — crea la instancia `api`, le registra los interceptores de auth y exporta los atajos `httpGet`/`httpPost`/... con las firmas de siempre. Usar los atajos. `createHttpClient` es solo para un cliente contra **otro** API, y ese nace sin auth.
+
+Dos comportamientos heredados y asumidos: un `204 No Content` devuelve `''` casteado a `T`, y los GET mandan `Content-Type: application/json`. No hay tests del cliente (SPEC 03).
 
 ### Rutas
 
