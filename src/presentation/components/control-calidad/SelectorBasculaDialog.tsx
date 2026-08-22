@@ -128,7 +128,7 @@ export function SelectorBasculaDialog({
                                         <button
                                             type="button"
                                             onClick={() => onSeleccionar(bascula.clave)}
-                                            className="flex w-full items-center justify-between gap-3 rounded-2xl border border-border-ui bg-bg-app px-4 py-3 text-left transition-colors hover:border-brand"
+                                            className="cursor-pointer flex w-full items-center justify-between gap-3 rounded-2xl border border-border-ui bg-bg-app px-4 py-3 text-left transition-colors hover:border-brand"
                                         >
                                             <span className="flex flex-col">
                                                 <span className="text-sm font-bold text-text-main">
