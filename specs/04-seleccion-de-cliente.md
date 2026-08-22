@@ -1,6 +1,6 @@
 # SPEC 04 — Selección de cliente antes del pesaje
 
-> **Estado:** Approved
+> **Estado:** Implemented
 > **Depende de:** SPEC 02
 > **Fecha:** 2026-08-22
 > **Objetivo:** Convertir `/clientes` en la pantalla de entrada del flujo de pesaje, con una lista de tarjetas de los clientes del operador que al elegir una lleva a `/control-calidad` con ese cliente, de modo que nadie pese sin saber para quién.
