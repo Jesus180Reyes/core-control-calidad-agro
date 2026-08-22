@@ -1,12 +1,22 @@
 import { Link } from '@tanstack/react-router'
 
+import { useAuth } from '#/presentation/hooks/auth/useAuth'
+
 interface NavItem {
     label: string
     to: string
     icon: React.ReactNode
 }
 
+function inicialesDe(nombreCompleto: string): string {
+    const palabras = nombreCompleto.trim().split(/\s+/)
+    const primera = palabras[0]?.[0] ?? ''
+    const ultima = palabras.length > 1 ? palabras[palabras.length - 1][0] : ''
+    return `${primera}${ultima}`.toUpperCase()
+}
+
 export function Sidebar() {
+    const { usuario, logout } = useAuth()
     // 💡 Rutas alineadas a la nueva arquitectura y estructura plana del enrutador
     const menuItems: NavItem[] = [
         {
@@ -91,6 +101,22 @@ export function Sidebar() {
             </div>
 
             <div className="space-y-5">
+                {usuario && (
+                    <div className="flex items-center gap-3 px-3">
+                        <div className="w-9 h-9 shrink-0 rounded-full bg-indigo-100 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-xs font-black">
+                            {inicialesDe(usuario.complete_name)}
+                        </div>
+                        <div className="leading-tight overflow-hidden">
+                            <p className="text-text-main font-bold truncate">
+                                {usuario.complete_name}
+                            </p>
+                            <p className="text-text-muted text-[10px] uppercase tracking-widest">
+                                {usuario.rol}
+                            </p>
+                        </div>
+                    </div>
+                )}
+
                 <div className="pt-4 border-t border-border-ui/30 space-y-1">
                     <Link
                         to="/control-calidad"
@@ -108,10 +134,7 @@ export function Sidebar() {
                     </Link>
 
                     <button
-                        onClick={() => {
-                            localStorage.removeItem('auth_token')
-                            window.location.reload()
-                        }}
+                        onClick={logout}
                         className="w-full group flex items-center gap-4.5 px-4.5 py-2.5 rounded-xl transition-all duration-200 text-sm font-semibold text-rose-600 hover:bg-rose-50/50 dark:hover:bg-rose-950/10 cursor-pointer text-left"
                     >
                         <span className="shrink-0">

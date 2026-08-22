@@ -1,5 +1,8 @@
+import { useEffect } from 'react'
 import { Sidebar } from '#/presentation/components/shared/SideBar'
-import { createFileRoute, Outlet, redirect } from '@tanstack/react-router'
+import { leerToken } from '#/presentation/hooks/auth/almacenamientoSesion'
+import { useAuth } from '#/presentation/hooks/auth/useAuth'
+import { createFileRoute, Outlet, redirect, useNavigate } from '@tanstack/react-router'
 
 export const Route = createFileRoute('/(portal)/_portal')({
     notFoundComponent: () => (
@@ -10,16 +13,26 @@ export const Route = createFileRoute('/(portal)/_portal')({
     ),
 
     beforeLoad: async () => {
-        const isLogged = true;
-        if (!isLogged) {
+        if (typeof window !== 'undefined' && !leerToken()) {
             throw redirect({ to: '/login' })
         }
-
     },
     component: PortalLayout,
 })
 
 function PortalLayout() {
+    const navigate = useNavigate()
+    const { estaAutenticado } = useAuth()
+
+    // `beforeLoad` no vuelve a correr en una carga directa: cuando el HTML llegó
+    // ya renderizado por el SSR, TanStack Start no repite `router.load()` al
+    // hidratar y el guard del servidor se salta la comprobación (no hay
+    // `localStorage` ahí). Este efecto es el respaldo del lado del cliente.
+    useEffect(() => {
+        if (!estaAutenticado) {
+            navigate({ to: '/login', replace: true })
+        }
+    }, [estaAutenticado, navigate])
 
     return <div className="flex w-full min-h-screen">
         <Sidebar />

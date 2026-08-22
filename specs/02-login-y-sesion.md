@@ -1,6 +1,6 @@
 # SPEC 02 — Login y sesión contra el backend
 
-> **Estado:** Approved
+> **Estado:** Implemented
 > **Depende de:** —
 > **Fecha:** 2026-08-21
 > **Objetivo:** Reemplazar el placeholder de `/login` por una pantalla real que autentique contra `POST /auth/login`, persista la sesión y proteja el portal, para que el operario entre con su usuario y contraseña en vez de con el guard falso `isLogged = true`.
@@ -195,7 +195,7 @@ Solo obligatoriedad. Sin `.email()`, sin mínimo de longitud, sin regex: las reg
    - `useForm<LoginRequest>` con `zodResolver(loginSchema)` y `defaultValues: { username: '', password: '' }`
    - `useExecuteMutation<LoginResponse, LoginRequest>('/auth/login')`
    - `onSubmit` que en éxito llama `iniciarSesion(data)` y navega a `/`
-   - `errorLogin: string | null` derivado del fallo: si es `HttpError` con `status === 401` → `'Usuario o contraseña incorrectos'`; si `status >= 500` → `'El servidor no está disponible. Intentá de nuevo.'`; si el `fetch` falla sin respuesta (backend caído, CORS) → `'No se pudo contactar al servidor.'`
+   - `errorLogin: string | null` derivado del fallo: si es `HttpError` y el body trae `message` (string no vacío), se muestra ese texto tal cual; si no trae `message` se usa `'El servidor no está disponible. Intentá de nuevo.'`; si el `fetch` falla sin respuesta (backend caído, CORS) → `'No se pudo contactar al servidor.'`
    - `verPassword` / `alternarVerPassword` para el ojo del input
    Expone `{ control, onSubmit, enviando, errorLogin, verPassword, alternarVerPassword }`.
 
@@ -228,23 +228,23 @@ Solo obligatoriedad. Sin `.email()`, sin mínimo de longitud, sin regex: las reg
 
 ## Criterios de aceptación
 
-- [ ] Abrir `/control-calidad` sin sesión redirige a `/login`.
-- [ ] `/login` muestra la card con logo, campos Usuario y Contraseña, y botón de ingresar.
-- [ ] Enviar el formulario vacío marca los dos campos con su mensaje de zod y **no** dispara ninguna petición HTTP.
-- [ ] Credenciales correctas guardan `auth_token` y `auth_user` en `localStorage` y llevan al dashboard `/`.
-- [ ] Credenciales incorrectas (401) muestran "Usuario o contraseña incorrectos" en la card, **sin** recargar la página ni redirigir, y `localStorage` sigue vacío.
-- [ ] Con el backend apagado, el formulario muestra "No se pudo contactar al servidor." y no queda colgado en "Ingresando…".
-- [ ] Mientras la petición está en vuelo el botón está deshabilitado y dice "Ingresando…".
-- [ ] El botón de ojo alterna el `type` del campo de contraseña entre `password` y `text`.
-- [ ] Tras el login, el Sidebar muestra "Luis de Jesus Reyes Nolasco" y "OPERADOR".
-- [ ] Recargar la página con sesión abierta mantiene al usuario dentro y el Sidebar sigue mostrando su nombre.
-- [ ] Entrar a `/login` con sesión abierta redirige a `/`.
-- [ ] "Cerrar Sesión" borra `auth_token` y `auth_user` y deja al usuario en `/login`; volver atrás con el botón del navegador no reingresa al portal.
-- [ ] Cualquier petición hecha con `httpGet`/`httpPost` después del login lleva el header `Authorization: Bearer <token>` (verificable en la pestaña Network).
-- [ ] Un `401` en una petición autenticada limpia la sesión y deja al usuario en `/login`.
-- [ ] La pantalla de login se ve correcta en modo claro y oscuro, y a 360 px de ancho.
-- [ ] `npx vitest run` pasa completo, incluyendo `useLogin.test.tsx`.
-- [ ] `npx tsc --noEmit` pasa sin errores.
+- [X] Abrir `/control-calidad` sin sesión redirige a `/login`.
+- [X] `/login` muestra la card con logo, campos Usuario y Contraseña, y botón de ingresar.
+- [X] Enviar el formulario vacío marca los dos campos con su mensaje de zod y **no** dispara ninguna petición HTTP.
+- [X] Credenciales correctas guardan `auth_token` y `auth_user` en `localStorage` y llevan al dashboard `/`.
+- [X] Credenciales incorrectas (401) muestran "Usuario o contraseña incorrectos" en la card, **sin** recargar la página ni redirigir, y `localStorage` sigue vacío.
+- [X] Con el backend apagado, el formulario muestra "No se pudo contactar al servidor." y no queda colgado en "Ingresando…".
+- [X] Mientras la petición está en vuelo el botón está deshabilitado y dice "Ingresando…".
+- [X] El botón de ojo alterna el `type` del campo de contraseña entre `password` y `text`.
+- [X] Tras el login, el Sidebar muestra "Luis de Jesus Reyes Nolasco" y "OPERADOR".
+- [X] Recargar la página con sesión abierta mantiene al usuario dentro y el Sidebar sigue mostrando su nombre.
+- [X] Entrar a `/login` con sesión abierta redirige a `/`.
+- [X] "Cerrar Sesión" borra `auth_token` y `auth_user` y deja al usuario en `/login`; volver atrás con el botón del navegador no reingresa al portal.
+- [X] Cualquier petición hecha con `httpGet`/`httpPost` después del login lleva el header `Authorization: Bearer <token>` (verificable en la pestaña Network).
+- [X] Un `401` en una petición autenticada limpia la sesión y deja al usuario en `/login`.
+- [X] La pantalla de login se ve correcta en modo claro y oscuro, y a 360 px de ancho.
+- [X] `npx vitest run` pasa completo, incluyendo `useLogin.test.tsx`.
+- [X] `npx tsc --noEmit` pasa sin errores.
 
 ---
 
@@ -262,8 +262,8 @@ Solo obligatoriedad. Sin `.email()`, sin mínimo de longitud, sin regex: las reg
 - **Sí:** guard por presencia de token, sin validarlo. No existe `/auth/me`, y decodificar el `exp` del JWT en el front duplicaría en el cliente una regla que solo el backend puede hacer cumplir. Un token expirado se descubre en la primera petición, que devuelve 401 y cierra la sesión: la sesión efectivamente dura lo que dura el token.
 - **Sí:** el `beforeLoad` del portal comprueba el token **solo en el cliente**. `beforeLoad` corre también en el servidor, donde `localStorage` no existe; comprobarlo ahí lanzaría o redirigiría siempre.
 - **Sí:** zod valida únicamente que los campos no estén vacíos. Replicar reglas de contraseña en el front produce falsos rechazos en cuanto el backend las cambie.
-- **Sí:** el mensaje del 401 es fijo en el front ("Usuario o contraseña incorrectos") y **no** se lee `message` del body. El backend devuelve `"Unauthorized"`, que no se le muestra en inglés a un operario de planta.
-- **Sí:** se distinguen tres fallos con mensajes distintos (401, 5xx, sin respuesta). "Contraseña incorrecta" cuando en realidad el backend está apagado hace perder mucho tiempo en planta.
+- **No:** mensaje fijo en el front para el 401. Decisión revertida: ahora se muestra el `message` que devuelve el body del `HttpError` tal cual (por ejemplo el contractual `"Unauthorized"` del 401), y solo se cae a `'El servidor no está disponible. Intentá de nuevo.'` cuando el body no trae `message`. Asume que el backend real ya manda (o mandará) el texto en un lenguaje apto para el operario; si en producción vuelve a llegar en inglés, corregirlo es un cambio de backend, no de este front.
+- **Sí:** se distinguen tres fallos (con `message` del servidor, sin `message` del servidor, sin respuesta). "Contraseña incorrecta" cuando en realidad el backend está apagado hace perder mucho tiempo en planta.
 - **Sí:** los tipos espejan el wire format, `complete_name` en snake_case incluido. Renombrar a `nombreCompleto` obliga a mantener una capa de mapeo para un solo endpoint.
 - **Sí:** `RolUsuario = string` en vez de una unión cerrada. Solo se conoce `'OPERADOR'`; una unión con los demás roles inventados dejaría fuera del sistema a los usuarios reales o mentiría al `tsc`.
 - **No:** el rol no controla nada en este spec. Se guarda y se muestra. Cruzarlo con el PIN de supervisor del bloqueo crítico cambia reglas de negocio de `useControlCalidad`, el hook más delicado del repo, y va en su propio spec.

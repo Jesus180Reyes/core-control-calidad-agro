@@ -11,6 +11,7 @@ interface ControlledInputProps<TFieldValues extends FieldValues> {
     type?: string
     className?: string
     icon?: React.ReactNode
+    accionDerecha?: React.ReactNode
 }
 
 export function ControlledInput<TFieldValues extends FieldValues>({
@@ -20,7 +21,8 @@ export function ControlledInput<TFieldValues extends FieldValues>({
     placeholder,
     type = 'text',
     className = '',
-    icon
+    icon,
+    accionDerecha
 }: ControlledInputProps<TFieldValues>) {
     return (
         <Controller
@@ -45,8 +47,13 @@ export function ControlledInput<TFieldValues extends FieldValues>({
                             type={type}
                             placeholder={placeholder}
                             value={field.value ?? ''}
-                            className={`w-full bg-white border-slate-200/80 shadow-sm focus-visible:ring-indigo-500 ${icon ? 'pl-9' : ''} ${error ? 'border-red-500 focus-visible:ring-red-500' : ''}`}
+                            className={`w-full bg-white border-slate-200/80 shadow-sm focus-visible:ring-indigo-500 ${icon ? 'pl-9' : ''} ${accionDerecha ? 'pr-9' : ''} ${error ? 'border-red-500 focus-visible:ring-red-500' : ''}`}
                         />
+                        {accionDerecha && (
+                            <span className="absolute inset-y-0 right-3 flex items-center">
+                                {accionDerecha}
+                            </span>
+                        )}
                     </div>
                     {error && (
                         <span className="text-[11px] font-semibold text-red-500 block mt-1">
