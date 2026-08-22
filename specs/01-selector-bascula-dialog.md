@@ -1,6 +1,6 @@
 # SPEC 01 — Selector de báscula con dialog propio
 
-> **Estado:** Borrador
+> **Estado:** Approved
 > **Depende de:** —
 > **Fecha:** 2026-08-21
 > **Objetivo:** Reemplazar el diálogo nativo de Chrome por un dialog de shadcn que liste las básculas ya autorizadas con un alias legible, para que el operario elija la correcta en `/control-calidad`.
