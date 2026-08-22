@@ -1,3 +1,5 @@
+import { leerToken, limpiarSesion } from '#/presentation/hooks/auth/almacenamientoSesion'
+
 const BASE_URL = import.meta.env.VITE_API_URL ?? ''
 
 export class HttpError extends Error {
@@ -26,17 +28,28 @@ interface HttpRequestOptions {
 type QueryRequestOptions = Pick<HttpRequestOptions, 'params' | 'headers' | 'signal'>
 type MutationRequestOptions = Pick<HttpRequestOptions, 'headers' | 'signal'>
 
-async function parseResponse<T>(response: Response): Promise<T> {
+async function parseResponse<T>(response: Response, llevabaToken: boolean): Promise<T> {
   const contentType = response.headers.get('content-type') ?? ''
   const body = contentType.includes('application/json')
     ? await response.json().catch(() => null)
     : await response.text()
 
   if (!response.ok) {
+    if (response.status === 401 && llevabaToken) {
+      limpiarSesion()
+      window.location.assign('/login')
+    }
     throw new HttpError(`${response.status} ${response.statusText}`, response.status, body)
   }
 
   return body as T
+}
+
+function tieneAuthorization(headers?: HeadersInit): boolean {
+  if (!headers) return false
+  if (headers instanceof Headers) return headers.has('Authorization')
+  if (Array.isArray(headers)) return headers.some(([key]) => key.toLowerCase() === 'authorization')
+  return Object.keys(headers).some((key) => key.toLowerCase() === 'authorization')
 }
 
 function buildUrl(endpoint: string, params?: QueryParams): string {
@@ -60,15 +73,19 @@ export function httpRequest<T>(endpoint: string, options: HttpRequestOptions): P
   const { method, body, params, headers, signal } = options
   const isFormData = body instanceof FormData
 
+  const token = leerToken()
+  const llevaToken = Boolean(token) && !tieneAuthorization(headers)
+
   return fetch(buildUrl(endpoint, params), {
     method,
     headers: {
       ...(isFormData ? {} : { 'Content-Type': 'application/json' }),
+      ...(llevaToken ? { Authorization: `Bearer ${token}` } : {}),
       ...headers,
     },
     body: isFormData ? body : body !== undefined ? JSON.stringify(body) : undefined,
     signal,
-  }).then((response) => parseResponse<T>(response))
+  }).then((response) => parseResponse<T>(response, llevaToken))
 }
 
 export function httpGet<T>(endpoint: string, options?: QueryRequestOptions): Promise<T> {
