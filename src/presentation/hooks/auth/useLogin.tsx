@@ -6,7 +6,7 @@ import { useNavigate } from '@tanstack/react-router'
 import { useExecuteMutation } from '#/presentation/hooks/shared/useExecuteMutation'
 import { useAuth } from '#/presentation/hooks/auth/useAuth'
 import { loginSchema, type LoginFormValues } from '#/presentation/hooks/auth/loginSchema'
-import { HttpError } from '#/infrastructure/http/http-client'
+import { HttpError, mensajeDelServidor } from '#/infrastructure/http/http-client'
 import type { LoginResponse } from '#/presentation/types/auth/auth.types'
 
 interface UseLoginResult {
@@ -16,14 +16,6 @@ interface UseLoginResult {
     errorLogin: string | null
     verPassword: boolean
     alternarVerPassword: () => void
-}
-
-function mensajeDelServidor(body: unknown): string | null {
-    if (typeof body === 'object' && body !== null && 'message' in body) {
-        const { message } = body as { message: unknown }
-        if (typeof message === 'string' && message.length > 0) return message
-    }
-    return null
 }
 
 function derivarErrorLogin(error: Error): string {

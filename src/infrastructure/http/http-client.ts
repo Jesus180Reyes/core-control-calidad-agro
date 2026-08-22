@@ -13,6 +13,14 @@ export class HttpError extends Error {
   }
 }
 
+export function mensajeDelServidor(body: unknown): string | null {
+  if (typeof body === 'object' && body !== null && 'message' in body) {
+    const { message } = body as { message: unknown }
+    if (typeof message === 'string' && message.length > 0) return message
+  }
+  return null
+}
+
 export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE'
 
 export type QueryParams = Record<string, string | number | boolean | undefined | null>
