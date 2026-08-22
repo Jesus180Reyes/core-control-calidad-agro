@@ -12,6 +12,7 @@ interface ControlledInputProps<TFieldValues extends FieldValues> {
     className?: string
     icon?: React.ReactNode
     accionDerecha?: React.ReactNode
+    uppercase?: boolean
 }
 
 export function ControlledInput<TFieldValues extends FieldValues>({
@@ -22,7 +23,8 @@ export function ControlledInput<TFieldValues extends FieldValues>({
     type = 'text',
     className = '',
     icon,
-    accionDerecha
+    accionDerecha,
+    uppercase = false
 }: ControlledInputProps<TFieldValues>) {
     return (
         <Controller
@@ -43,11 +45,12 @@ export function ControlledInput<TFieldValues extends FieldValues>({
                         )}
                         <Input
                             {...field}
+                            onChange={(e) => field.onChange(uppercase ? e.target.value.toUpperCase() : e.target.value)}
                             id={name}
                             type={type}
                             placeholder={placeholder}
                             value={field.value ?? ''}
-                            className={`w-full bg-white border-slate-200/80 shadow-sm focus-visible:ring-indigo-500 ${icon ? 'pl-9' : ''} ${accionDerecha ? 'pr-9' : ''} ${error ? 'border-red-500 focus-visible:ring-red-500' : ''}`}
+                            className={`w-full bg-white border-slate-200/80 shadow-sm focus-visible:ring-indigo-500 ${icon ? 'pl-9' : ''} ${accionDerecha ? 'pr-9' : ''} ${error ? 'border-red-500 focus-visible:ring-red-500' : ''} ${uppercase ? 'uppercase' : ''}`}
                         />
                         {accionDerecha && (
                             <span className="absolute inset-y-0 right-3 flex items-center">

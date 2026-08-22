@@ -27,6 +27,7 @@ export function LoginCard({ control, onSubmit, enviando, errorLogin, verPassword
                     control={control}
                     label="Usuario"
                     placeholder="Ingresá tu usuario"
+                    uppercase
                 />
 
                 <ControlledInput
