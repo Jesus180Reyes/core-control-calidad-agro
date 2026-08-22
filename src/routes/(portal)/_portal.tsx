@@ -1,4 +1,5 @@
 import { Sidebar } from '#/presentation/components/shared/SideBar'
+import { leerToken } from '#/presentation/hooks/auth/almacenamientoSesion'
 import { createFileRoute, Outlet, redirect } from '@tanstack/react-router'
 
 export const Route = createFileRoute('/(portal)/_portal')({
@@ -10,11 +11,9 @@ export const Route = createFileRoute('/(portal)/_portal')({
     ),
 
     beforeLoad: async () => {
-        const isLogged = true;
-        if (!isLogged) {
+        if (typeof window !== 'undefined' && !leerToken()) {
             throw redirect({ to: '/login' })
         }
-
     },
     component: PortalLayout,
 })
