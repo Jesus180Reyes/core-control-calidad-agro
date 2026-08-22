@@ -195,7 +195,7 @@ Solo obligatoriedad. Sin `.email()`, sin mínimo de longitud, sin regex: las reg
    - `useForm<LoginRequest>` con `zodResolver(loginSchema)` y `defaultValues: { username: '', password: '' }`
    - `useExecuteMutation<LoginResponse, LoginRequest>('/auth/login')`
    - `onSubmit` que en éxito llama `iniciarSesion(data)` y navega a `/`
-   - `errorLogin: string | null` derivado del fallo: si es `HttpError` con `status === 401` → `'Usuario o contraseña incorrectos'`; si `status >= 500` → `'El servidor no está disponible. Intentá de nuevo.'`; si el `fetch` falla sin respuesta (backend caído, CORS) → `'No se pudo contactar al servidor.'`
+   - `errorLogin: string | null` derivado del fallo: si es `HttpError` y el body trae `message` (string no vacío), se muestra ese texto tal cual; si no trae `message` se usa `'El servidor no está disponible. Intentá de nuevo.'`; si el `fetch` falla sin respuesta (backend caído, CORS) → `'No se pudo contactar al servidor.'`
    - `verPassword` / `alternarVerPassword` para el ojo del input
    Expone `{ control, onSubmit, enviando, errorLogin, verPassword, alternarVerPassword }`.
 
@@ -262,8 +262,8 @@ Solo obligatoriedad. Sin `.email()`, sin mínimo de longitud, sin regex: las reg
 - **Sí:** guard por presencia de token, sin validarlo. No existe `/auth/me`, y decodificar el `exp` del JWT en el front duplicaría en el cliente una regla que solo el backend puede hacer cumplir. Un token expirado se descubre en la primera petición, que devuelve 401 y cierra la sesión: la sesión efectivamente dura lo que dura el token.
 - **Sí:** el `beforeLoad` del portal comprueba el token **solo en el cliente**. `beforeLoad` corre también en el servidor, donde `localStorage` no existe; comprobarlo ahí lanzaría o redirigiría siempre.
 - **Sí:** zod valida únicamente que los campos no estén vacíos. Replicar reglas de contraseña en el front produce falsos rechazos en cuanto el backend las cambie.
-- **Sí:** el mensaje del 401 es fijo en el front ("Usuario o contraseña incorrectos") y **no** se lee `message` del body. El backend devuelve `"Unauthorized"`, que no se le muestra en inglés a un operario de planta.
-- **Sí:** se distinguen tres fallos con mensajes distintos (401, 5xx, sin respuesta). "Contraseña incorrecta" cuando en realidad el backend está apagado hace perder mucho tiempo en planta.
+- **No:** mensaje fijo en el front para el 401. Decisión revertida: ahora se muestra el `message` que devuelve el body del `HttpError` tal cual (por ejemplo el contractual `"Unauthorized"` del 401), y solo se cae a `'El servidor no está disponible. Intentá de nuevo.'` cuando el body no trae `message`. Asume que el backend real ya manda (o mandará) el texto en un lenguaje apto para el operario; si en producción vuelve a llegar en inglés, corregirlo es un cambio de backend, no de este front.
+- **Sí:** se distinguen tres fallos (con `message` del servidor, sin `message` del servidor, sin respuesta). "Contraseña incorrecta" cuando en realidad el backend está apagado hace perder mucho tiempo en planta.
 - **Sí:** los tipos espejan el wire format, `complete_name` en snake_case incluido. Renombrar a `nombreCompleto` obliga a mantener una capa de mapeo para un solo endpoint.
 - **Sí:** `RolUsuario = string` en vez de una unión cerrada. Solo se conoce `'OPERADOR'`; una unión con los demás roles inventados dejaría fuera del sistema a los usuarios reales o mentiría al `tsc`.
 - **No:** el rol no controla nada en este spec. Se guarda y se muestra. Cruzarlo con el PIN de supervisor del bloqueo crítico cambia reglas de negocio de `useControlCalidad`, el hook más delicado del repo, y va en su propio spec.

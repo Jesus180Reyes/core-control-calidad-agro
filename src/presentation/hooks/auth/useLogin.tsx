@@ -18,10 +18,17 @@ interface UseLoginResult {
     alternarVerPassword: () => void
 }
 
+function mensajeDelServidor(body: unknown): string | null {
+    if (typeof body === 'object' && body !== null && 'message' in body) {
+        const { message } = body as { message: unknown }
+        if (typeof message === 'string' && message.length > 0) return message
+    }
+    return null
+}
+
 function derivarErrorLogin(error: Error): string {
     if (error instanceof HttpError) {
-        if (error.status === 401) return 'Usuario o contraseña incorrectos'
-        if (error.status >= 500) return 'El servidor no está disponible. Intentá de nuevo.'
+        return mensajeDelServidor(error.body) ?? 'El servidor no está disponible. Intentá de nuevo.'
     }
     return 'No se pudo contactar al servidor.'
 }
