@@ -1,6 +1,6 @@
 # SPEC 02 — Login y sesión contra el backend
 
-> **Estado:** Draft
+> **Estado:** Approved
 > **Depende de:** —
 > **Fecha:** 2026-08-21
 > **Objetivo:** Reemplazar el placeholder de `/login` por una pantalla real que autentique contra `POST /auth/login`, persista la sesión y proteja el portal, para que el operario entre con su usuario y contraseña en vez de con el guard falso `isLogged = true`.
