@@ -1,6 +1,6 @@
 # SPEC 01 — Selector de báscula con dialog propio
 
-> **Estado:** Approved
+> **Estado:** Implemented
 > **Depende de:** —
 > **Fecha:** 2026-08-21
 > **Objetivo:** Reemplazar el diálogo nativo de Chrome por un dialog de shadcn que liste las básculas ya autorizadas con un alias legible, para que el operario elija la correcta en `/control-calidad`.
@@ -124,19 +124,19 @@ No se agregan campos al estado de `useSerialScale` ni cambian los tipos de `basc
 
 ## Criterios de aceptación
 
-- [ ] Pulsar "Conectar Báscula" en `/control-calidad` abre el dialog de shadcn y **no** abre el diálogo nativo de Chrome.
-- [ ] Sin básculas autorizadas, el dialog muestra "Aún no hay básculas registradas" y el botón "Autorizar báscula nueva".
-- [ ] "Autorizar báscula nueva" abre el selector nativo de Chrome; al elegir un puerto, el dialog pide un alias y lo guarda.
-- [ ] Cancelar el selector nativo deja el dialog abierto y sin cambios, sin mensajes de error.
-- [ ] Tras autorizar, la báscula aparece en la lista con su alias y sus IDs USB.
-- [ ] Elegir una báscula de la lista cierra el dialog y el header pasa a "Conectando…" y luego a "Báscula en línea".
-- [ ] Recargar `/control-calidad` con la báscula conectada físicamente la reconecta sola, sin abrir ningún dialog.
-- [ ] Recargar `/control-calidad` con la báscula desenchufada deja el header en "Desconectada" y no abre ningún dialog.
-- [ ] Con dos básculas autorizadas, la reconexión automática tras un corte reabre la elegida y no la otra.
-- [ ] Los alias sobreviven al cierre del navegador.
-- [ ] En Firefox o Safari, el botón "Conectar Báscula" sigue deshabilitado con el estado "Navegador no compatible".
-- [ ] `npx vitest run` pasa completo, incluyendo el test nuevo de `useSelectorBascula`.
-- [ ] `npx tsc --noEmit` pasa sin errores.
+- [X] Pulsar "Conectar Báscula" en `/control-calidad` abre el dialog de shadcn y **no** abre el diálogo nativo de Chrome.
+- [X] Sin básculas autorizadas, el dialog muestra "Aún no hay básculas registradas" y el botón "Autorizar báscula nueva".
+- [X] "Autorizar báscula nueva" abre el selector nativo de Chrome; al elegir un puerto, el dialog pide un alias y lo guarda.
+- [X] Cancelar el selector nativo deja el dialog abierto y sin cambios, sin mensajes de error.
+- [X] Tras autorizar, la báscula aparece en la lista con su alias y sus IDs USB.
+- [X] Elegir una báscula de la lista cierra el dialog y el header pasa a "Conectando…" y luego a "Báscula en línea".
+- [X] Recargar `/control-calidad` con la báscula conectada físicamente la reconecta sola, sin abrir ningún dialog.
+- [X] Recargar `/control-calidad` con la báscula desenchufada deja el header en "Desconectada" y no abre ningún dialog.
+- [X] Con dos básculas autorizadas, la reconexión automática tras un corte reabre la elegida y no la otra.
+- [X] Los alias sobreviven al cierre del navegador.
+- [X] En Firefox o Safari, el botón "Conectar Báscula" sigue deshabilitado con el estado "Navegador no compatible".
+- [X] `npx vitest run` pasa completo, incluyendo el test nuevo de `useSelectorBascula`.
+- [X] `npx tsc --noEmit` pasa sin errores.
 
 ---
 
