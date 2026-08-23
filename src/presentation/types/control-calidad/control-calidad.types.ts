@@ -9,10 +9,3 @@ export interface ParametrosData {
   ideal: number
   maximo: number
 }
-
-export interface Muestra {
-  id: string
-  hora: string
-  peso: number
-  estado: 'DENTRO DE RANGO' | 'DESVIADO'
-}
