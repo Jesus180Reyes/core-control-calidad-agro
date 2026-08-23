@@ -1,17 +1,17 @@
 import { ClienteCard } from '#/presentation/components/clientes/ClienteCard'
-import { ClientesVacio } from '#/presentation/components/clientes/ClientesVacio'
+import { EmptyState } from '#/presentation/components/shared/EmptyState'
 import { useClientes } from '#/presentation/hooks/clientes/useClientes'
 
-/**
- * Consume el listado del backend, así que suspende: la ruta la monta dentro de
- * <Suspense> y <ErrorBoundary>.
- */
 export function ClientesView() {
     const { clientes, seleccionarCliente } = useClientes()
 
-    // Un operador sin clientes vinculados recibe 200 con la lista vacía, no un 404.
     if (clientes.length === 0) {
-        return <ClientesVacio />
+        return (
+            <EmptyState
+                title="No hay clientes asignados"
+                description="Pedí a un supervisor que te vincule al menos un cliente para poder pesar."
+            />
+        )
     }
 
     return (

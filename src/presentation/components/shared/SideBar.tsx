@@ -26,7 +26,6 @@ function inicialesDe(nombreCompleto: string): string {
 export function Sidebar() {
     const { usuario, logout } = useAuth()
     const { pathname } = useLocation()
-    // 💡 Rutas alineadas a la nueva arquitectura y estructura plana del enrutador
     const menuItems: NavItem[] = [
         // {
         //     label: 'Dashboard',

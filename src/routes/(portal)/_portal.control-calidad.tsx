@@ -4,9 +4,7 @@ import { BloqueoCriticoDialog } from '#/presentation/components/control-calidad/
 import { HeaderControlCalidad } from '#/presentation/components/control-calidad/HeaderControlCalidad'
 import { SelectorBasculaDialog } from '#/presentation/components/control-calidad/SelectorBasculaDialog'
 import { useControlCalidad } from '#/presentation/hooks/bascula/useControlCalidad'
-import { AyudaVisualCard } from '#/presentation/views/control-calidad/AyudaVisualCard'
 import { DetallesOperacionCard } from '#/presentation/views/control-calidad/DetallesOperacionCard'
-import { HistorialMuestrasCard } from '#/presentation/views/control-calidad/HistorialMuestrasCard'
 import { MonitoreoBasculaCard } from '#/presentation/views/control-calidad/MonitoreoBasculaCard'
 import { ParametrosReferenciaCard } from '#/presentation/views/control-calidad/ParametrosReferenciaCard'
 import { createFileRoute, redirect, useLocation, useNavigate } from '@tanstack/react-router'
@@ -39,7 +37,6 @@ function ControlCalidadPage() {
     const {
         operacion,
         parametros,
-        ultimasMuestras,
         scale,
         selector,
         pesajeInfo,
@@ -90,11 +87,6 @@ function ControlCalidadPage() {
                         onImprimirEtiqueta={() => console.log('Vamos a imprimir')}
                     />
                 </div>
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-                <HistorialMuestrasCard muestras={ultimasMuestras} lote={operacion.lote} />
-                <AyudaVisualCard />
             </div>
 
             <BloqueoCriticoDialog

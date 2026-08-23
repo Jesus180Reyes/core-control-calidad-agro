@@ -1,11 +1,9 @@
 import type { InfoDesconexion } from "#/presentation/types/control-calidad/bascula.types"
-import type { Muestra, OperacionData, ParametrosData } from "#/presentation/types/control-calidad/control-calidad.types"
+import type { OperacionData, ParametrosData } from "#/presentation/types/control-calidad/control-calidad.types"
 import type { Cliente } from "#/presentation/types/clientes/clientes.types"
 import { useEffect, useMemo, useRef, useState } from "react"
 import { useSerialScale } from "./useSerialScale"
 import { useSelectorBascula } from "./useSelectorBascula"
-
-const MAX_MUESTRAS_VISIBLES = 8
 
 export function useControlCalidad(cliente: Cliente | null) {
     /**
@@ -27,14 +25,6 @@ export function useControlCalidad(cliente: Cliente | null) {
         ideal: 230,
         maximo: 252,
     })
-
-    /** Consecutivo local de muestras (hasta que exista el ID del servidor). */
-    const consecutivoRef = useRef<number>(1843)
-
-    const [ultimasMuestras, setUltimasMuestras] = useState<Muestra[]>([
-        { id: '#1842', hora: '14:22:10', peso: 50012, estado: 'DENTRO DE RANGO' },
-        { id: '#1841', hora: '14:18:05', peso: 49998, estado: 'DENTRO DE RANGO' },
-    ])
 
     /**
      * El selector necesita abrir el puerto y la báscula necesita al selector
@@ -58,16 +48,6 @@ export function useControlCalidad(cliente: Cliente | null) {
         autoReconectar: true,
         // Ancla la reconexión automática a la báscula que eligió el operario.
         resolverPuertoAutorizado: selector.resolverPuertoPreferido,
-        onPesajeEstable: (peso) => {
-            const dentroDeRango = peso >= parametros.minimo && peso <= parametros.maximo
-            const muestra: Muestra = {
-                id: `#${consecutivoRef.current++}`,
-                hora: new Date().toLocaleTimeString('es-HN', { hour12: false }),
-                peso,
-                estado: dentroDeRango ? 'DENTRO DE RANGO' : 'DESVIADO',
-            }
-            setUltimasMuestras((previas) => [muestra, ...previas].slice(0, MAX_MUESTRAS_VISIBLES))
-        },
         onDesconexion: (info: InfoDesconexion) => {
             console.warn(`⚠️ Báscula (${info.motivo}) a las ${info.hora}: ${info.mensaje}`)
         },
@@ -131,7 +111,6 @@ export function useControlCalidad(cliente: Cliente | null) {
     return {
         operacion,
         parametros,
-        ultimasMuestras,
         scale,
         selector,
         pesajeInfo: {
