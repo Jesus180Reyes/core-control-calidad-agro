@@ -4,11 +4,11 @@ import {
     DialogContent,
     DialogHeader,
     DialogTitle,
-} from '@/components/ui/dialog' // Ajusta el alias según tu proyecto
+} from '@/components/ui/dialog'
 
 interface BloqueoCriticoDialogProps {
     isOpen: boolean
-    onAutorizar: (pin: string) => Promise<boolean> | void // 👈 Ahora puede retornar si fue exitoso o no
+    onAutorizar: (pin: string) => Promise<boolean> | void
     onRechazar: () => void
 }
 
@@ -18,11 +18,11 @@ export function BloqueoCriticoDialog({
     onRechazar,
 }: BloqueoCriticoDialogProps) {
     const [pin, setPin] = useState<string[]>(['', '', '', ''])
-    const [errorPin, setErrorPin] = useState<string | null>(null) // ❌ Estado para capturar el error
+    const [errorPin, setErrorPin] = useState<string | null>(null)
 
     const handlePinChange = (value: string, index: number) => {
         if (!/^[0-9]?$/.test(value)) return
-        if (errorPin) setErrorPin(null) // Limpiamos el error si vuelve a escribir
+        if (errorPin) setErrorPin(null)
 
         const newPin = [...pin]
         newPin[index] = value
@@ -45,14 +45,12 @@ export function BloqueoCriticoDialog({
         const pinCompleto = pin.join('')
         if (pinCompleto.length === 4) {
             try {
-                // Ejecutamos la validación que viene del padre
                 const esValido = await onAutorizar(pinCompleto)
 
                 if (esValido === false) {
-                    // Si el padre nos retorna false, lanzamos el estado de error
                     setErrorPin('El PIN ingresado es incorrecto.')
-                    setPin(['', '', '', '']) // Reseteamos el PIN para reintentar
-                    document.getElementById('dialog-pin-0')?.focus() // Foco al primer input
+                    setPin(['', '', '', ''])
+                    document.getElementById('dialog-pin-0')?.focus()
                 } else {
                     setErrorPin(null)
                     setPin(['', '', '', ''])

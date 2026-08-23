@@ -22,7 +22,7 @@ No hay linter ni formatter configurado en el proyecto.
 
 ## Stack
 
-TanStack Start (SSR) + TanStack Router (file-based) + TanStack Query + React 19 + Tailwind v4 + shadcn (estilo `base-nova`, sobre `@base-ui/react`) + react-hook-form/zod. El código y los comentarios están en español; mantener ese idioma.
+TanStack Start (SSR) + TanStack Router (file-based) + TanStack Query + React 19 + Tailwind v4 + shadcn (estilo `base-nova`, sobre `@base-ui/react`) + react-hook-form/zod. Los comentarios y el texto de la UI están en español; mantener ese idioma. Los identificadores nuevos —nombres de componentes, funciones y props— van en **inglés** (`EmptyState`, no `EstadoVacio`). El código existente sigue en español (`ClienteCard`, `useClientes`, `SideBar`…) y no se renombra: la regla aplica sólo de acá en adelante.
 
 ## Arquitectura
 
