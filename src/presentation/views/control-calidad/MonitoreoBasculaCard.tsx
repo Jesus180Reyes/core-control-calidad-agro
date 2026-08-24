@@ -8,6 +8,8 @@ interface MonitoreoBasculaCardProps {
     isStabilizing: boolean
     /** `unidad_medida` del lote; llega del API en mayúsculas ("LIBRAS"). */
     unidad: string
+    /** Hay un `POST /pesajes` en vuelo. */
+    guardando: boolean
     onGuardar?: () => void
     onImprimirEtiqueta?: () => void
 }
@@ -18,6 +20,7 @@ export function MonitoreoBasculaCard({
     diferencia,
     isStabilizing,
     unidad,
+    guardando,
     onGuardar,
     onImprimirEtiqueta,
 }: MonitoreoBasculaCardProps) {
@@ -39,7 +42,8 @@ export function MonitoreoBasculaCard({
             </div>
 
             <PanelAcciones
-                disabledGuardar={esPesoCero || requiereReajuste || isStabilizing}
+                disabledGuardar={esPesoCero || requiereReajuste || isStabilizing || guardando}
+                guardando={guardando}
                 onGuardar={onGuardar}
                 onImprimirEtiqueta={onImprimirEtiqueta}
                 isStabilizing={isStabilizing}
@@ -86,6 +90,7 @@ function ContenidoEstado({ esPesoCero, requiereReajuste, pesoActual, diferencia,
 
 interface PanelAccionesProps {
     disabledGuardar: boolean
+    guardando: boolean
     onGuardar?: () => void
     onImprimirEtiqueta?: () => void
     isStabilizing: boolean
@@ -94,7 +99,7 @@ interface PanelAccionesProps {
 
 }
 
-function PanelAcciones({ disabledGuardar, onGuardar, onImprimirEtiqueta, isStabilizing, pesoActual, requiereReajuste }: PanelAccionesProps) {
+function PanelAcciones({ disabledGuardar, guardando, onGuardar, onImprimirEtiqueta, isStabilizing, pesoActual, requiereReajuste }: PanelAccionesProps) {
     return (
         <div className="w-full space-y-4 pt-6 lg:pt-8 border-t border-slate-50 dark:border-zinc-800/40">
 
@@ -102,7 +107,7 @@ function PanelAcciones({ disabledGuardar, onGuardar, onImprimirEtiqueta, isStabi
                 variant="primary"
                 onClick={onGuardar}
                 disabled={disabledGuardar}
-                isLoading={isStabilizing}
+                isLoading={guardando}
                 icon={
                     <svg className="w-5 h-5 lg:w-6 lg:h-6" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M20.25 6.375c0 2.278-3.694 4.125-8.25 4.125S3.75 8.653 3.75 6.375m16.5 0c0-2.278-3.694-4.125-8.25-4.125S3.75 4.097 3.75 6.375m16.5 0v11.25c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125V6.375m16.5 0v3.75m-16.5-3.75v3.75m16.5 0v3.75C20.25 16.153 16.556 18 12 18s-8.25-1.847-8.25-4.125v-3.75m16.5 0c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125" />
@@ -117,6 +122,7 @@ function PanelAcciones({ disabledGuardar, onGuardar, onImprimirEtiqueta, isStabi
                 < CustomButton
                     variant="secondary"
                     onClick={onImprimirEtiqueta}
+                    disabled={guardando}
                     icon={
                         <svg className="w-4 h-4 lg:w-5 lg:h-5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" d="M6.72 13.82l-.24-2.48a1.125 1.125 0 011.12-1.24h8.8a1.125 1.125 0 011.12 1.24l-.24 2.48m-10.56 0h10.56m-10.56 0a1.125 1.125 0 00-1.12 1.24v2.88c0 .53.43.96.96.96h10.88c.53 0 .96-.43.96-.96v-2.88a1.125 1.125 0 00-1.12-1.24M15 18H9M15 6h-6V4h6v2z" />
