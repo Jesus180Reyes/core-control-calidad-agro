@@ -3,6 +3,7 @@ import type { OperacionData, ParametrosData } from "#/presentation/types/control
 import type { Cliente } from "#/presentation/types/clientes/clientes.types"
 import type { Lote } from "#/presentation/types/lotes/lotes.types"
 import { useEffect, useMemo, useRef, useState } from "react"
+import { usePesajes } from "#/presentation/hooks/pesajes/usePesajes"
 import { useSerialScale } from "./useSerialScale"
 import { useSelectorBascula } from "./useSelectorBascula"
 
@@ -86,8 +87,27 @@ export function useControlCalidad(cliente: Cliente | null, lote: Lote | null) {
     useEffect(() => {
         // Solo se bloquea con lecturas confiables: la báscula debe estar
         // transmitiendo y el peso ya estabilizado (evita disparos durante la carga).
-        setMostrarBloqueo(esAltoRango && scale.hayFlujoDatos && !scale.isStabilizing)
-    }, [esAltoRango, scale.hayFlujoDatos, scale.isStabilizing])
+        // Sin muestra confirmada no hay nada que autorizar ni que guardar.
+        setMostrarBloqueo(
+            esAltoRango && scale.hayFlujoDatos && !scale.isStabilizing && scale.pesoEstable !== null,
+        )
+    }, [esAltoRango, scale.hayFlujoDatos, scale.isStabilizing, scale.pesoEstable])
+
+    const pesajes = usePesajes(lote)
+
+    /**
+     * Guarda la muestra ya confirmada —no la lectura viva— y solo si el
+     * servidor la aceptó prepara la siguiente. Si falla, el peso se queda en
+     * pantalla: el producto sigue sobre la plataforma y se puede reintentar.
+     */
+    const guardarPesaje = async (): Promise<boolean> => {
+        if (scale.pesoEstable === null) return false
+
+        const guardado = await pesajes.guardarPesaje(scale.pesoEstable)
+        if (guardado) scale.reiniciarPesaje()
+
+        return guardado
+    }
 
     const handleRechazarPesaje = () => {
         console.log("❌ Pesaje rechazado por el operario")
@@ -96,18 +116,17 @@ export function useControlCalidad(cliente: Cliente | null, lote: Lote | null) {
     }
 
     const handleAutorizarConPin = async (pinIngresado: string): Promise<boolean> => {
-        console.log("🔑 Procesando validación de PIN en el servidor:", pinIngresado)
-        try {
-            const pinCorrecto = "1234"
-            if (pinIngresado !== pinCorrecto) return false
+        const pinCorrecto = "1234"
+        if (pinIngresado !== pinCorrecto) return false
 
-            console.log("✅ PIN de supervisor aprobado.")
-            setMostrarBloqueo(false)
-            return true
-        } catch (err) {
-            console.error("Error al autorizar lote:", err)
-            return false
-        }
+        /*
+         * El booleano significa "el PIN es válido", no "el pesaje se guardó":
+         * el dialog se cierra igual y un fallo del envío lo cuenta el toast.
+         */
+        setMostrarBloqueo(false)
+        void guardarPesaje()
+
+        return true
     }
 
     return {
@@ -119,6 +138,8 @@ export function useControlCalidad(cliente: Cliente | null, lote: Lote | null) {
             diferencia,
             requiereReajuste,
         },
+        guardarPesaje,
+        guardando: pesajes.guardando,
         bloqueo: {
             mostrar: mostrarBloqueo,
             handleRechazar: handleRechazarPesaje,

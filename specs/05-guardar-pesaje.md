@@ -1,6 +1,6 @@
 # SPEC 05 — Guardar el pesaje en la base de datos
 
-> **Estado:** Approved
+> **Estado:** Implemented
 > **Depende de:** SPEC 03, SPEC 04
 > **Fecha:** 2026-08-24
 > **Objetivo:** Conectar el botón "Guardar en Base de Datos" de `/control-calidad` al endpoint `POST /pesajes`, para que cada muestra estabilizada del lote quede registrada y la pantalla se reinicie lista para el siguiente bulto.
@@ -164,24 +164,24 @@ Vive en `usePesajes.tsx`, que es el único archivo que arma el body.
 
 ## Criterios de aceptación
 
-- [ ] `npx tsc --noEmit` pasa sin errores.
-- [ ] `npx vitest run` pasa completo, con los mismos tests que hoy.
-- [ ] Con el peso estabilizado dentro del rango, tocar "Guardar en Base de Datos" manda un `POST /pesajes` con body `{ lote_id, estado_calidad_id: 1, peso_bruto }` y **sin** la clave `tara` (verificable en la pestaña Network).
-- [ ] `peso_bruto` es exactamente el número que la card mostró congelado (`pesoEstable`), no la lectura viva.
-- [ ] `lote_id` corresponde al lote elegido en `/lotes-clientes`.
-- [ ] Tras un guardado exitoso aparece un toast verde con el `msg` del servidor.
-- [ ] Tras un guardado exitoso la pantalla vuelve a esperar muestra: `pesoEstable` es `null` y se puede tomar otra sin retirar el producto.
-- [ ] Con el backend apagado, el toast es rojo y dice "No se pudo contactar al servidor.".
-- [ ] Con un error del servidor, el toast rojo muestra el mensaje del servidor si viene, y "No se pudo guardar el pesaje." si no.
-- [ ] Tras un guardado fallido el peso **no** se reinicia: el mismo número sigue en pantalla y el botón vuelve a estar disponible para reintentar.
-- [ ] Una petición fallida no se reintenta sola (`mutations: { retry: 0 }` de SPEC 03): en Network se ve un solo `POST`.
-- [ ] Mientras el `POST` está en vuelo, el botón muestra el spinner y un segundo click no dispara una segunda petición.
-- [ ] Con el peso por encima del máximo aparece el `BloqueoCriticoDialog`, y solo aparece cuando ya hay muestra estabilizada.
-- [ ] Ingresar el PIN `1234` y tocar "Autorizar Lote" cierra el dialog y manda el `POST /pesajes`.
-- [ ] Ingresar un PIN incorrecto muestra el error dentro del dialog y **no** manda ninguna petición.
-- [ ] "Rechazar Pesaje" no manda ninguna petición.
-- [ ] Guardar y volver a `/lotes-clientes` muestra los lotes recargados desde el API (query invalidada), sin recargar la página.
-- [ ] Los toasts se ven correctamente en modo claro y oscuro.
+- [X] `npx tsc --noEmit` pasa sin errores.
+- [x] `npx vitest run` pasa completo, con los mismos tests que hoy.
+- [X] Con el peso estabilizado dentro del rango, tocar "Guardar en Base de Datos" manda un `POST /pesajes` con body `{ lote_id, estado_calidad_id: 1, peso_bruto }` y **sin** la clave `tara` (verificable en la pestaña Network).
+- [X] `peso_bruto` es exactamente el número que la card mostró congelado (`pesoEstable`), no la lectura viva.
+- [X] `lote_id` corresponde al lote elegido en `/lotes-clientes`.
+- [X] Tras un guardado exitoso aparece un toast verde con el `msg` del servidor.
+- [X] Tras un guardado exitoso la pantalla vuelve a esperar muestra: `pesoEstable` es `null` y se puede tomar otra sin retirar el producto.
+- [X] Con el backend apagado, el toast es rojo y dice "No se pudo contactar al servidor.".
+- [X] Con un error del servidor, el toast rojo muestra el mensaje del servidor si viene, y "No se pudo guardar el pesaje." si no.
+- [X] Tras un guardado fallido el peso **no** se reinicia: el mismo número sigue en pantalla y el botón vuelve a estar disponible para reintentar.
+- [X] Una petición fallida no se reintenta sola (`mutations: { retry: 0 }` de SPEC 03): en Network se ve un solo `POST`.
+- [X] Mientras el `POST` está en vuelo, el botón muestra el spinner y un segundo click no dispara una segunda petición.
+- [X] Con el peso por encima del máximo aparece el `BloqueoCriticoDialog`, y solo aparece cuando ya hay muestra estabilizada.
+- [X] Ingresar el PIN `1234` y tocar "Autorizar Lote" cierra el dialog y manda el `POST /pesajes`.
+- [X] Ingresar un PIN incorrecto muestra el error dentro del dialog y **no** manda ninguna petición.
+- [X] "Rechazar Pesaje" no manda ninguna petición.
+- [X] Guardar y volver a `/lotes-clientes` muestra los lotes recargados desde el API (query invalidada), sin recargar la página.
+- [X] Los toasts se ven correctamente en modo claro y oscuro.
 
 ---
 

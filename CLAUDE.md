@@ -41,6 +41,8 @@ Capas bajo `src/`, con alias `#/*` y `@/*` apuntando ambos a `src/` (`#/` es el 
 
 Varios hooks de dominio (`useControlCalidad`, `useParametros`) todavía devuelven datos mock en `useState`; al conectarlos al backend, reemplazar solo el interior del hook.
 
+Las notificaciones van por `sonner` (`toast.success` / `toast.error`), con el `<Toaster />` montado en `__root.tsx` dentro del `ThemeProvider`. Una mutación reporta su resultado por el toast, no por el `ErrorBoundary`, y el texto del error se deriva con los helpers de `http-errors.ts` (ver `derivarErrorPesaje` en `usePesajes`).
+
 ### Cliente HTTP
 
 `infrastructure/http/` son cinco archivos con una frontera deliberada: los tres primeros no importan **nada** de `#/presentation` ni del router. Al tocarlos, mantener eso.

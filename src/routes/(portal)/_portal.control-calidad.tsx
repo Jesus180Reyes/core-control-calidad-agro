@@ -50,6 +50,8 @@ function ControlCalidadPage() {
         selector,
         pesajeInfo,
         bloqueo,
+        guardarPesaje,
+        guardando,
 
     } = useControlCalidad(cliente, lote)
 
@@ -93,7 +95,8 @@ function ControlCalidadPage() {
                         diferencia={pesajeInfo.diferencia}
                         isStabilizing={scale.isStabilizing}
                         unidad={parametros.unidad}
-                        onGuardar={() => console.log('guardando')}
+                        guardando={guardando}
+                        onGuardar={() => void guardarPesaje()}
                         onImprimirEtiqueta={() => console.log('Vamos a imprimir')}
                     />
                 </div>

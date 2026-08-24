@@ -56,6 +56,7 @@ export function useLogin(): UseLoginResult {
             navigate({ to: '/' })
         },
         onError: (error) => {
+            console.log(error);
             setErrorLogin(derivarErrorLogin(error))
         },
     })
