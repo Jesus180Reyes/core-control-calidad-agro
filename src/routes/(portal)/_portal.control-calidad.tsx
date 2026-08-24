@@ -11,10 +11,14 @@ import { createFileRoute, redirect, useLocation, useNavigate } from '@tanstack/r
 import { useEffect } from 'react'
 
 export const Route = createFileRoute('/(portal)/_portal/control-calidad')({
-    // Sin cliente no se pesa: la entrada directa por URL rebota a la lista.
+    // Sin cliente no se pesa y sin lote no hay rango: la entrada directa por
+    // URL rebota al paso que falte.
     beforeLoad: ({ location }) => {
         if (!location.state.cliente) {
             throw redirect({ to: '/clientes' })
+        }
+        if (!location.state.lote) {
+            throw redirect({ to: '/lotes-clientes', state: { cliente: location.state.cliente } })
         }
     },
     component: ControlCalidadPage,
@@ -23,6 +27,7 @@ export const Route = createFileRoute('/(portal)/_portal/control-calidad')({
 function ControlCalidadPage() {
     const navigate = useNavigate()
     const cliente = useLocation({ select: (location) => location.state.cliente }) ?? null
+    const lote = useLocation({ select: (location) => location.state.lote }) ?? null
 
     // Respaldo del lado del cliente, por el mismo motivo documentado en
     // `_portal.tsx`: cuando el HTML llega ya renderizado por el SSR, TanStack
@@ -31,8 +36,12 @@ function ControlCalidadPage() {
     useEffect(() => {
         if (!cliente) {
             navigate({ to: '/clientes', replace: true })
+            return
         }
-    }, [cliente, navigate])
+        if (!lote) {
+            navigate({ to: '/lotes-clientes', state: { cliente }, replace: true })
+        }
+    }, [cliente, lote, navigate])
 
     const {
         operacion,
@@ -42,7 +51,7 @@ function ControlCalidadPage() {
         pesajeInfo,
         bloqueo,
 
-    } = useControlCalidad(cliente)
+    } = useControlCalidad(cliente, lote)
 
     return (
         <div className="flex-1 min-h-screen bg-[#F8FAFC] dark:bg-zinc-950 p-6 space-y-6 overflow-y-auto">
@@ -55,7 +64,7 @@ function ControlCalidadPage() {
                 onConnect={() => selector.abrir()}
                 onDisconnect={() => void scale.disconnectSerial()}
                 onReintentar={() => void scale.reconectar()}
-                onVolver={() => navigate({ to: '/clientes' })}
+                onVolver={() => navigate({ to: '/lotes-clientes', state: { cliente: cliente ?? undefined } })}
             />
 
             <BannerEstadoBascula
@@ -83,6 +92,7 @@ function ControlCalidadPage() {
                         requiereReajuste={pesajeInfo.requiereReajuste}
                         diferencia={pesajeInfo.diferencia}
                         isStabilizing={scale.isStabilizing}
+                        unidad={parametros.unidad}
                         onGuardar={() => console.log('guardando')}
                         onImprimirEtiqueta={() => console.log('Vamos a imprimir')}
                     />

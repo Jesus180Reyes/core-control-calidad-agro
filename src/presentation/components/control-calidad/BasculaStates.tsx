@@ -3,9 +3,11 @@ interface StateProps {
     pesoActual: number
     diferencia: number
     isStabilizing: boolean
+    /** `unidad_medida` del lote; llega del API en mayúsculas ("LIBRAS"). */
+    unidad: string
 }
 
-export function EstadoEspera() {
+export function EstadoEspera({ unidad }: Pick<StateProps, 'unidad'>) {
     return (
         <div className="flex flex-col items-center w-full">
             <div className="absolute top-6 right-6 lg:top-8 lg:right-8">
@@ -28,7 +30,7 @@ export function EstadoEspera() {
                 <h2 className="text-6xl md:text-7xl lg:text-8xl xl:text-9xl font-black tracking-tight font-sans text-slate-600 dark:text-zinc-400 transition-all">
                     0
                 </h2>
-                <span className="text-xl lg:text-3xl font-bold text-slate-400 dark:text-zinc-500">g</span>
+                <span className="text-xl lg:text-3xl font-bold text-slate-400 dark:text-zinc-500 lowercase">{unidad}</span>
             </div>
 
             <div className="grid grid-cols-2 w-full border-t border-slate-100 dark:border-zinc-800/60 pt-8 mb-4">
@@ -37,7 +39,9 @@ export function EstadoEspera() {
                         <div className="w-3 h-3 rounded-full absolute left-1/2 -translate-x-1/2 bg-slate-400 top-1/2 -translate-y-1/2" />
                     </div>
                     <span className="text-[10px] lg:text-[11px] font-bold tracking-wider text-slate-400 dark:text-zinc-500 uppercase">Desviación</span>
-                    <span className="text-sm lg:text-base font-black mt-1 text-slate-500">0 g</span>
+                    <span className="text-sm lg:text-base font-black mt-1 text-slate-500">
+                        0 <span className="lowercase">{unidad}</span>
+                    </span>
                 </div>
 
                 <div className="flex flex-col items-center justify-center pl-2">
@@ -54,7 +58,7 @@ export function EstadoEspera() {
     )
 }
 
-export function EstadoDesviado({ pesoActual, diferencia, isStabilizing }: StateProps) {
+export function EstadoDesviado({ pesoActual, diferencia, isStabilizing, unidad }: StateProps) {
     return (
         <div className="flex flex-col items-center w-full">
             <div className="absolute top-6 right-6 lg:top-8 lg:right-8">
@@ -77,7 +81,7 @@ export function EstadoDesviado({ pesoActual, diferencia, isStabilizing }: StateP
                 <h2 className="text-6xl md:text-7xl lg:text-8xl xl:text-9xl font-black tracking-tight font-sans text-amber-600 dark:text-amber-500 transition-all">
                     {pesoActual.toLocaleString()}
                 </h2>
-                <span className="text-xl lg:text-3xl font-bold text-slate-400 dark:text-zinc-500">g</span>
+                <span className="text-xl lg:text-3xl font-bold text-slate-400 dark:text-zinc-500 lowercase">{unidad}</span>
             </div>
 
             <div className="grid grid-cols-2 w-full border-t border-slate-100 dark:border-zinc-800/60 pt-8 mb-4">
@@ -87,7 +91,7 @@ export function EstadoDesviado({ pesoActual, diferencia, isStabilizing }: StateP
                     </div>
                     <span className="text-[10px] lg:text-[11px] font-bold tracking-wider text-slate-400 dark:text-zinc-500 uppercase">Desviación</span>
                     <span className="text-sm lg:text-base font-black mt-1 text-amber-500">
-                        +{diferencia.toFixed(0)} g
+                        +{diferencia.toFixed(0)} <span className="lowercase">{unidad}</span>
                     </span>
                 </div>
 
@@ -107,7 +111,7 @@ export function EstadoDesviado({ pesoActual, diferencia, isStabilizing }: StateP
     )
 }
 
-export function EstadoAprobado({ pesoActual, diferencia, isStabilizing }: StateProps) {
+export function EstadoAprobado({ pesoActual, diferencia, isStabilizing, unidad }: StateProps) {
     return (
         <div className="flex flex-col items-center w-full">
             <div className="absolute top-6 right-6 lg:top-8 lg:right-8">
@@ -130,7 +134,7 @@ export function EstadoAprobado({ pesoActual, diferencia, isStabilizing }: StateP
                 <h2 className="text-6xl md:text-7xl lg:text-8xl xl:text-9xl font-black tracking-tight font-sans text-emerald-800 dark:text-emerald-500 transition-all">
                     {pesoActual.toLocaleString()}
                 </h2>
-                <span className="text-xl lg:text-3xl font-bold text-slate-400 dark:text-zinc-500">g</span>
+                <span className="text-xl lg:text-3xl font-bold text-slate-400 dark:text-zinc-500 lowercase">{unidad}</span>
             </div>
 
             <div className="grid grid-cols-2 w-full border-t border-slate-100 dark:border-zinc-800/60 pt-8 mb-4">
@@ -140,7 +144,7 @@ export function EstadoAprobado({ pesoActual, diferencia, isStabilizing }: StateP
                     </div>
                     <span className="text-[10px] lg:text-[11px] font-bold tracking-wider text-slate-400 dark:text-zinc-500 uppercase">Desviación</span>
                     <span className="text-sm lg:text-base font-black mt-1 text-emerald-600">
-                        {diferencia === 0 ? '0' : `${diferencia > 0 ? '+' : ''}${diferencia.toFixed(0)}`} g
+                        {diferencia === 0 ? '0' : `${diferencia > 0 ? '+' : ''}${diferencia.toFixed(0)}`} <span className="lowercase">{unidad}</span>
                     </span>
                 </div>
 

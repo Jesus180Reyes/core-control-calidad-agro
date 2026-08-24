@@ -1,30 +1,32 @@
 import type { InfoDesconexion } from "#/presentation/types/control-calidad/bascula.types"
 import type { OperacionData, ParametrosData } from "#/presentation/types/control-calidad/control-calidad.types"
 import type { Cliente } from "#/presentation/types/clientes/clientes.types"
+import type { Lote } from "#/presentation/types/lotes/lotes.types"
 import { useEffect, useMemo, useRef, useState } from "react"
 import { useSerialScale } from "./useSerialScale"
 import { useSelectorBascula } from "./useSelectorBascula"
 
-export function useControlCalidad(cliente: Cliente | null) {
+export function useControlCalidad(cliente: Cliente | null, lote: Lote | null) {
     /**
-     * La operación se deriva del cliente que llega de `/clientes`; ya no es un
-     * estado propio con un cliente inventado.
+     * La operación se deriva del cliente y del lote que llegan de
+     * `/clientes` → `/lotes-clientes`; ya no es un estado propio inventado.
      *
-     * `etapa` y `lote` quedan vacíos a propósito: no están en la tabla de
-     * clientes y todavía no existe la pantalla que los elija. La cadena vacía
-     * es lo que `DetallesOperacionCard` pinta como `—`.
+     * `etapa` queda vacía a propósito: todavía no existe la pantalla que la
+     * elija. La cadena vacía es lo que `DetallesOperacionCard` pinta como `—`.
      */
     const operacion = useMemo<OperacionData>(() => ({
         cliente: cliente?.nombre ?? '',
         etapa: '',
-        lote: '',
-    }), [cliente?.nombre])
+        lote: lote?.nombre_lote ?? '',
+    }), [cliente?.nombre, lote?.nombre_lote])
 
-    const [parametros] = useState<ParametrosData>({
-        minimo: 220,
-        ideal: 230,
-        maximo: 252,
-    })
+    /** El rango lo define el lote; el API manda los pesos como texto decimal. */
+    const parametros = useMemo<ParametrosData>(() => ({
+        minimo: Number(lote?.peso_minimo) || 0,
+        ideal: Number(lote?.peso_ideal) || 0,
+        maximo: Number(lote?.peso_maximo) || 0,
+        unidad: lote?.unidad_medida ?? '',
+    }), [lote?.peso_minimo, lote?.peso_ideal, lote?.peso_maximo, lote?.unidad_medida])
 
     /**
      * El selector necesita abrir el puerto y la báscula necesita al selector

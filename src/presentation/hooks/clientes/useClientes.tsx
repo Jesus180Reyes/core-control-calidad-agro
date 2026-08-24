@@ -9,8 +9,9 @@ export function useClientes() {
 
     const { data } = useExecuteQuery<ClientesResponse>(['clientes'], '/clientes')
 
+    // El cliente no lleva directo a la báscula: primero hay que elegir el lote.
     const seleccionarCliente = (cliente: Cliente) => {
-        navigate({ to: '/control-calidad', state: { cliente } })
+        navigate({ to: '/lotes-clientes', state: { cliente } })
     }
 
     return { clientes: data.clientes, seleccionarCliente }

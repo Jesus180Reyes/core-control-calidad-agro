@@ -1,12 +1,8 @@
 
-export type RolUsuario = string
 
 export interface Usuario {
-    id: number
-    cedula: string
-    username: string
     complete_name: string
-    rol: RolUsuario
+    rol: string
 }
 
 export interface LoginRequest {

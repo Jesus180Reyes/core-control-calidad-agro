@@ -6,6 +6,8 @@ interface MonitoreoBasculaCardProps {
     requiereReajuste: boolean
     diferencia: number
     isStabilizing: boolean
+    /** `unidad_medida` del lote; llega del API en mayúsculas ("LIBRAS"). */
+    unidad: string
     onGuardar?: () => void
     onImprimirEtiqueta?: () => void
 }
@@ -15,6 +17,7 @@ export function MonitoreoBasculaCard({
     requiereReajuste,
     diferencia,
     isStabilizing,
+    unidad,
     onGuardar,
     onImprimirEtiqueta,
 }: MonitoreoBasculaCardProps) {
@@ -31,6 +34,7 @@ export function MonitoreoBasculaCard({
                     pesoActual={pesoActual}
                     diferencia={diferencia}
                     isStabilizing={isStabilizing}
+                    unidad={unidad}
                 />
             </div>
 
@@ -53,10 +57,11 @@ interface ContenidoEstadoProps {
     pesoActual: number
     diferencia: number
     isStabilizing: boolean
+    unidad: string
 }
 
-function ContenidoEstado({ esPesoCero, requiereReajuste, pesoActual, diferencia, isStabilizing }: ContenidoEstadoProps) {
-    if (esPesoCero) return <EstadoEspera />
+function ContenidoEstado({ esPesoCero, requiereReajuste, pesoActual, diferencia, isStabilizing, unidad }: ContenidoEstadoProps) {
+    if (esPesoCero) return <EstadoEspera unidad={unidad} />
 
     if (requiereReajuste) {
         return (
@@ -64,6 +69,7 @@ function ContenidoEstado({ esPesoCero, requiereReajuste, pesoActual, diferencia,
                 pesoActual={pesoActual}
                 diferencia={diferencia}
                 isStabilizing={isStabilizing}
+                unidad={unidad}
             />
         )
     }
@@ -73,6 +79,7 @@ function ContenidoEstado({ esPesoCero, requiereReajuste, pesoActual, diferencia,
             pesoActual={pesoActual}
             diferencia={diferencia}
             isStabilizing={isStabilizing}
+            unidad={unidad}
         />
     )
 }

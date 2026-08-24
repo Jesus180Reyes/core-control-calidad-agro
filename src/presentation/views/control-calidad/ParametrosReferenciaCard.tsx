@@ -26,7 +26,7 @@ export function ParametrosReferenciaCard({ parametros, pesoActual }: ParametrosR
                 Parámetros de Referencia
             </h3>
 
-            <ReferenceValuesGrid min={min} ideal={ideal} max={max} />
+            <ReferenceValuesGrid min={min} ideal={ideal} max={max} unidad={parametros.unidad} />
 
             <WeightProgressBar
                 percentage={positionPercentage}
@@ -40,29 +40,31 @@ interface ReferenceValuesGridProps {
     min: number
     ideal: number
     max: number
+    /** `unidad_medida` del lote; llega del API en mayúsculas ("LIBRAS"). */
+    unidad: string
 }
 
-export function ReferenceValuesGrid({ min, ideal, max }: ReferenceValuesGridProps) {
+export function ReferenceValuesGrid({ min, ideal, max, unidad }: ReferenceValuesGridProps) {
     return (
         <div className="grid grid-cols-3 gap-3">
             <div className="bg-slate-50/50 dark:bg-zinc-800/40 border border-slate-100 dark:border-zinc-800 rounded-2xl p-3 text-center">
                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tight">Mínimo</p>
                 <p className="text-sm font-extrabold text-slate-800 dark:text-zinc-200 mt-0.5">
-                    {min.toLocaleString()}<span className="text-slate-400 font-normal text-xs ml-0.5">g</span>
+                    {min.toLocaleString()}<span className="text-slate-400 font-normal text-xs ml-0.5 lowercase">{unidad}</span>
                 </p>
             </div>
 
             <div className="bg-indigo-50/30 dark:bg-indigo-950/10 border-2 border-indigo-500/10 rounded-2xl p-3 text-center">
                 <p className="text-[10px] font-bold text-indigo-500 uppercase tracking-tight">Ideal</p>
                 <p className="text-sm font-extrabold text-indigo-600 mt-0.5">
-                    {ideal.toLocaleString()}<span className="text-indigo-400 font-normal text-xs ml-0.5">g</span>
+                    {ideal.toLocaleString()}<span className="text-indigo-400 font-normal text-xs ml-0.5 lowercase">{unidad}</span>
                 </p>
             </div>
 
             <div className="bg-slate-50/50 dark:bg-zinc-800/40 border border-slate-100 dark:border-zinc-800 rounded-2xl p-3 text-center">
                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tight">Máximo</p>
                 <p className="text-sm font-extrabold text-slate-800 dark:text-zinc-200 mt-0.5">
-                    {max.toLocaleString()}<span className="text-slate-400 font-normal text-xs ml-0.5">g</span>
+                    {max.toLocaleString()}<span className="text-slate-400 font-normal text-xs ml-0.5 lowercase">{unidad}</span>
                 </p>
             </div>
         </div>
