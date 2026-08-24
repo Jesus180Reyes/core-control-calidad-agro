@@ -17,7 +17,7 @@ export function useAuth(): UseAuthResult {
     const sesion = useSyncExternalStore(suscribir, snapshot, () => null)
 
     function iniciarSesion(respuesta: LoginResponse): boolean {
-        if (!respuesta.accessToken || !respuesta.user?.id) return false
+        if (!respuesta.accessToken) return false
         guardarSesion({ accessToken: respuesta.accessToken, usuario: respuesta.user })
         return true
     }

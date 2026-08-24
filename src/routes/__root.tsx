@@ -4,6 +4,7 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { TanStackDevtools } from '@tanstack/react-devtools'
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 
+import { Toaster } from '@/components/ui/sonner'
 import { ThemeProvider } from '#/presentation/theme/ThemeProvider'
 import { queryClient } from '#/infrastructure/query-client/query-client'
 import appCss from '../styles.css?url'
@@ -41,6 +42,9 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <QueryClientProvider client={queryClient}>
           <ThemeProvider defaultTheme="system">
             {children || <Outlet />}
+
+            {/* Arriba y al centro: el operario no aparta la vista del peso. */}
+            <Toaster position="top-center" richColors />
           </ThemeProvider>
 
           {isDev && <ReactQueryDevtools initialIsOpen={false} />}
