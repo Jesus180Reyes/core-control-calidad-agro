@@ -40,7 +40,7 @@ export function LoginCard({ control, onSubmit, enviando, errorLogin, verPassword
                         <button
                             type="button"
                             onClick={alternarVerPassword}
-                            className="text-slate-400 hover:text-slate-600 cursor-pointer"
+                            className="text-text-muted/70 hover:text-text-main transition-colors duration-200 cursor-pointer"
                             aria-label={verPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
                         >
                             <IconoVisibilidadPassword visible={verPassword} />
