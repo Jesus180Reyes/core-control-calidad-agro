@@ -24,10 +24,18 @@
     inset -1px -1px 2px rgba(0, 0, 0, 0.04),
     0px 4px 12px -2px rgba(79, 70, 229, 0.08);
 
-  --shadow-clay-btn-hover: 
-    inset 1px 1px 2px rgba(255, 255, 255, 0.6), 
+  --shadow-clay-btn-hover:
+    inset 1px 1px 2px rgba(255, 255, 255, 0.6),
     inset -1px -1px 2px rgba(0, 0, 0, 0.06),
     0px 6px 16px -2px rgba(79, 70, 229, 0.12);
+
+  /* Cursor falso de los casilleros de PIN (InputOTPSlot). */
+  --animate-caret-blink: caret-blink 1.25s ease-out infinite;
+
+  @keyframes caret-blink {
+    0%, 70%, 100% { opacity: 1; }
+    20%, 50%      { opacity: 0; }
+  }
 }
 
 

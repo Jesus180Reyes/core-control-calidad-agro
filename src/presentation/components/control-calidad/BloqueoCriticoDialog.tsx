@@ -1,10 +1,16 @@
-import React, { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { KeyRound, Lock } from 'lucide-react'
 import {
     Dialog,
     DialogContent,
+    DialogDescription,
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog'
+import { CustomButton } from '#/presentation/components/shared/button/CustomButton'
+import { PinInput } from '#/presentation/components/shared/inputs/PinInput'
+
+const LARGO_PIN = 4
 
 interface BloqueoCriticoDialogProps {
     isOpen: boolean
@@ -17,163 +23,116 @@ export function BloqueoCriticoDialog({
     onAutorizar,
     onRechazar,
 }: BloqueoCriticoDialogProps) {
-    const [pin, setPin] = useState<string[]>(['', '', '', ''])
-    const [errorPin, setErrorPin] = useState<string | null>(null)
+    const [pin, setPin] = useState('')
+    const [error, setError] = useState<string | null>(null)
+    const [validando, setValidando] = useState(false)
+    const pinRef = useRef<HTMLInputElement>(null)
 
-    const handlePinChange = (value: string, index: number) => {
-        if (!/^[0-9]?$/.test(value)) return
-        if (errorPin) setErrorPin(null)
+    useEffect(() => {
+        if (!isOpen) return
+        setPin('')
+        setError(null)
+        setValidando(false)
+    }, [isOpen])
 
-        const newPin = [...pin]
-        newPin[index] = value
-        setPin(newPin)
-
-        if (value !== '' && index < 3) {
-            const nextInput = document.getElementById(`dialog-pin-${index + 1}`)
-            nextInput?.focus()
-        }
+    const rechazarPin = (mensaje: string) => {
+        setError(mensaje)
+        setPin('')
+        pinRef.current?.focus()
     }
 
-    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>, index: number) => {
-        if (e.key === 'Backspace' && pin[index] === '' && index > 0) {
-            const prevInput = document.getElementById(`dialog-pin-${index - 1}`)
-            prevInput?.focus()
+    const autorizar = async () => {
+        if (pin.length < LARGO_PIN || validando) return
+
+        setValidando(true)
+        try {
+            const esValido = await onAutorizar(pin)
+            if (esValido === false) rechazarPin('El PIN ingresado es incorrecto.')
+            else setPin('')
+        } catch {
+            rechazarPin('Error al validar el PIN. Intente de nuevo.')
+        } finally {
+            setValidando(false)
         }
-    }
-
-    const handleAutorizar = async () => {
-        const pinCompleto = pin.join('')
-        if (pinCompleto.length === 4) {
-            try {
-                const esValido = await onAutorizar(pinCompleto)
-
-                if (esValido === false) {
-                    setErrorPin('El PIN ingresado es incorrecto.')
-                    setPin(['', '', '', ''])
-                    document.getElementById('dialog-pin-0')?.focus()
-                } else {
-                    setErrorPin(null)
-                    setPin(['', '', '', ''])
-                }
-            } catch (err) {
-                setErrorPin('Error al validar el PIN. Intente de nuevo.')
-            }
-        }
-    }
-
-    const handleCloseRechazar = () => {
-        onRechazar()
-        setPin(['', '', '', ''])
-        setErrorPin(null)
     }
 
     return (
         <Dialog open={isOpen}>
             <DialogContent
-                className="max-w-[420px] rounded-[2.5rem] border-2 border-red-500 bg-white dark:bg-zinc-950 p-8 shadow-2xl [&>button]:hidden outline-none"
+                showCloseButton={false}
+                className="max-w-105 rounded-[2.5rem] border-2 border-red-500 bg-surface p-8 shadow-2xl outline-none"
             >
-                <DialogHeader className="hidden">
-                    <DialogTitle>Bloqueo Crítico</DialogTitle>
-                </DialogHeader>
-
-                <div className="flex flex-col items-center text-center">
-                    {/* Icono de Candado Rojo */}
-                    <div className="w-16 h-16 bg-red-600 rounded-2xl flex items-center justify-center shadow-lg shadow-red-500/20 mb-6">
-                        <svg
-                            className="w-8 h-8 text-white"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2.5"
-                            viewBox="0 0 24 24"
-                        >
-                            <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"
-                            />
-                        </svg>
+                <DialogHeader className="items-center text-center">
+                    <div className="mb-4 flex size-16 items-center justify-center rounded-2xl bg-red-600 shadow-lg shadow-red-500/20">
+                        <Lock className="size-8 text-white" strokeWidth={2.5} />
                     </div>
 
-                    {/* Título y Mensaje */}
-                    <h3 className="text-xl font-black text-slate-900 dark:text-white mb-2">
+                    <DialogTitle className="text-xl font-black text-text-main">
                         Bloqueo Crítico
-                    </h3>
-                    <p className="text-sm text-slate-500 dark:text-zinc-400 leading-relaxed px-2 mb-4">
+                    </DialogTitle>
+                    <DialogDescription className="px-2 text-sm leading-relaxed text-text-muted">
                         Se ha detectado una desviación de peso fuera de los límites de tolerancia.
                         Se requiere autorización de supervisión para continuar.
-                    </p>
+                    </DialogDescription>
+                </DialogHeader>
 
-                    {/* Sección PIN de Supervisor */}
-                    <div className="w-full mb-6">
-                        <label className="text-[11px] font-bold tracking-widest text-slate-400 dark:text-zinc-500 uppercase block mb-2 text-left px-2">
-                            PIN DE SUPERVISOR
-                        </label>
+                <form
+                    className="flex flex-col gap-6"
+                    onSubmit={(e) => {
+                        e.preventDefault()
+                        autorizar()
+                    }}
+                >
+                    <div className="flex flex-col gap-2">
+                        <span className="flex items-center gap-2 px-2 text-[11px] font-bold uppercase tracking-widest text-text-muted">
+                            <KeyRound className={`size-4 ${error ? 'text-red-500' : ''}`} />
+                            PIN de supervisor
+                        </span>
 
-                        <div className={`flex items-center gap-3 bg-blue-50/50 dark:bg-zinc-900 border rounded-2xl px-4 py-3 transition-colors ${errorPin ? 'border-red-500 bg-red-50/50 dark:bg-red-950/10' : 'border-blue-100 dark:border-zinc-800'
-                            }`}>
-                            {/* Icono Llave */}
-                            <svg
-                                className={`w-5 h-5 ${errorPin ? 'text-red-500' : 'text-slate-400'}`}
-                                fill="none"
-                                stroke="currentColor"
-                                strokeWidth="2"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z"
-                                />
-                            </svg>
+                        <PinInput
+                            ref={pinRef}
+                            value={pin}
+                            onChange={(valor) => {
+                                setPin(valor)
+                                if (error) setError(null)
+                            }}
+                            length={LARGO_PIN}
+                            invalid={error !== null}
+                            autoFocus
+                            masked
+                        />
 
-                            {/* Inputs del PIN */}
-                            <div className="flex justify-between w-full px-4">
-                                {pin.map((digit, index) => (
-                                    <input
-                                        key={index}
-                                        id={`dialog-pin-${index}`}
-                                        type="password"
-                                        maxLength={1}
-                                        value={digit}
-                                        onChange={(e) => handlePinChange(e.target.value, index)}
-                                        onKeyDown={(e) => handleKeyDown(e, index)}
-                                        className="w-8 h-8 text-center text-xl font-bold bg-transparent border-b-2 border-slate-300 dark:border-zinc-700 focus:border-blue-500 dark:focus:border-blue-400 outline-none text-slate-800 dark:text-white"
-                                        placeholder="•"
-                                    />
-                                ))}
-                            </div>
-                        </div>
-
-                        {/* 🛑 Alerta de PIN Incorrecto con animación suave */}
-                        {errorPin && (
-                            <p className="text-xs text-red-600 dark:text-red-400 font-bold mt-2 text-left px-2 animate-bounce">
-                                ⚠️ {errorPin}
+                        {error && (
+                            <p className="px-2 text-xs font-bold text-red-600 dark:text-red-400">
+                                ⚠️ {error}
                             </p>
                         )}
                     </div>
 
-                    {/* Botones de Acción */}
-                    <div className="w-full space-y-3">
-                        <button
-                            onClick={handleAutorizar}
-                            disabled={pin.join('').length < 4}
-                            className="w-full bg-red-700 hover:bg-red-800 disabled:bg-red-700/50 text-white font-bold py-4 rounded-2xl flex items-center justify-center gap-2 transition-all shadow-md active:scale-[0.98] cursor-pointer"
+                    <div className="flex flex-col gap-3">
+                        <CustomButton
+                            type="submit"
+                            variant="danger"
+                            isLoading={validando}
+                            disabled={pin.length < LARGO_PIN}
                         >
                             Autorizar Lote
-                        </button>
+                        </CustomButton>
 
-                        <button
-                            onClick={handleCloseRechazar}
-                            className="w-full bg-slate-50 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-slate-700 dark:text-zinc-300 font-bold py-4 rounded-2xl flex items-center justify-center gap-2 transition-all hover:bg-slate-100 dark:hover:bg-zinc-800/80 active:scale-[0.98] cursor-pointer"
+                        <CustomButton
+                            type="button"
+                            variant="secondary"
+                            disabled={validando}
+                            onClick={onRechazar}
                         >
                             Rechazar Pesaje
-                        </button>
+                        </CustomButton>
                     </div>
+                </form>
 
-                    <span className="text-[10px] italic text-slate-400 dark:text-zinc-500 mt-6 block">
-                        Esta acción será registrada en el historial de auditoría permanente.
-                    </span>
-                </div>
+                <span className="block text-center text-[10px] italic text-text-muted">
+                    Esta acción será registrada en el historial de auditoría permanente.
+                </span>
             </DialogContent>
         </Dialog>
     )
