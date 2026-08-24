@@ -43,8 +43,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
           <ThemeProvider defaultTheme="system">
             {children || <Outlet />}
 
-            {/* Arriba y al centro: el operario no aparta la vista del peso. */}
-            <Toaster position="top-center" richColors />
+            <Toaster position="bottom-right" richColors />
           </ThemeProvider>
 
           {isDev && <ReactQueryDevtools initialIsOpen={false} />}

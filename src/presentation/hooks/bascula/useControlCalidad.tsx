@@ -119,12 +119,8 @@ export function useControlCalidad(cliente: Cliente | null, lote: Lote | null) {
         const pinCorrecto = "1234"
         if (pinIngresado !== pinCorrecto) return false
 
-        /*
-         * El booleano significa "el PIN es válido", no "el pesaje se guardó":
-         * el dialog se cierra igual y un fallo del envío lo cuenta el toast.
-         */
-        setMostrarBloqueo(false)
-        void guardarPesaje()
+        const guardado = await guardarPesaje()
+        if (guardado) setMostrarBloqueo(false)
 
         return true
     }

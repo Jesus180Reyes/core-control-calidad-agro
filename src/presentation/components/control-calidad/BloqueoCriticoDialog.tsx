@@ -47,8 +47,10 @@ export function BloqueoCriticoDialog({
         setValidando(true)
         try {
             const esValido = await onAutorizar(pin)
+            // Con el PIN válido el PIN se conserva: si el guardado falló, el
+            // dialog sigue abierto y el operario reintenta sin volver a tipearlo.
+            // El reset al reabrir lo hace el efecto de `isOpen`.
             if (esValido === false) rechazarPin('El PIN ingresado es incorrecto.')
-            else setPin('')
         } catch {
             rechazarPin('Error al validar el PIN. Intente de nuevo.')
         } finally {
