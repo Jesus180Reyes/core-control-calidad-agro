@@ -5,7 +5,7 @@ import { useNavigate } from '@tanstack/react-router'
 
 import { useExecuteMutation } from '#/presentation/hooks/shared/useExecuteMutation'
 import { useAuth } from '#/presentation/hooks/auth/useAuth'
-import { loginSchema, type LoginFormValues } from '#/presentation/schema/auth/loginSchema'
+import { loginSchema, type LoginFormValues } from '#/presentation/hooks/auth/loginSchema'
 import { esDeRed, esHttpError, esTimeout, mensajeDelServidor } from '#/infrastructure/http/http-client'
 import type { LoginResponse } from '#/presentation/types/auth/auth.types'
 

@@ -5,10 +5,7 @@ import { useExecuteMutation } from '#/presentation/hooks/shared/useExecuteMutati
 import type { Lote } from '#/presentation/types/lotes/lotes.types'
 import type { CrearPesajeBody, CrearPesajeResponse } from '#/presentation/types/pesajes/pesajes.types'
 
-/** El backend recalcula el estado real; el contrato exige el campo igual. */
-const ESTADO_CALIDAD_POR_DEFECTO = 1
 
-/** Misma escalera que `derivarErrorLogin`: cada fallo con su mensaje. */
 function derivarErrorPesaje(error: unknown): string {
     if (esDeRed(error) || esTimeout(error)) return 'No se pudo contactar al servidor.'
     if (esHttpError(error)) return mensajeDelServidor(error.body) ?? 'No se pudo guardar el pesaje.'
@@ -31,7 +28,6 @@ export function usePesajes(lote: Lote | null) {
         return mutation
             .mutateAsync({
                 lote_id: lote.id,
-                estado_calidad_id: ESTADO_CALIDAD_POR_DEFECTO,
                 peso_bruto: pesoBruto,
             })
             .then(() => true, () => false)

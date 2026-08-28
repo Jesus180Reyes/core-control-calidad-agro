@@ -1,7 +1,7 @@
 import type { Control } from 'react-hook-form'
 
 import { ControlledInput } from '#/presentation/components/shared/inputs/ControlledInput'
-import type { LoginFormValues } from '#/presentation/schema/auth/loginSchema'
+import type { LoginFormValues } from '#/presentation/hooks/auth/loginSchema'
 interface LoginCardProps {
     control: Control<LoginFormValues>
     onSubmit: () => void
