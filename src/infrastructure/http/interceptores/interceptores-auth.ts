@@ -1,5 +1,5 @@
-import type { HttpClient } from '#/infrastructure/http/create-http-client'
-import { esNoAutorizado } from '#/infrastructure/http/http-errors'
+import type { HttpClient } from '#/infrastructure/http/core/create-http-client'
+import { esNoAutorizado } from '#/infrastructure/http/core/http-errors'
 import { leerToken, limpiarSesion } from '#/presentation/hooks/auth/almacenamientoSesion'
 
 /**

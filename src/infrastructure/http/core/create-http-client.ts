@@ -4,8 +4,8 @@ import {
   NetworkError,
   RequestCancelado,
   TimeoutError,
-} from '#/infrastructure/http/http-errors'
-import { construirUrl, type QueryParams } from '#/infrastructure/http/query-params'
+} from '#/infrastructure/http/core/http-errors'
+import { construirUrl, type QueryParams } from '#/infrastructure/http/core/query-params'
 
 /**
  * Cliente HTTP instanciable. Este módulo no conoce la sesión, el router ni

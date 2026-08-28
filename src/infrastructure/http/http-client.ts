@@ -1,5 +1,6 @@
-import { createHttpClient } from '#/infrastructure/http/create-http-client'
-import { registrarInterceptoresAuth } from '#/infrastructure/http/interceptores-auth'
+import { BASE_URL, TIMEOUT_POR_DEFECTO_MS } from '#/infrastructure/http/core/config-http'
+import { createHttpClient } from '#/infrastructure/http/core/create-http-client'
+import { registrarInterceptoresAuth } from '#/infrastructure/http/interceptores/interceptores-auth'
 
 /**
  * Instancia única del cliente HTTP de la app, ya cableada a la sesión.
@@ -13,8 +14,8 @@ import { registrarInterceptoresAuth } from '#/infrastructure/http/interceptores-
  * mano si los necesita.
  */
 export const api = createHttpClient({
-  baseUrl: import.meta.env.VITE_API_URL ?? '',
-  timeoutMs: 15_000,
+  baseUrl: BASE_URL,
+  timeoutMs: TIMEOUT_POR_DEFECTO_MS,
 })
 
 registrarInterceptoresAuth(api)
@@ -42,9 +43,9 @@ export {
   esTimeout,
   esValidacion,
   mensajeDelServidor,
-} from '#/infrastructure/http/http-errors'
+} from '#/infrastructure/http/core/http-errors'
 
-export { createHttpClient } from '#/infrastructure/http/create-http-client'
+export { createHttpClient } from '#/infrastructure/http/core/create-http-client'
 
 export type {
   ContextoPeticion,
@@ -57,6 +58,6 @@ export type {
   InterceptorRespuesta,
   MutationRequestOptions,
   QueryRequestOptions,
-} from '#/infrastructure/http/create-http-client'
+} from '#/infrastructure/http/core/create-http-client'
 
-export type { QueryParams, ValorParam } from '#/infrastructure/http/query-params'
+export type { QueryParams, ValorParam } from '#/infrastructure/http/core/query-params'
