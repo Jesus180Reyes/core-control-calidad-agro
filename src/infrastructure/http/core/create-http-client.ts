@@ -1,11 +1,11 @@
 import {
   ErrorHttpBase,
-  HttpError,
   NetworkError,
   RequestCancelado,
   TimeoutError,
 } from '#/infrastructure/http/core/http-errors'
 import { construirUrl, type QueryParams } from '#/infrastructure/http/core/query-params'
+import { parsearRespuesta } from '#/infrastructure/http/transportes/respuesta-json'
 
 /**
  * Cliente HTTP instanciable. Este módulo no conoce la sesión, el router ni
@@ -84,26 +84,6 @@ const TIMEOUT_POR_DEFECTO = 15_000
  * la `DOMException`.
  */
 const RAZON_TIMEOUT = Symbol('http-timeout')
-
-/**
- * Parsea la respuesta y lanza `HttpError` fuera de 2xx.
- *
- * Comportamiento heredado tal cual del cliente anterior: un `204 No Content`
- * cae a `response.text()` y devuelve `''` casteado a `T`, y un JSON inválido en
- * un 200 devuelve `null`. Arreglarlo está fuera del alcance del SPEC 03.
- */
-async function parsearRespuesta<T>(response: Response): Promise<T> {
-  const contentType = response.headers.get('content-type') ?? ''
-  const body = contentType.includes('application/json')
-    ? await response.json().catch(() => null)
-    : await response.text()
-
-  if (!response.ok) {
-    throw new HttpError(`${response.status} ${response.statusText}`, response.status, body)
-  }
-
-  return body as T
-}
 
 export function createHttpClient(config: HttpClientConfig = {}): HttpClient {
   const {
