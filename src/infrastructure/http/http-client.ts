@@ -45,6 +45,8 @@ export {
   mensajeDelServidor,
 } from '#/infrastructure/http/core/http-errors'
 
+export type { ErrorValidacion } from '#/infrastructure/http/core/http-errors'
+
 export { createHttpClient } from '#/infrastructure/http/core/create-http-client'
 
 export type {
