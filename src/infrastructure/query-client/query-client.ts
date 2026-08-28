@@ -1,5 +1,5 @@
 import { QueryClient } from '@tanstack/react-query'
-import { esReintentable } from '#/infrastructure/http/http-errors'
+import { esReintentable } from '#/infrastructure/http/core/http-errors'
 
 /** Reintentos además del intento original: 3 peticiones como máximo. */
 const MAX_REINTENTOS = 2

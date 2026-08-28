@@ -1,11 +1,12 @@
 import {
   ErrorHttpBase,
-  HttpError,
   NetworkError,
   RequestCancelado,
   TimeoutError,
-} from '#/infrastructure/http/http-errors'
-import { construirUrl, type QueryParams } from '#/infrastructure/http/query-params'
+} from '#/infrastructure/http/core/http-errors'
+import { construirUrl, type QueryParams } from '#/infrastructure/http/core/query-params'
+import { parsearRespuestaBlob } from '#/infrastructure/http/transportes/respuesta-blob'
+import { parsearRespuesta } from '#/infrastructure/http/transportes/respuesta-json'
 
 /**
  * Cliente HTTP instanciable. Este módulo no conoce la sesión, el router ni
@@ -14,6 +15,14 @@ import { construirUrl, type QueryParams } from '#/infrastructure/http/query-para
  */
 
 export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE'
+
+/**
+ * Qué transporte lee el cuerpo de la respuesta. Es una opción y no una función
+ * aparte para que el binario comparta el timeout, el signal, los interceptores
+ * y la traducción de errores con el resto: duplicar todo eso por transporte es
+ * lo que llevaba al template a repetir el mismo `fetch` en cinco archivos.
+ */
+export type TipoDeParseo = 'json' | 'blob'
 
 export interface HttpClientConfig {
   baseUrl?: string
@@ -34,6 +43,8 @@ export interface HttpRequestOptions {
   signal?: AbortSignal
   /** Sobreescribe el timeout del cliente. `0` lo desactiva para esta petición. */
   timeoutMs?: number
+  /** Cómo leer el cuerpo de la respuesta. @default 'json' */
+  parsear?: TipoDeParseo
   /** Valores iniciales de `ContextoPeticion.meta`. */
   meta?: Record<string, unknown>
 }
@@ -84,26 +95,6 @@ const TIMEOUT_POR_DEFECTO = 15_000
  * la `DOMException`.
  */
 const RAZON_TIMEOUT = Symbol('http-timeout')
-
-/**
- * Parsea la respuesta y lanza `HttpError` fuera de 2xx.
- *
- * Comportamiento heredado tal cual del cliente anterior: un `204 No Content`
- * cae a `response.text()` y devuelve `''` casteado a `T`, y un JSON inválido en
- * un 200 devuelve `null`. Arreglarlo está fuera del alcance del SPEC 03.
- */
-async function parsearRespuesta<T>(response: Response): Promise<T> {
-  const contentType = response.headers.get('content-type') ?? ''
-  const body = contentType.includes('application/json')
-    ? await response.json().catch(() => null)
-    : await response.text()
-
-  if (!response.ok) {
-    throw new HttpError(`${response.status} ${response.statusText}`, response.status, body)
-  }
-
-  return body as T
-}
 
 export function createHttpClient(config: HttpClientConfig = {}): HttpClient {
   const {
@@ -156,6 +147,7 @@ export function createHttpClient(config: HttpClientConfig = {}): HttpClient {
       headers,
       signal: signalExterno,
       timeoutMs = timeoutPorDefecto,
+      parsear = 'json',
       meta,
     } = options
 
@@ -203,6 +195,8 @@ export function createHttpClient(config: HttpClientConfig = {}): HttpClient {
       }
 
       for (const interceptor of interceptoresRespuesta) await interceptor(respuesta, ctx)
+
+      if (parsear === 'blob') return (await parsearRespuestaBlob(respuesta)) as T
 
       return await parsearRespuesta<T>(respuesta)
     } catch (error) {

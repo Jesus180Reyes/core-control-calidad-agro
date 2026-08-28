@@ -2,6 +2,7 @@ import type { Sesion, Usuario } from '#/presentation/types/auth/auth.types'
 
 const CLAVE_TOKEN = 'auth_token'
 const CLAVE_USUARIO = 'auth_user'
+const CLAVE_REFRESH = 'auth_refresh'
 
 const suscriptores = new Set<() => void>()
 
@@ -31,6 +32,7 @@ function limpiarStorage(storage: Storage): void {
     try {
         storage.removeItem(CLAVE_TOKEN)
         storage.removeItem(CLAVE_USUARIO)
+        storage.removeItem(CLAVE_REFRESH)
     } catch {
         // Sin acceso a localStorage: no hay nada que limpiar.
     }
@@ -49,7 +51,12 @@ export function leerSesion(): Sesion | null {
         }
 
         const usuario: Usuario = JSON.parse(crudoUsuario)
-        return { accessToken, usuario }
+
+        // El refresh token no participa de la validación: una sesión sin él es
+        // legítima (es la que emite el backend de hoy).
+        const refreshToken = storage.getItem(CLAVE_REFRESH) ?? undefined
+
+        return { accessToken, usuario, refreshToken }
     } catch {
         limpiarStorage(storage)
         return null
@@ -67,11 +74,40 @@ export function guardarSesion(sesion: Sesion): void {
     try {
         storage.setItem(CLAVE_TOKEN, sesion.accessToken)
         storage.setItem(CLAVE_USUARIO, JSON.stringify(sesion.usuario))
+
+        // Si el backend no lo manda, se borra el de la sesión anterior en vez
+        // de dejarlo colgado apuntando a un usuario que ya no está logueado.
+        if (sesion.refreshToken) storage.setItem(CLAVE_REFRESH, sesion.refreshToken)
+        else storage.removeItem(CLAVE_REFRESH)
     } catch {
         // Cuota llena o escritura denegada: se sigue sin persistir.
     }
     invalidarCache()
     notificar()
+}
+
+/**
+ * Actualiza los dos tokens tras un refresh, sin tocar al usuario.
+ *
+ * No notifica a los suscriptores a propósito: `useAuth` lee por
+ * `useSyncExternalStore`, y avisar en cada refresh rerenderizaría la app entera
+ * en mitad de una petición para informar un cambio que nadie puede percibir.
+ * La caché sí se invalida, para que la próxima lectura no devuelva el token viejo.
+ */
+export function guardarTokens(tokens: { accessToken: string; refreshToken?: string }): void {
+    const storage = almacen()
+    if (!storage) {
+        invalidarCache()
+        return
+    }
+
+    try {
+        storage.setItem(CLAVE_TOKEN, tokens.accessToken)
+        if (tokens.refreshToken) storage.setItem(CLAVE_REFRESH, tokens.refreshToken)
+    } catch {
+        // Cuota llena o escritura denegada: se sigue con el token en memoria.
+    }
+    invalidarCache()
 }
 
 export function limpiarSesion(): void {
@@ -87,6 +123,17 @@ export function leerToken(): string | null {
 
     try {
         return storage.getItem(CLAVE_TOKEN)
+    } catch {
+        return null
+    }
+}
+
+export function leerRefreshToken(): string | null {
+    const storage = almacen()
+    if (!storage) return null
+
+    try {
+        return storage.getItem(CLAVE_REFRESH)
     } catch {
         return null
     }

@@ -1,7 +1,7 @@
 import type { Control } from 'react-hook-form'
 
 import { ControlledInput } from '#/presentation/components/shared/inputs/ControlledInput'
-import type { LoginFormValues } from '#/presentation/schema/auth/loginSchema'
+import type { LoginFormValues } from '#/presentation/hooks/auth/loginSchema'
 interface LoginCardProps {
     control: Control<LoginFormValues>
     onSubmit: () => void
@@ -40,7 +40,7 @@ export function LoginCard({ control, onSubmit, enviando, errorLogin, verPassword
                         <button
                             type="button"
                             onClick={alternarVerPassword}
-                            className="text-slate-400 hover:text-slate-600 cursor-pointer"
+                            className="text-text-muted/70 hover:text-text-main transition-colors duration-200 cursor-pointer"
                             aria-label={verPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
                         >
                             <IconoVisibilidadPassword visible={verPassword} />

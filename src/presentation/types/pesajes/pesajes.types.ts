@@ -1,9 +1,7 @@
 
 export interface CrearPesajeBody {
     lote_id: number
-    estado_calidad_id: number
     peso_bruto: number
-    /** Opcional en el API; este spec nunca la manda. */
     tara?: number
 }
 

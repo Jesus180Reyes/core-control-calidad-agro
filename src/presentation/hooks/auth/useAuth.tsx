@@ -18,7 +18,11 @@ export function useAuth(): UseAuthResult {
 
     function iniciarSesion(respuesta: LoginResponse): boolean {
         if (!respuesta.accessToken) return false
-        guardarSesion({ accessToken: respuesta.accessToken, usuario: respuesta.user })
+        guardarSesion({
+            accessToken: respuesta.accessToken,
+            usuario: respuesta.user,
+            refreshToken: respuesta.refreshToken ?? '',
+        })
         return true
     }
 
