@@ -128,6 +128,7 @@ export type {
   InterceptorRespuesta,
   MutationRequestOptions,
   QueryRequestOptions,
+  TipoDeParseo,
 } from '#/infrastructure/http/core/create-http-client'
 
 export type { QueryParams, ValorParam } from '#/infrastructure/http/core/query-params'
