@@ -45,15 +45,31 @@ Las notificaciones van por `sonner` (`toast.success` / `toast.error`), con el `<
 
 ### Cliente HTTP
 
-`infrastructure/http/` son cinco archivos con una frontera deliberada: los tres primeros no importan **nada** de `#/presentation` ni del router. Al tocarlos, mantener eso.
+`infrastructure/http/` está dividido por responsabilidad, y la división **es** la frontera: `core/` y `transportes/` no importan **nada** de `#/presentation` ni del router; `interceptores/` es lo único que conoce la sesión y `/login`. Al tocar la carpeta, mantener eso.
 
-- `http-errors.ts` — jerarquía con raíz `ErrorHttpBase`: `HttpError` (`status`, `body`), `NetworkError`, `TimeoutError`, `RequestCancelado`. Más los helpers `esHttpError`/`esDeRed`/`esTimeout`/`esNoAutorizado`/... Discriminar siempre con ellos, nunca por descarte. `esReintentable` es la **única** definición de qué se reintenta (red, timeout, 408, 429, 5xx) y la consume `query-client.ts`.
+**`core/`** — el núcleo puro.
+
+- `http-errors.ts` — jerarquía con raíz `ErrorHttpBase`: `HttpError` (`status`, `body`), `NetworkError`, `TimeoutError`, `RequestCancelado`. Más los helpers `esHttpError`/`esDeRed`/`esTimeout`/`esNoAutorizado`/... Discriminar siempre con ellos, nunca por descarte. `esReintentable` es la **única** definición de qué se reintenta (red, timeout, 408, 429, 5xx) y la consume `query-client.ts`. `mensajeDelServidor(body)` cubre las dos formas del backend: el `message` string, y el objeto con el array de errores de Zod, que aplana a una línea por campo (`• lote_id: Required`).
 - `query-params.ts` — armado de la URL. Arrays como clave repetida (`ids=1&ids=2`), `Date` a ISO, `undefined`/`null` omitidos, `''` sí se manda. Un endpoint absoluto (`https://...`) ignora la base.
-- `create-http-client.ts` — `createHttpClient(config)`: `baseUrl`, `timeoutMs` (15 s por defecto, sobreescribible por petición y combinado con el `signal` de quien llama), `fetch` inyectable, e interceptores `onPeticion`/`onRespuesta`/`onError` que observan y mutan el contexto pero **nunca** cortocircuitan. No reintenta: de eso se encarga TanStack Query.
-- `interceptores-auth.ts` — el único de la carpeta que importa de `#/presentation` y el único que conoce `/login`. Inyecta el `Bearer` y cierra sesión ante un 401 **de una petición que llevaba token** (sin esa condición, el propio login rebotaría con su 401 legítimo).
-- `http-client.ts` — crea la instancia `api`, le registra los interceptores de auth y exporta los atajos `httpGet`/`httpPost`/... con las firmas de siempre. Usar los atajos. `createHttpClient` es solo para un cliente contra **otro** API, y ese nace sin auth.
+- `config-http.ts` — `BASE_URL` y `TIMEOUT_POR_DEFECTO_MS`. El **único** lugar donde se lee `import.meta.env`.
+- `create-http-client.ts` — `createHttpClient(config)`: `baseUrl`, `timeoutMs` (sobreescribible por petición y combinado con el `signal` de quien llama), `fetch` inyectable, e interceptores `onPeticion`/`onRespuesta`/`onError` que observan y mutan el contexto pero **nunca** cortocircuitan. No reintenta ni sabe del 401: de los reintentos por error se encarga TanStack Query, y del 401 la fachada. La opción `parsear: 'json' | 'blob'` elige el transporte.
 
-Dos comportamientos heredados y asumidos: un `204 No Content` devuelve `''` casteado a `T`, y los GET mandan `Content-Type: application/json`. No hay tests del cliente (SPEC 03).
+**`transportes/`** — cómo se lee el cuerpo, sin conocer nada más.
+
+- `respuesta-json.ts` — el camino por defecto.
+- `respuesta-blob.ts` — binario. Lanza `HttpError` fuera de 2xx **y también** ante un 2xx que responde `application/json`: es el backend contestando un error sin cambiar el status, y sin esa rama se descarga un "PDF" que es un mensaje de error.
+- `cuerpo-multipart.ts` — `aFormData(objeto)`. `File`/`Blob` tal cual, otro objeto como JSON, el resto `String(valor)`, `undefined`/`null` omiten la clave. El `Content-Type` no se fija en ningún lado: el cliente lo omite ante un `FormData` para que el navegador ponga el `boundary`.
+
+**`interceptores/`** — lo único que toca la sesión.
+
+- `interceptores-auth.ts` — inyecta el `Bearer` y nada más. Exporta `peticionLlevaToken(headers)` (la regla que decide si un 401 es de la sesión o del propio login) y `cerrarSesionYSalir()`. La política del 401 **no** vive acá: un `onError` que llamara a `limpiarSesion()` borraría el refresh token justo antes de que el reintento alcanzara a usarlo.
+- `refresh-token.ts` — `refrescarSesion()` contra `POST /auth/refresh`, **single-flight**: dos 401 simultáneos comparten la promesa y el backend ve un solo refresh. Sale por un cliente propio sin interceptores de auth, porque si saliera por `api` su propio 401 dispararía otro refresh. El endpoint todavía no existe en el backend: hasta que exista, el refresh falla y se degrada al cierre de sesión.
+
+**`http-client.ts`** — la fachada. `httpRequest` envuelve a `api.request` y es donde vive la política del 401: refrescar → reintentar **una sola vez** → si el refresh falla o no hay refresh token, cerrar sesión e ir a `/login`. Los atajos `httpGet`/`httpPost`/... se construyen sobre `httpRequest`, así que llevan refresh; **`api` no**, y está exportado sólo para casos que necesiten el 401 crudo. Usar los atajos. `createHttpClient` es para un cliente contra **otro** API, y ese nace sin auth ni refresh.
+
+Los hooks de `presentation/hooks/shared/` cubren los cuatro casos: `useExecuteQuery`, `useExecuteMutation`, `useExecuteFilesMutation` (multipart) y `useExecutePdfMutation` (binario, que revoca sus object URLs al regenerar y al desmontar).
+
+Dos comportamientos heredados y asumidos: un `204 No Content` devuelve `''` casteado a `T`, y los GET mandan `Content-Type: application/json`. Del cliente sólo hay tests del refresh y del reintento del 401 (`interceptores/refresh-token.test.ts`); `create-http-client`, `query-params` y los transportes siguen sin cubrir (SPEC 03, SPEC 06).
 
 ### Rutas
 
