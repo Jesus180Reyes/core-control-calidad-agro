@@ -13,8 +13,7 @@ export function useLotes(cliente: Cliente) {
         `/lotes/cliente/${cliente.id}`,
     )
 
-    // El cliente viaja junto al lote: control-calidad necesita a los dos y el
-    // state del history no se acumula entre navegaciones.
+
     const seleccionarLote = (lote: Lote) => {
         navigate({ to: '/control-calidad', state: { cliente, lote } })
     }
