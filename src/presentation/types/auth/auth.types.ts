@@ -15,9 +15,18 @@ export interface LoginResponse {
     msg: string
     user: Usuario
     accessToken: string
+    /** Opcional hasta que el backend lo emita (ver SPEC 06). */
+    refreshToken?: string
 }
 
 export interface Sesion {
     accessToken: string
     usuario: Usuario
+    refreshToken?: string
+}
+
+/** Lo que devuelve `POST /auth/refresh`. Con rotación: el refresh viejo queda invalidado. */
+export interface RefreshResponse {
+    accessToken: string
+    refreshToken?: string
 }
