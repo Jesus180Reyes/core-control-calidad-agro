@@ -13,7 +13,6 @@ export function useLotes(cliente: Cliente) {
         `/lotes/cliente/${cliente.id}`,
     )
 
-
     const seleccionarLote = (lote: Lote) => {
         navigate({ to: '/control-calidad', state: { cliente, lote } })
     }

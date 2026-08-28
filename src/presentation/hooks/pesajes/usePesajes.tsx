@@ -1,16 +1,10 @@
 import { useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
-import { esDeRed, esHttpError, esTimeout, mensajeDelServidor } from '#/infrastructure/http/http-client'
 import { useExecuteMutation } from '#/presentation/hooks/shared/useExecuteMutation'
 import type { Lote } from '#/presentation/types/lotes/lotes.types'
 import type { CrearPesajeBody, CrearPesajeResponse } from '#/presentation/types/pesajes/pesajes.types'
 
 
-function derivarErrorPesaje(error: unknown): string {
-    if (esDeRed(error) || esTimeout(error)) return 'No se pudo contactar al servidor.'
-    if (esHttpError(error)) return mensajeDelServidor(error.body) ?? 'No se pudo guardar el pesaje.'
-    return 'Ocurrió un error inesperado al guardar.'
-}
 
 export function usePesajes(lote: Lote | null) {
     const queryClient = useQueryClient()
@@ -19,8 +13,8 @@ export function usePesajes(lote: Lote | null) {
             toast.success(msg)
             void queryClient.invalidateQueries({ queryKey: ['lotes', 'cliente', lote_id] })
         },
-        onError: (error) => toast.error(derivarErrorPesaje(error)),
-    })
+        onError: (error) => toast.error(error.message),
+    });
 
     const guardarPesaje = (pesoBruto: number): Promise<boolean> => {
         if (!lote) return Promise.resolve(false)
