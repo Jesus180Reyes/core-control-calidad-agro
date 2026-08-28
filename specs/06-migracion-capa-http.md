@@ -1,6 +1,6 @@
 # SPEC 06 — Migración de la capa HTTP al patrón del template auditado
 
-> **Estado:** Approved
+> **Estado:** Implemented
 > **Depende de:** SPEC 02, SPEC 03
 > **Fecha:** 2026-08-28
 > **Objetivo:** Reestructurar `src/infrastructure/http/` por responsabilidad y transplantarle las cuatro capacidades que le faltan frente al template auditado en producción —refresh token con reintento del 401, aplanado de los errores de validación de Zod, transporte `blob` para PDF y transporte multipart para archivos— sin romper ninguna llamada existente.
@@ -278,28 +278,28 @@ Cada paso deja el proyecto compilando y la suite de vitest en verde.
 
 ## Criterios de aceptación
 
-- [ ] `npx tsc --noEmit` pasa sin errores.
-- [ ] `npx vitest run` pasa completo, incluidos los tests nuevos de `refresh-token`.
-- [ ] `src/infrastructure/http/` tiene exactamente las carpetas `core/`, `interceptores/` y `transportes/` más la fachada `http-client.ts`.
-- [ ] Ningún archivo de `core/` ni de `transportes/` importa de `#/presentation` ni de `@tanstack/react-router` (verificable con `grep -rn "#/presentation\|react-router" src/infrastructure/http/core src/infrastructure/http/transportes`, que no devuelve nada).
-- [ ] `useClientes`, `useLotes`, `usePesajes` y `useLogin` compilan **sin ningún cambio** en sus imports ni en sus llamadas.
-- [ ] Login, `/clientes`, `/lotes-clientes` y guardar un pesaje funcionan igual que antes de este spec, contra el backend real.
-- [ ] Un `POST /pesajes` con body inválido muestra en el toast rojo el campo y el mensaje que devolvió Zod (`• lote_id: Required`), no el texto genérico.
-- [ ] Un error del backend con `message` string sigue mostrando ese string, sin viñetas.
-- [ ] El login sigue funcionando contra un backend que **no** devuelve `refreshToken`: la sesión se guarda y no aparece `auth_refresh` en `localStorage`.
-- [ ] Con un `refreshToken` en `localStorage` y el `accessToken` vencido, una petición cualquiera dispara `POST /auth/refresh`, guarda los dos tokens nuevos y **reintenta** la petición original con el `Bearer` nuevo. En Network se ven tres peticiones y ningún salto a `/login`.
-- [ ] Dos peticiones en vuelo que reciben 401 al mismo tiempo generan **un solo** `POST /auth/refresh` (verificable en Network y en el test de single-flight).
-- [ ] Con el endpoint `/auth/refresh` inexistente (estado de hoy), un 401 con token limpia la sesión y navega a `/login` — el comportamiento previo a este spec, sin excepciones sin capturar en consola.
-- [ ] Un 401 del propio `POST /auth/login` **no** dispara refresh, **no** cierra sesión y muestra el mensaje de credenciales inválidas.
-- [ ] Si el reintento vuelve a dar 401, no hay bucle: exactamente dos peticiones al endpoint original y un solo refresh.
-- [ ] Los atajos `httpGet`/`httpPost`/`httpPut`/`httpPatch`/`httpDelete` pasan por el wrapper con refresh (verificable: un 401 en un GET de `useExecuteQuery` también reintenta).
-- [ ] Una petición con `parsear: 'blob'` contra un endpoint que devuelve `application/pdf` resuelve con un `Blob` de tipo `application/pdf` y tamaño mayor a cero.
-- [ ] Una petición con `parsear: 'blob'` contra un endpoint que responde `200` con `application/json` lanza `HttpError`, no devuelve un blob corrupto.
-- [ ] `aFormData({ archivo: File, meta: { a: 1 }, nombre: 'x', vacio: null })` produce un `FormData` con tres entradas: el `File` tal cual, `meta` como JSON y `nombre` como string.
-- [ ] Una mutación por `useExecuteFilesMutation` sale con `Content-Type: multipart/form-data; boundary=...` puesto por el navegador (no `application/json`).
+- [X] `npx tsc --noEmit` pasa sin errores.
+- [X] `npx vitest run` pasa completo, incluidos los tests nuevos de `refresh-token`.
+- [X] `src/infrastructure/http/` tiene exactamente las carpetas `core/`, `interceptores/` y `transportes/` más la fachada `http-client.ts`.
+- [X] Ningún archivo de `core/` ni de `transportes/` importa de `#/presentation` ni de `@tanstack/react-router` (verificable con `grep -rn "#/presentation\|react-router" src/infrastructure/http/core src/infrastructure/http/transportes`, que no devuelve nada).
+- [X] `useClientes`, `useLotes`, `usePesajes` y `useLogin` compilan **sin ningún cambio** en sus imports ni en sus llamadas.
+- [X] Login, `/clientes`, `/lotes-clientes` y guardar un pesaje funcionan igual que antes de este spec, contra el backend real.
+- [X] Un `POST /pesajes` con body inválido muestra en el toast rojo el campo y el mensaje que devolvió Zod (`• lote_id: Required`), no el texto genérico.
+- [X] Un error del backend con `message` string sigue mostrando ese string, sin viñetas.
+- [X] El login sigue funcionando contra un backend que **no** devuelve `refreshToken`: la sesión se guarda y no aparece `auth_refresh` en `localStorage`.
+- [X] Con un `refreshToken` en `localStorage` y el `accessToken` vencido, una petición cualquiera dispara `POST /auth/refresh`, guarda los dos tokens nuevos y **reintenta** la petición original con el `Bearer` nuevo. En Network se ven tres peticiones y ningún salto a `/login`.
+- [X] Dos peticiones en vuelo que reciben 401 al mismo tiempo generan **un solo** `POST /auth/refresh` (verificable en Network y en el test de single-flight).
+- [X] Con el endpoint `/auth/refresh` inexistente (estado de hoy), un 401 con token limpia la sesión y navega a `/login` — el comportamiento previo a este spec, sin excepciones sin capturar en consola.
+- [X] Un 401 del propio `POST /auth/login` **no** dispara refresh, **no** cierra sesión y muestra el mensaje de credenciales inválidas.
+- [X] Si el reintento vuelve a dar 401, no hay bucle: exactamente dos peticiones al endpoint original y un solo refresh.
+- [X] Los atajos `httpGet`/`httpPost`/`httpPut`/`httpPatch`/`httpDelete` pasan por el wrapper con refresh (verificable: un 401 en un GET de `useExecuteQuery` también reintenta).
+- [X] Una petición con `parsear: 'blob'` contra un endpoint que devuelve `application/pdf` resuelve con un `Blob` de tipo `application/pdf` y tamaño mayor a cero.
+- [X] Una petición con `parsear: 'blob'` contra un endpoint que responde `200` con `application/json` lanza `HttpError`, no devuelve un blob corrupto.
+- [X] `aFormData({ archivo: File, meta: { a: 1 }, nombre: 'x', vacio: null })` produce un `FormData` con tres entradas: el `File` tal cual, `meta` como JSON y `nombre` como string.
+- [X] Una mutación por `useExecuteFilesMutation` sale con `Content-Type: multipart/form-data; boundary=...` puesto por el navegador (no `application/json`).
 - [ ] `useExecutePdfMutation` revoca la object URL anterior al generar un PDF nuevo y al desmontarse (verificable en `chrome://blob-internals`).
-- [ ] El directorio `api-template/` ya no existe en el repositorio.
-- [ ] La sección "Cliente HTTP" de `CLAUDE.md` describe la estructura y el reintento nuevos.
+- [X] El directorio `api-template/` ya no existe en el repositorio.
+- [X] La sección "Cliente HTTP" de `CLAUDE.md` describe la estructura y el reintento nuevos.
 
 ---
 
