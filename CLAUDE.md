@@ -111,3 +111,18 @@ Vitest sin archivo de configuración propio: los tests que necesiten DOM deben e
 ## Formularios
 
 react-hook-form + zod (`@hookform/resolvers`) a través de los wrappers `Controlled*` en `presentation/components/shared/inputs/` (`ControlledInput`, `ControlledSelector`, `ControlledDatePicker`), que reciben `control` y `name` tipados y ya pintan label y error.
+
+## Tablas
+
+`presentation/components/shared/table/DataTable.tsx` es la forma de pintar una tabla nueva. Corre sobre **TanStack Table v9** (`useTable`, `tableFeatures`, `<table.FlexRender>`) montado sobre la primitiva `components/ui/table.tsx` de shadcn, que **no se edita**: los tokens del proyecto se le pasan por `className` desde el `DataTable`. Los ejemplos de data-table que circulan por internet son de v8 (`useReactTable`, `getCoreRowModel`, `flexRender`, `declare module` para la `meta`) y **no compilan** acá; la referencia son las skills que el propio paquete trae en `node_modules/@tanstack/react-table/skills/` y `node_modules/@tanstack/table-core/skills/`.
+
+La pantalla solo declara columnas (`ColumnDef` de la librería, tipadas con el alias `DataTableColumns<TData>`) y se las pasa junto a `data`; el `useTable` y el estado del orden viven adentro del componente. Props: `getRowId`, `onRowClick`, `defaultSorting`, `emptyTitle` / `emptyDescription`, `maxHeight` y `className`. La `meta` de columna —`align`, `headerClassName`, `cellClassName`— se tipa con `metaHelper` dentro de `dataTableFeatures`, no augmentando el módulo.
+
+Cuatro comportamientos que conviene saber antes de tocarlo:
+
+- **El orden es opt-in.** La librería ordena todas las columnas por defecto; acá `defaultColumn.enableSorting` es `false` y cada columna lo pide con `enableSorting: true`. También se fija `sortDescFirst: false`, porque si no una columna numérica arranca descendente y el ciclo sale al revés del resto de la tabla.
+- **La carga es de `<Suspense>`.** El `DataTable` no tiene `isLoading` ni filas esqueleto, a propósito: los GET pasan por `useSuspenseQuery` (ver arriba) y el spinner es de la pantalla.
+- **Filtrar y paginar son del hook de dominio**, que es quien conoce el endpoint y sus params. El componente pinta todas las filas que recibe; no tiene paginación ni búsqueda.
+- **`maxHeight` es lo que activa el header pegajoso.** El contenedor de scroll real es el `div[data-slot=table-container]` que monta la primitiva, y no acepta `className`: el alto máximo se le aplica desde el wrapper con una variante arbitraria sobre ese slot.
+
+`presentation/views/historial/PesajesTable.tsx` es anterior a esto: `<table>` a mano, colores crudos sin modo oscuro y una paginación decorativa. Queda pendiente de migración y **no** es el modelo a copiar.
