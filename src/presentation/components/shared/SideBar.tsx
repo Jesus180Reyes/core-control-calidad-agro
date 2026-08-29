@@ -43,8 +43,7 @@ export function Sidebar() {
         //     ),
         // },
         {
-            // La entrada del flujo es la lista de clientes: no se pesa sin
-            // saber para quién. El item sigue resaltado durante el pesaje.
+
             label: 'Control de Calidad',
             to: '/clientes',
             rutasActivas: ['/control-calidad'],
