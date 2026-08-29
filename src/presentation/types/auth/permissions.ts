@@ -1,7 +1,6 @@
 
 export const PERMISSIONS = {
-    CLIENTES_LISTAR: 'clientes.listar',
-    LOTES_CREAR: 'lotes.crear',
+    MODULOCONTROLCALIDAD: 'MODULO-CONTROL-CALIDAD',
 } as const
 
 export type Permission = (typeof PERMISSIONS)[keyof typeof PERMISSIONS]

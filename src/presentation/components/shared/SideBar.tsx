@@ -1,6 +1,9 @@
 import { Link, useLocation } from '@tanstack/react-router'
 
+import { Can } from '#/presentation/components/shared/Can'
 import { useAuth } from '#/presentation/hooks/auth/useAuth'
+import { usePermissions } from '#/presentation/hooks/auth/usePermissions'
+import { PERMISSIONS, type Permission } from '#/presentation/types/auth/permissions'
 
 interface NavItem {
     label: string
@@ -8,6 +11,8 @@ interface NavItem {
     icon: React.ReactNode
     /** Rutas que también dejan el item resaltado, además de su propio `to`. */
     rutasActivas?: string[]
+    /** Sin él, el item no se pinta. Un item sin `permission` es visible para todos. */
+    permission?: Permission
 }
 
 const CLASES_ITEM = 'group flex items-center gap-4 px-4.5 py-3 rounded-xl transition-all duration-200 text-sm font-semibold cursor-pointer'
@@ -25,6 +30,7 @@ function inicialesDe(nombreCompleto: string): string {
 
 export function Sidebar() {
     const { usuario, logout } = useAuth()
+    const { has } = usePermissions()
     const { pathname } = useLocation()
     const menuItems: NavItem[] = [
         // {
@@ -42,6 +48,7 @@ export function Sidebar() {
             label: 'Control de Calidad',
             to: '/clientes',
             rutasActivas: ['/control-calidad'],
+            permission: PERMISSIONS.MODULOCONTROLCALIDAD,
             icon: (
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2.2} viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
@@ -91,6 +98,9 @@ export function Sidebar() {
 
                 <nav className="space-y-1">
                     {menuItems.map((item) => {
+
+                        if (item.permission !== undefined && !has(item.permission)) return null
+
                         const activo = pathname === item.to || (item.rutasActivas?.includes(pathname) ?? false)
 
                         return (
@@ -127,20 +137,23 @@ export function Sidebar() {
                 )}
 
                 <div className="pt-4 border-t border-border-ui/30 space-y-1">
-                    <Link
-                        to="/control-calidad"
-                        inactiveProps={{
-                            className: 'text-text-muted hover:bg-slate-50 dark:hover:bg-slate-900/40 hover:text-text-main',
-                        }}
-                        className="group flex items-center gap-4.5 px-4.5 py-2.5 rounded-xl transition-all duration-200 text-sm font-semibold cursor-pointer"
-                    >
-                        <span className="shrink-0">
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2.2} viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
-                            </svg>
-                        </span>
-                        <span>Ajustes</span>
-                    </Link>
+                    {/* Apunta a una ruta del módulo: sin el permiso el link rebotaría. */}
+                    <Can permission={PERMISSIONS.MODULOCONTROLCALIDAD}>
+                        <Link
+                            to="/control-calidad"
+                            inactiveProps={{
+                                className: 'text-text-muted hover:bg-slate-50 dark:hover:bg-slate-900/40 hover:text-text-main',
+                            }}
+                            className="group flex items-center gap-4.5 px-4.5 py-2.5 rounded-xl transition-all duration-200 text-sm font-semibold cursor-pointer"
+                        >
+                            <span className="shrink-0">
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2.2} viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+                                </svg>
+                            </span>
+                            <span>Ajustes</span>
+                        </Link>
+                    </Can>
 
                     <button
                         onClick={logout}

@@ -3,16 +3,25 @@ import { act, cleanup, renderHook } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 // `useAuth` monta `useNavigate`, que fuera de un `RouterProvider` lanza.
+// `redirect` se stubea como un objeto reconocible: sólo importa que el guard lo tire.
 vi.mock('@tanstack/react-router', () => ({
     useNavigate: () => vi.fn(),
+    redirect: (opciones: { to: string }) => ({ esRedirect: true, ...opciones }),
 }))
 
 import { guardarPermisos, guardarSesion, leerSesion, limpiarSesion, suscribir } from './almacenamientoSesion'
+import { requirePermission } from './requirePermission'
 import { usePermissions } from './usePermissions'
-import { PERMISSIONS, advertirPermisosDesconocidos } from '#/presentation/types/auth/permissions'
+import { PERMISSIONS, advertirPermisosDesconocidos, type Permission } from '#/presentation/types/auth/permissions'
 import type { Usuario } from '#/presentation/types/auth/auth.types'
 
 const USUARIO: Usuario = { complete_name: 'Luis de Jesus Reyes Nolasco', rol: 'OPERADOR' }
+
+const CONTROL_CALIDAD = PERMISSIONS.MODULOCONTROLCALIDAD
+
+// El catálogo tiene un solo permiso hoy: para probar las combinaciones hace
+// falta un segundo string tipado a mano.
+const OTRO_MODULO = 'MODULO-REPORTES' as Permission
 
 /** Escribe una sesión "vieja" a mano, sin pasar por `guardarSesion`. */
 function sembrarSesionSinPermisos(): void {
@@ -62,11 +71,11 @@ describe('almacenamiento de permisos', () => {
         const aviso = vi.fn()
         const desuscribir = suscribir(aviso)
 
-        guardarPermisos([PERMISSIONS.CLIENTES_LISTAR, PERMISSIONS.LOTES_CREAR])
+        guardarPermisos([CONTROL_CALIDAD, OTRO_MODULO])
 
-        expect(localStorage.getItem('auth_permisos')).toBe('["clientes.listar","lotes.crear"]')
+        expect(localStorage.getItem('auth_permisos')).toBe('["MODULO-CONTROL-CALIDAD","MODULO-REPORTES"]')
         expect(aviso).toHaveBeenCalledTimes(1)
-        expect(leerSesion()?.permisos).toEqual(['clientes.listar', 'lotes.crear'])
+        expect(leerSesion()?.permisos).toEqual(['MODULO-CONTROL-CALIDAD', 'MODULO-REPORTES'])
 
         desuscribir()
     })
@@ -76,7 +85,7 @@ describe('almacenamiento de permisos', () => {
             accessToken: 'token-1',
             usuario: USUARIO,
             refreshToken: 'refresh-1',
-            permisos: [PERMISSIONS.CLIENTES_LISTAR],
+            permisos: [CONTROL_CALIDAD],
         })
 
         limpiarSesion()
@@ -95,41 +104,65 @@ describe('usePermissions', () => {
     }
 
     it('`has` distingue un permiso concedido de uno ausente', () => {
-        const { result } = montarConPermisos([PERMISSIONS.CLIENTES_LISTAR])
+        const { result } = montarConPermisos([CONTROL_CALIDAD])
 
-        expect(result.current.has(PERMISSIONS.CLIENTES_LISTAR)).toBe(true)
-        expect(result.current.has(PERMISSIONS.LOTES_CREAR)).toBe(false)
+        expect(result.current.has(CONTROL_CALIDAD)).toBe(true)
+        expect(result.current.has(OTRO_MODULO)).toBe(false)
     })
 
     it('`hasAny` alcanza con uno y `hasAll` los exige todos', () => {
-        const { result } = montarConPermisos([PERMISSIONS.CLIENTES_LISTAR])
+        const { result } = montarConPermisos([CONTROL_CALIDAD])
 
-        expect(result.current.hasAny(PERMISSIONS.CLIENTES_LISTAR, PERMISSIONS.LOTES_CREAR)).toBe(true)
-        expect(result.current.hasAll(PERMISSIONS.CLIENTES_LISTAR, PERMISSIONS.LOTES_CREAR)).toBe(false)
+        expect(result.current.hasAny(CONTROL_CALIDAD, OTRO_MODULO)).toBe(true)
+        expect(result.current.hasAll(CONTROL_CALIDAD, OTRO_MODULO)).toBe(false)
     })
 
     it('`hasAll` da true cuando están todos', () => {
-        const { result } = montarConPermisos([PERMISSIONS.CLIENTES_LISTAR, PERMISSIONS.LOTES_CREAR])
+        const { result } = montarConPermisos([CONTROL_CALIDAD, OTRO_MODULO])
 
-        expect(result.current.hasAll(PERMISSIONS.CLIENTES_LISTAR, PERMISSIONS.LOTES_CREAR)).toBe(true)
+        expect(result.current.hasAll(CONTROL_CALIDAD, OTRO_MODULO)).toBe(true)
     })
 
     it('sin sesión, la lista está vacía y los tres helpers dan false', () => {
         const { result } = renderHook(() => usePermissions())
 
         expect(result.current.permissions).toEqual([])
-        expect(result.current.has(PERMISSIONS.CLIENTES_LISTAR)).toBe(false)
-        expect(result.current.hasAny(PERMISSIONS.CLIENTES_LISTAR)).toBe(false)
-        expect(result.current.hasAll(PERMISSIONS.CLIENTES_LISTAR)).toBe(false)
+        expect(result.current.has(CONTROL_CALIDAD)).toBe(false)
+        expect(result.current.hasAny(CONTROL_CALIDAD)).toBe(false)
+        expect(result.current.hasAll(CONTROL_CALIDAD)).toBe(false)
     })
 
     it('reacciona a `guardarPermisos` sin volver a montar', () => {
         const { result } = montarConPermisos([])
-        expect(result.current.has(PERMISSIONS.LOTES_CREAR)).toBe(false)
+        expect(result.current.has(CONTROL_CALIDAD)).toBe(false)
 
-        act(() => guardarPermisos([PERMISSIONS.LOTES_CREAR]))
+        act(() => guardarPermisos([CONTROL_CALIDAD]))
 
-        expect(result.current.has(PERMISSIONS.LOTES_CREAR)).toBe(true)
+        expect(result.current.has(CONTROL_CALIDAD)).toBe(true)
+    })
+})
+
+describe('requirePermission', () => {
+    it('deja pasar cuando el permiso está concedido', () => {
+        guardarSesion({ accessToken: 'token-1', usuario: USUARIO, permisos: [CONTROL_CALIDAD] })
+
+        expect(() => requirePermission(CONTROL_CALIDAD)).not.toThrow()
+    })
+
+    it('rebota a `/` cuando el permiso falta: la URL escrita a mano no entra', () => {
+        guardarSesion({ accessToken: 'token-1', usuario: USUARIO, permisos: [OTRO_MODULO] })
+
+        expect(() => requirePermission(CONTROL_CALIDAD)).toThrow(
+            expect.objectContaining({ esRedirect: true, to: '/' }),
+        )
+    })
+
+    it('rebota también con una sesión vieja, sin `auth_permisos`', () => {
+        sembrarSesionSinPermisos()
+
+        expect(() => requirePermission(CONTROL_CALIDAD)).toThrow(
+            expect.objectContaining({ esRedirect: true, to: '/' }),
+        )
     })
 })
 
@@ -138,7 +171,7 @@ describe('advertirPermisosDesconocidos', () => {
         const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
 
         expect(() =>
-            advertirPermisosDesconocidos([PERMISSIONS.CLIENTES_LISTAR, 'reportes.exportar']),
+            advertirPermisosDesconocidos([CONTROL_CALIDAD, 'reportes.exportar']),
         ).not.toThrow()
 
         expect(warn).toHaveBeenCalledTimes(1)
@@ -148,7 +181,7 @@ describe('advertirPermisosDesconocidos', () => {
     it('no avisa cuando todos los permisos están en el catálogo', () => {
         const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
 
-        advertirPermisosDesconocidos([PERMISSIONS.CLIENTES_LISTAR, PERMISSIONS.LOTES_CREAR])
+        advertirPermisosDesconocidos([CONTROL_CALIDAD])
 
         expect(warn).not.toHaveBeenCalled()
     })
