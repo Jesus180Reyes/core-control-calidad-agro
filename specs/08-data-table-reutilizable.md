@@ -3,7 +3,7 @@
 > **Estado:** Approved
 > **Depende de:** —
 > **Fecha:** 2026-08-29
-> **Objetivo:** Crear un componente `<DataTable>` genérico sobre `@tanstack/react-table` y la primitiva `table` de shadcn, con ordenamiento por columna, fila clickeable, header pegajoso, estado vacío y dark mode, sin que ninguna pantalla existente cambie.
+> **Objetivo:** Crear un componente `<DataTable>` genérico sobre `@tanstack/react-table` y la primitiva `table` de shadcn, con ordenamiento por columna, fila clickeable, header pegajoso, estado vacío y dark mode, y estrenarlo en `/inspeccion-clientes`.
 
 ---
 
@@ -32,10 +32,12 @@ Este spec entrega la herramienta y **no** la usa. `PesajesTable` queda exactamen
 - Apariencia única alineada a los tokens del proyecto (`bg-surface`, `text-text-main`, `text-text-muted`, `border-border-ui`, `shadow-clay-card`), con dark mode.
 - Tests de vitest del componente.
 - Actualización de `CLAUDE.md` con la sección de tablas.
+- **La pantalla `/inspeccion-clientes`**, que hoy es un placeholder (`Hello ...`), estrena el componente: hook de dominio, vista con las columnas del `Cliente` y ruta que compone. La lista arranca **vacía**, así que la pantalla muestra el estado vacío hasta que exista el endpoint.
 
 **Fuera de alcance (para specs futuros):**
 
-- **Migrar `PesajesTable`.** El historial sigue con su tabla a mano, sus colores hardcodeados y su paginación decorativa. Ninguna pantalla cambia en este spec.
+- **Migrar `PesajesTable`.** El historial sigue con su tabla a mano, sus colores hardcodeados y su paginación decorativa.
+- **El endpoint de `/inspeccion-clientes`.** El hook devuelve `[]` en duro; conectarlo al backend es otro spec.
 - Paginación, de cliente o de servidor. La tabla pinta todas las filas que recibe.
 - Búsqueda o filtros, globales o por columna. Filtrar es del hook de dominio, que es quien conoce el endpoint y sus params.
 - Selección de filas con checkbox y acciones masivas.
@@ -182,25 +184,27 @@ Cada paso deja el proyecto compilando y la suite en verde.
 
 ## Criterios de aceptación
 
-- [ ] `npx tsc --noEmit` pasa sin errores.
-- [ ] `npx vitest run` pasa completo, incluido `DataTable.test.tsx`.
-- [ ] `@tanstack/react-table` figura en `dependencies` de `package.json`.
-- [ ] `src/components/ui/table.tsx` existe y su contenido es el que generó el CLI de shadcn, sin ediciones a mano.
-- [ ] `<DataTable data={filas} columns={columnas} />` pinta un `<th>` por columna y un `<tr>` por elemento, sin más props.
-- [ ] Una columna con `meta: { align: 'right' }` alinea a la derecha su header **y** sus celdas.
-- [ ] Click en el header de una columna ordenable ordena ascendente; el segundo click, descendente; el tercero vuelve al orden del array original.
-- [ ] El `<th>` de una columna ordenable expone `aria-sort` con el valor correspondiente, y el de una no ordenable no expone `aria-sort` ni contiene un `<button>`.
-- [ ] Con `defaultSorting`, la primera pintada ya sale ordenada.
-- [ ] Con `onRowClick`, un click en cualquier parte de la fila dispara el callback con el objeto original.
-- [ ] Con `onRowClick`, la fila es alcanzable con Tab y Enter dispara el callback.
-- [ ] Sin `onRowClick`, las filas no son enfocables con Tab y no muestran `cursor-pointer`.
-- [ ] Con `onRowClick`, las filas se siguen exponiendo con el rol `row`: ninguna lleva `role="button"`.
-- [ ] Con `maxHeight` y filas suficientes para scrollear, el header queda fijo y las filas **no** se ven a través de él.
-- [ ] Cuando las columnas no entran en el ancho, el contenedor scrollea en horizontal y la página **no**.
-- [ ] Con `data={[]}`, se ven los headers y un estado vacío con el texto de `emptyTitle` / `emptyDescription`, y ninguna fila de datos.
-- [ ] En modo oscuro, header, filas, hover, separadores y estado vacío son legibles; ningún color crudo (`bg-white`, `text-slate-*`, `text-indigo-*`) aparece en `DataTable.tsx`.
-- [ ] `PesajesTable.tsx` y el resto de las pantallas se comportan **exactamente igual** que antes de este spec.
-- [ ] `CLAUDE.md` documenta el componente, su API y las dos reglas de alcance.
+- [X] `npx tsc --noEmit` pasa sin errores.
+- [X] `npx vitest run` pasa completo, incluido `DataTable.test.tsx`.
+- [X] `@tanstack/react-table` figura en `dependencies` de `package.json`.
+- [X] `src/components/ui/table.tsx` existe y su contenido es el que generó el CLI de shadcn, sin ediciones a mano.
+- [X] `<DataTable data={filas} columns={columnas} />` pinta un `<th>` por columna y un `<tr>` por elemento, sin más props.
+- [X] Una columna con `meta: { align: 'right' }` alinea a la derecha su header **y** sus celdas.
+- [X] Click en el header de una columna ordenable ordena ascendente; el segundo click, descendente; el tercero vuelve al orden del array original.
+- [X] El `<th>` de una columna ordenable expone `aria-sort` con el valor correspondiente, y el de una no ordenable no expone `aria-sort` ni contiene un `<button>`.
+- [X] Con `defaultSorting`, la primera pintada ya sale ordenada.
+- [X] Con `onRowClick`, un click en cualquier parte de la fila dispara el callback con el objeto original.
+- [X] Con `onRowClick`, la fila es alcanzable con Tab y Enter dispara el callback.
+- [X] Sin `onRowClick`, las filas no son enfocables con Tab y no muestran `cursor-pointer`.
+- [X] Con `onRowClick`, las filas se siguen exponiendo con el rol `row`: ninguna lleva `role="button"`.
+- [X] Con `maxHeight` y filas suficientes para scrollear, el header queda fijo y las filas **no** se ven a través de él.
+- [X] Cuando las columnas no entran en el ancho, el contenedor scrollea en horizontal y la página **no**.
+- [X] Con `data={[]}`, se ven los headers y un estado vacío con el texto de `emptyTitle` / `emptyDescription`, y ninguna fila de datos.
+- [X] En modo oscuro, header, filas, hover, separadores y estado vacío son legibles; ningún color crudo (`bg-white`, `text-slate-*`, `text-indigo-*`) aparece en `DataTable.tsx`.
+- [X] `/inspeccion-clientes` deja de mostrar el placeholder `Hello ...` y pinta el header de la pantalla más la tabla con sus cinco columnas y el estado vacío.
+- [X] Conectar el endpoint más adelante toca **sólo** el interior de `useClientInspection`: ni la vista ni la ruta cambian.
+- [X] `PesajesTable.tsx` y el resto de las pantallas se comportan **exactamente igual** que antes de este spec.
+- [X] `CLAUDE.md` documenta el componente, su API y las dos reglas de alcance.
 
 ---
 
@@ -234,7 +238,10 @@ Cada paso deja el proyecto compilando y la suite en verde.
 - **No:** `role="button"` en la fila, aunque el spec lo pedía al aprobarse. Decisión del usuario, tomada durante la implementación: el rol explícito **reemplaza** al rol implícito `row`, así que un lector de pantalla deja de anunciar la tabla como tabla justo donde la estructura más ayuda. El foco y las teclas salen de `tabIndex` y del `onKeyDown`, que no dependen del rol: se pierde nada y se gana la semántica.
 - **Sí:** el anillo de foco se pinta con `outline`, no con `ring`. Un `box-shadow` sobre un `<tr>` con `border-collapse` no pinta de forma confiable en todos los navegadores.
 - **Sí:** ese tratamiento se aplica **solo** con `onRowClick`. Poner `tabIndex={0}` en filas que no hacen nada llena el recorrido de Tab de paradas muertas.
-- **Sí:** ninguna pantalla se migra en este spec. Decisión del usuario. Migrar `PesajesTable` obliga a decidir qué pasa con su paginación decorativa y con el texto "1-5 de 1,248", que es una discusión de producto, no de componentes.
+- **Sí:** `/inspeccion-clientes` estrena el componente. Decisión del usuario, tomada durante la implementación: el spec se aprobó sin consumidores, pero una tabla que nunca se montó en un navegador no está verificada. Esa ruta era un placeholder, así que estrenarla no cambia ninguna pantalla en uso.
+- **Sí:** el hook devuelve `[]` en duro. Decisión del usuario. La pantalla queda armada de punta a punta y muestra el estado vacío; cuando exista el endpoint se reemplaza sólo el interior del hook, igual que `useControlCalidad` y `useParametros`.
+- **Sí:** las columnas salen del tipo `Cliente` que ya existe (`nombre`, `producto`, `codigo_exportacion`, `telefono`, `direccion_planta`). Inventar campos produciría columnas que el backend nunca va a llenar.
+- **Sí:** `PesajesTable` **no** se migra igual. Migrarlo obliga a decidir qué pasa con su paginación decorativa y con el texto "1-5 de 1,248", que es una discusión de producto, no de componentes.
 - **Sí:** identificadores en inglés (`DataTable`, `onRowClick`, `emptyTitle`, `getRowId`). Archivo nuevo, regla de `CLAUDE.md`.
 
 ---
@@ -243,7 +250,7 @@ Cada paso deja el proyecto compilando y la suite en verde.
 
 | Riesgo | Mitigación |
 | --- | --- |
-| El componente entra sin ningún consumidor: código no ejercitado en producción, y una API diseñada contra casos imaginados. | Los tests del paso 8 lo cubren, y las columnas del historial —badge por estado, peso formateado, celda de dos líneas, fila teñida— fueron el caso real contra el que se dimensionó la API. Aun así, la primera migración real es la que va a decir si la `meta` alcanza. |
+| El único consumidor arranca con la lista vacía: el camino de las filas —ordenar, clickear, scrollear con el header pegajoso— no se ejercita en la app hasta que llegue el endpoint. | Los tests del paso 8 cubren ese camino, y se verificó en el navegador con datos de prueba antes de dejar la pantalla en `[]`. Aun así, la primera pantalla con datos reales es la que va a decir si la `meta` alcanza. |
 | El `<thead>` pegajoso se transparenta y las filas se ven a través. | El paso 4 le pone fondo opaco propio (`bg-bg-app`), no heredado del contenedor, y hay un criterio de aceptación específico. |
 | La `meta` de columna queda atada al set `dataTableFeatures`: una segunda tabla del proyecto con otras necesidades tendría que compartir ese tipo o declarar su propio set. | Es el diseño de v9 y es preferible al problema inverso de v8, donde la augmentación global contaminaba cualquier tabla. Con un solo `DataTable` en el proyecto, la `meta` crece en su archivo. |
 | Las clases de la primitiva de shadcn (`bg-muted`, `text-muted-foreground`) apuntan a variables que este proyecto no define, así que caen a un valor vacío o heredado. | El `DataTable` pasa `className` con los tokens del proyecto en cada slot, y `tailwind-merge` (ya instalado) resuelve el conflicto a favor del último. El criterio de dark mode es lo que verifica que ninguna clase quedó sin sobreescribir. |
