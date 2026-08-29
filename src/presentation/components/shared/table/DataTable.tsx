@@ -1,3 +1,4 @@
+import type { CSSProperties } from 'react'
 import {
     metaHelper,
     tableFeatures,
@@ -63,6 +64,8 @@ interface DataTableProps<TData extends RowData> {
     columns: DataTableColumns<TData>
     /** Id estable de fila. Sin esto, la tabla usa el índice del array. */
     getRowId?: (row: TData) => string
+    /** Alto máximo del área scrolleable; es lo que activa el header pegajoso. */
+    maxHeight?: string
     className?: string
 }
 
@@ -70,6 +73,7 @@ export function DataTable<TData extends RowData>({
     data,
     columns,
     getRowId,
+    maxHeight,
     className,
 }: DataTableProps<TData>) {
     const table = useTable({
@@ -83,12 +87,23 @@ export function DataTable<TData extends RowData>({
         <div
             className={cn(
                 'bg-surface rounded-3xl border border-border-ui shadow-clay-card overflow-hidden',
+                // El contenedor de scroll real es el div que monta la primitiva
+                // `Table`, que no acepta className: el alto máximo se le aplica
+                // desde acá, apuntando a su slot, para no editar table.tsx.
+                maxHeight &&
+                    '[&>[data-slot=table-container]]:max-h-[var(--data-table-max-h)] [&>[data-slot=table-container]]:overflow-y-auto',
                 className,
             )}
+            style={
+                maxHeight
+                    ? ({ '--data-table-max-h': maxHeight } as CSSProperties)
+                    : undefined
+            }
         >
             <Table>
-                {/* Fondo opaco: es también lo que sostiene el header pegajoso. */}
-                <TableHeader className="bg-bg-app">
+                {/* El fondo opaco es lo que sostiene el header pegajoso: sin él,
+                    las filas se ven a través al scrollear. */}
+                <TableHeader className="sticky top-0 z-10 bg-bg-app">
                     {table.getHeaderGroups().map((headerGroup) => (
                         <TableRow
                             key={headerGroup.id}
