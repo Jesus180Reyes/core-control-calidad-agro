@@ -1,6 +1,7 @@
 
 export const PERMISSIONS = {
     MODULOCONTROLCALIDAD: 'MODULO-CONTROL-CALIDAD',
+    MODULOCLIENTES: 'MODULO-CLIENTES',
 } as const
 
 export type Permission = (typeof PERMISSIONS)[keyof typeof PERMISSIONS]
