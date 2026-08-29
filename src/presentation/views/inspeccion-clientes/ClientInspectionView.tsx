@@ -1,50 +1,67 @@
+
+import { ClientRowActions } from '#/presentation/components/inspeccion-clientes/ClientRowActions'
 import {
     DataTable,
     type DataTableColumns,
 } from '#/presentation/components/shared/table/DataTable'
-import { useClientInspection } from '#/presentation/hooks/inspeccion-clientes/useClientInspection'
 import type { Cliente } from '#/presentation/types/clientes/clientes.types'
+import { useClientInspection } from '#/presentation/hooks/inspeccion-clientes/useClientInspection'
 
-/** Los campos del cliente son nullables: sin dato, un guión apagado. */
 function Dato({ valor }: { valor: string | null }) {
     if (!valor) return <span className="text-text-muted">—</span>
 
     return <>{valor}</>
 }
 
-const columns: DataTableColumns<Cliente> = [
-    {
-        accessorKey: 'nombre',
-        header: 'Cliente',
-        enableSorting: true,
-        meta: { cellClassName: 'font-bold' },
-    },
-    {
-        accessorKey: 'producto',
-        header: 'Producto',
-        enableSorting: true,
-        cell: ({ row }) => <Dato valor={row.original.producto} />,
-    },
-    {
-        accessorKey: 'codigo_exportacion',
-        header: 'Código exportación',
-        enableSorting: true,
-        cell: ({ row }) => <Dato valor={row.original.codigo_exportacion} />,
-    },
-    {
-        accessorKey: 'telefono',
-        header: 'Teléfono',
-        cell: ({ row }) => <Dato valor={row.original.telefono} />,
-    },
-    {
-        accessorKey: 'direccion_planta',
-        header: 'Planta',
-        cell: ({ row }) => <Dato valor={row.original.direccion_planta} />,
-    },
-]
+
+function crearColumnas(
+): DataTableColumns<Cliente> {
+    return [
+        {
+            id: 'acciones',
+            header: 'Acciones',
+            meta: { align: 'center', cellClassName: 'py-2' },
+            cell: ({ row }) => (
+                <ClientRowActions
+                    cliente={row.original}
+                />
+            ),
+        },
+        {
+            accessorKey: 'nombre',
+            header: 'Cliente',
+            enableSorting: true,
+            meta: { cellClassName: 'font-bold' },
+        },
+        {
+            accessorKey: 'producto',
+            header: 'Producto',
+            enableSorting: true,
+            cell: ({ row }) => <Dato valor={row.original.producto} />,
+        },
+        {
+            accessorKey: 'codigo_exportacion',
+            header: 'Código exportación',
+            enableSorting: true,
+            cell: ({ row }) => <Dato valor={row.original.codigo_exportacion} />,
+        },
+        {
+            accessorKey: 'telefono',
+            header: 'Teléfono',
+            cell: ({ row }) => <Dato valor={row.original.telefono} />,
+        },
+        {
+            accessorKey: 'direccion_planta',
+            header: 'Planta',
+            cell: ({ row }) => <Dato valor={row.original.direccion_planta} />,
+        },
+    ]
+}
 
 export function ClientInspectionView() {
     const { clientes } = useClientInspection()
+
+    const columns = crearColumnas();
 
     return (
         <DataTable

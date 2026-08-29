@@ -1,5 +1,9 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 @import "tailwindcss";
+/* Las primitivas de shadcn (popover, dialog, sheet, select) ya vienen con las
+   clases `animate-in`/`animate-out`; sin este import no existen y todo abre de
+   golpe. `duration-*` y `ease-*` alimentan la animación, no sólo la transición. */
+@import "tw-animate-css";
 @layer base {
   body {
     font-family: 'Inter', sans-serif;
@@ -11,8 +15,33 @@
   --color-bg-app: var(--bg-app);       
   --color-surface: var(--surface);     
   --color-border-ui: var(--border-ui); 
-  --color-text-main: var(--text-main); 
-  --color-text-muted: var(--text-muted); 
+  --color-text-main: var(--text-main);
+  --color-text-muted: var(--text-muted);
+
+  /* Paleta base de shadcn. Las primitivas de `components/ui/` están escritas
+     contra estos nombres (`bg-popover`, `bg-muted`, `border-input`…) y sin
+     definirlos la clase se genera vacía: un popover con fondo transparente
+     deja ver la pantalla de atrás. Acá no hay colores nuevos, sólo el puente
+     entre esos nombres y los tokens del proyecto. */
+  --color-background: var(--bg-app);
+  --color-foreground: var(--text-main);
+  --color-card: var(--surface);
+  --color-card-foreground: var(--text-main);
+  --color-popover: var(--surface);
+  --color-popover-foreground: var(--text-main);
+  --color-primary: var(--brand);
+  --color-primary-foreground: var(--brand-foreground);
+  --color-secondary: var(--muted);
+  --color-secondary-foreground: var(--text-main);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--text-muted);
+  --color-accent: var(--muted);
+  --color-accent-foreground: var(--text-main);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: #ffffff;
+  --color-border: var(--border-ui);
+  --color-input: var(--border-ui);
+  --color-ring: var(--brand);
 
   --shadow-clay-card: 
     inset 2px 2px 4px rgba(255, 255, 255, 0.4), 
@@ -40,23 +69,34 @@
 
 
 :root, .light {
-  --brand: #4f46e5;      
-  --success: #10b981;    
-  --bg-app: #f9fafb;      
-  --surface: #ffffff;     
-  --border-ui: #f1f5f9;   
-  --text-main: #0f172a; 
-  --text-muted: #64748b; 
+  --brand: #4f46e5;
+  --success: #10b981;
+  --bg-app: #f9fafb;
+  --surface: #ffffff;
+  --border-ui: #f1f5f9;
+  --text-main: #0f172a;
+  --text-muted: #64748b;
+
+  /* Sólo para la paleta de shadcn: el fondo de los estados hover/selected de
+     las primitivas, el color de error y el texto sobre `brand`. */
+  --brand-foreground: #ffffff;
+  --muted: #f1f5f9;
+  --destructive: #ef4444;
+  --radius: 0.5rem;
 }
 
 .dark {
-  --brand: #818cf8;      
-  --success: #34d399;    
-  --bg-app: #090d16;      
-  --surface: #111827;    
-  --border-ui: #1f2937;  
-  --text-main: #f8fafc;  
-  --text-muted: #94a3b8; 
+  --brand: #818cf8;
+  --success: #34d399;
+  --bg-app: #090d16;
+  --surface: #111827;
+  --border-ui: #1f2937;
+  --text-main: #f8fafc;
+  --text-muted: #94a3b8;
+
+  --brand-foreground: #0f172a;
+  --muted: #1f2937;
+  --destructive: #f87171;
 }
 
 @variant dark (.dark &);
