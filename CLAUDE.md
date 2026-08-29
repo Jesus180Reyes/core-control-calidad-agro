@@ -71,6 +71,21 @@ Los hooks de `presentation/hooks/shared/` cubren los cuatro casos: `useExecuteQu
 
 Dos comportamientos heredados y asumidos: un `204 No Content` devuelve `''` casteado a `T`, y los GET mandan `Content-Type: application/json`. Del cliente sólo hay tests del refresh y del reintento del 401 (`interceptores/refresh-token.test.ts`); `create-http-client`, `query-params` y los transportes siguen sin cubrir (SPEC 03, SPEC 06).
 
+### Permisos
+
+`src/presentation/types/auth/permissions.ts` es la **única** fuente de los strings de permiso: `PERMISSIONS` (objeto plano `as const`) y el tipo `Permission` derivado de sus valores. Nunca escribir `'clientes.listar'` a mano en una pantalla; un permiso nuevo se agrega primero al catálogo, con el string verificado contra el backend.
+
+Para consultarlos, `usePermissions()` (`has` / `hasAny` / `hasAll`, tipados contra `Permission`) o el componente `<Can permission={...}>`. Un `<Can>` sin ninguna de sus tres props (`permission`, `anyOf`, `allOf`) renderiza sus hijos: un olvido de prop no esconde contenido en silencio.
+
+Dos reglas del flujo, fijadas en SPEC 07:
+
+- Los permisos se piden **una sola vez, en el login** — `GET /permisos/me` encadenado al `onSuccess` de `useLogin`, después de `iniciarSesion` (el `Bearer` sale de `localStorage`, que recién ahí tiene el token) y antes de navegar. No se revalidan al recargar ni al cambiar de ruta: viven en `localStorage` bajo `auth_permisos` y se leen desde `Sesion.permisos`.
+- Un fallo de `/permisos/me` **no** bloquea la entrada: se entra con `permisos: []`. Lo mismo vale para una sesión guardada antes de SPEC 07, sin esa clave.
+
+La sesión guarda `string[]`, no `Permission[]`: un permiso que el backend emite y el catálogo no conoce se persiste igual (en desarrollo, `advertirPermisosDesconocidos` lo avisa por consola). Se guarda ancho y se consulta estrecho.
+
+Ocultar UI por permisos es comodidad, no control de acceso: `localStorage` es editable desde la consola del navegador y quien tiene que rechazar la operación es el backend, endpoint por endpoint. Hoy **ninguna** pantalla los aplica todavía —ni el Sidebar, ni los guards de ruta, ni un botón—; SPEC 07 entrega sólo la herramienta.
+
 ### Rutas
 
 Grupos `(auth)` y `(portal)` con layouts pathless: `(portal)/_portal.tsx` monta el `Sidebar` + `<Outlet/>` y hace el guard en `beforeLoad` (hoy `const isLogged = true` — placeholder). Las rutas hijas son archivos planos con punto: `_portal.control-calidad.tsx` → `/control-calidad`. Las URLs no incluyen el grupo ni el layout.
