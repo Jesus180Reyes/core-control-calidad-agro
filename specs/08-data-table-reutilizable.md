@@ -63,10 +63,12 @@ En v9 las capacidades de la tabla no son opciones sueltas: se registran una sola
 export const dataTableFeatures = tableFeatures({
     rowSortingFeature,
     sortedRowModel: createSortedRowModel(),
-    sortFns: { alphanumeric: sortFn_alphanumeric, text: sortFn_text },
+    sortFns,
     columnMeta: metaHelper<DataTableColumnMeta>(),
 })
 ```
+
+Se registra el objeto `sortFns` completo, no un subconjunto: la tabla es genérica y no puede saber si una columna trae texto, números o fechas, y `sortFn: 'auto'` necesita los comparadores registrados para resolver cada tipo.
 
 ### La `meta` de columna
 
@@ -148,7 +150,7 @@ Cada paso deja el proyecto compilando y la suite en verde.
 4. **Header pegajoso y scroll horizontal.** La primitiva `Table` ya se envuelve sola en un `div[data-slot=table-container]` con `overflow-x-auto`, que es el contenedor de scroll real; lo único que le falta es el alto máximo. El `DataTable` se lo aplica desde su propio wrapper con una variante arbitraria sobre ese slot, sin editar la primitiva. El `<thead>` lleva `sticky top-0 z-10` con fondo opaco propio — sin fondo opaco, las filas se ven **a través** del header al scrollear.
    Verificación: manual, con veinte filas y `maxHeight="24rem"`: el header queda fijo y no se transparenta.
 
-5. **Ordenamiento.** Se suman al set de features `rowSortingFeature`, `sortedRowModel: createSortedRowModel()` y las `sortFns` que se usen. El estado arranca por `initialState: { sorting: defaultSorting }` y lo administra la tabla: en v9 `initialState.<slice>` es el mecanismo previsto para un estado interno con valor inicial, sin `useState` ni `onSortingChange`. En las columnas con orden habilitado, el contenido del `<th>` es un `<button>` con el título y un ícono de lucide (`ChevronUp` / `ChevronDown` / `ChevronsUpDown` cuando no hay orden), cableado a `column.getToggleSortingHandler()`. El `<th>` lleva `aria-sort` derivado de `column.getIsSorted()`. Las columnas sin orden (`column.getCanSort()` falso) se pintan como texto plano, sin botón ni cursor.
+5. **Ordenamiento.** Se suman al set de features `rowSortingFeature`, `sortedRowModel: createSortedRowModel()` y el registro `sortFns`. El estado arranca por `initialState: { sorting: defaultSorting }` y lo administra la tabla: en v9 `initialState.<slice>` es el mecanismo previsto para un estado interno con valor inicial, sin `useState` ni `onSortingChange`. Tres opciones más, porque los defaults de la librería no coinciden con lo que pide este spec: `defaultColumn.enableSorting: false` (la librería ordena **todas** las columnas por defecto; acá el orden es opt-in y cada columna lo pide con `enableSorting: true`), `defaultColumn.sortDescFirst: false` (sin esto una columna numérica arranca descendente y el ciclo sale al revés del resto de la tabla) y `enableSortingRemoval: true` para que el tercer click vuelva al orden original. En las columnas con orden habilitado, el contenido del `<th>` es un `<button>` con el título y un ícono de lucide (`ChevronUp` / `ChevronDown` / `ChevronsUpDown` cuando no hay orden), cableado a `column.getToggleSortingHandler()`. El `<th>` lleva `aria-sort` derivado de `column.getIsSorted()`. Las columnas sin orden (`column.getCanSort()` falso) se pintan como texto plano, sin botón ni cursor.
    Verificación: click en un header ordena asc, el segundo desc, el tercero vuelve al orden original.
 
 6. **Fila clickeable.** Con `onRowClick`, cada `<TableRow>` recibe `onClick`, `tabIndex={0}`, `role="button"`, `cursor-pointer` y un `onKeyDown` que dispara con Enter y Espacio (con `preventDefault` en Espacio, que si no scrollea la página). Sin `onRowClick`, la fila no recibe nada de eso: ni `tabIndex`, ni `role`, ni cursor.

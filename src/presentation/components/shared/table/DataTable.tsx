@@ -1,10 +1,15 @@
 import type { CSSProperties } from 'react'
+import { ChevronDown, ChevronUp, ChevronsUpDown } from 'lucide-react'
 import {
+    createSortedRowModel,
     metaHelper,
+    rowSortingFeature,
+    sortFns,
     tableFeatures,
     useTable,
     type ColumnDef,
     type RowData,
+    type SortingState,
 } from '@tanstack/react-table'
 
 import {
@@ -41,6 +46,12 @@ export interface DataTableColumnMeta {
  * casi siempre alcanza con el alias `DataTableColumns`.
  */
 export const dataTableFeatures = tableFeatures({
+    rowSortingFeature,
+    sortedRowModel: createSortedRowModel(),
+    // El registro completo de comparadores: como la tabla es genérica, no puede
+    // saber si una columna trae texto, números o fechas, y `sortFn: 'auto'`
+    // necesita tenerlos registrados para resolver bien cada tipo.
+    sortFns,
     columnMeta: metaHelper<DataTableColumnMeta>(),
 })
 
@@ -50,20 +61,33 @@ export type DataTableColumns<TData extends RowData> = ColumnDef<
     TData
 >[]
 
-const alignClasses: Record<
-    NonNullable<DataTableColumnMeta['align']>,
-    string
-> = {
+type Align = NonNullable<DataTableColumnMeta['align']>
+
+const alignClasses: Record<Align, string> = {
     left: 'text-left',
     center: 'text-center',
     right: 'text-right',
 }
+
+/** El botón de orden ocupa todo el ancho del <th>, así que se alinea solo. */
+const justifyClasses: Record<Align, string> = {
+    left: 'justify-start',
+    center: 'justify-center',
+    right: 'justify-end',
+}
+
+const ariaSortValues = {
+    asc: 'ascending',
+    desc: 'descending',
+} as const
 
 interface DataTableProps<TData extends RowData> {
     data: TData[]
     columns: DataTableColumns<TData>
     /** Id estable de fila. Sin esto, la tabla usa el índice del array. */
     getRowId?: (row: TData) => string
+    /** Orden inicial. El estado vive dentro del componente. */
+    defaultSorting?: SortingState
     /** Alto máximo del área scrolleable; es lo que activa el header pegajoso. */
     maxHeight?: string
     className?: string
@@ -73,6 +97,7 @@ export function DataTable<TData extends RowData>({
     data,
     columns,
     getRowId,
+    defaultSorting,
     maxHeight,
     className,
 }: DataTableProps<TData>) {
@@ -81,6 +106,19 @@ export function DataTable<TData extends RowData>({
         columns,
         data,
         getRowId,
+        // El orden lo administra la tabla: `initialState` es la forma prevista
+        // en v9 para un estado interno con valor inicial.
+        initialState: { sorting: defaultSorting ?? [] },
+        defaultColumn: {
+            // La librería ordena todas las columnas por defecto; acá el orden
+            // es opt-in, y cada columna lo pide con `enableSorting: true`.
+            enableSorting: false,
+            // Sin esto, una columna numérica arranca descendente y el ciclo de
+            // clicks sale al revés del resto de la tabla.
+            sortDescFirst: false,
+        },
+        // Tercer click sobre el header: vuelve al orden original.
+        enableSortingRemoval: true,
     })
 
     return (
@@ -111,17 +149,46 @@ export function DataTable<TData extends RowData>({
                         >
                             {headerGroup.headers.map((header) => {
                                 const meta = header.column.columnDef.meta
+                                const align = meta?.align ?? 'left'
+                                const puedeOrdenar = header.column.getCanSort()
+                                const orden = header.column.getIsSorted()
 
                                 return (
                                     <TableHead
                                         key={header.id}
+                                        aria-sort={
+                                            puedeOrdenar
+                                                ? orden
+                                                    ? ariaSortValues[orden]
+                                                    : 'none'
+                                                : undefined
+                                        }
                                         className={cn(
                                             'h-12 px-6 text-xs font-bold uppercase tracking-wider text-text-muted',
-                                            alignClasses[meta?.align ?? 'left'],
+                                            alignClasses[align],
                                             meta?.headerClassName,
                                         )}
                                     >
-                                        {header.isPlaceholder ? null : (
+                                        {header.isPlaceholder ? null : puedeOrdenar ? (
+                                            <button
+                                                type="button"
+                                                onClick={header.column.getToggleSortingHandler()}
+                                                className={cn(
+                                                    'flex w-full cursor-pointer select-none items-center gap-1.5 rounded-lg uppercase transition-colors hover:text-text-main focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/40',
+                                                    justifyClasses[align],
+                                                )}
+                                            >
+                                                <table.FlexRender header={header} />
+
+                                                {orden === 'asc' ? (
+                                                    <ChevronUp className="size-3.5 shrink-0" />
+                                                ) : orden === 'desc' ? (
+                                                    <ChevronDown className="size-3.5 shrink-0" />
+                                                ) : (
+                                                    <ChevronsUpDown className="size-3.5 shrink-0 opacity-40" />
+                                                )}
+                                            </button>
+                                        ) : (
                                             <table.FlexRender header={header} />
                                         )}
                                     </TableHead>
