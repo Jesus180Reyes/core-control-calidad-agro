@@ -14,6 +14,7 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table'
+import { cn } from '@/lib/utils'
 
 /**
  * Lo que una columna puede pedirle a la tabla más allá de su contenido.
@@ -48,17 +49,28 @@ export type DataTableColumns<TData extends RowData> = ColumnDef<
     TData
 >[]
 
+const alignClasses: Record<
+    NonNullable<DataTableColumnMeta['align']>,
+    string
+> = {
+    left: 'text-left',
+    center: 'text-center',
+    right: 'text-right',
+}
+
 interface DataTableProps<TData extends RowData> {
     data: TData[]
     columns: DataTableColumns<TData>
     /** Id estable de fila. Sin esto, la tabla usa el índice del array. */
     getRowId?: (row: TData) => string
+    className?: string
 }
 
 export function DataTable<TData extends RowData>({
     data,
     columns,
     getRowId,
+    className,
 }: DataTableProps<TData>) {
     const table = useTable({
         features: dataTableFeatures,
@@ -68,32 +80,70 @@ export function DataTable<TData extends RowData>({
     })
 
     return (
-        <Table>
-            <TableHeader>
-                {table.getHeaderGroups().map((headerGroup) => (
-                    <TableRow key={headerGroup.id}>
-                        {headerGroup.headers.map((header) => (
-                            <TableHead key={header.id}>
-                                {header.isPlaceholder ? null : (
-                                    <table.FlexRender header={header} />
-                                )}
-                            </TableHead>
-                        ))}
-                    </TableRow>
-                ))}
-            </TableHeader>
+        <div
+            className={cn(
+                'bg-surface rounded-3xl border border-border-ui shadow-clay-card overflow-hidden',
+                className,
+            )}
+        >
+            <Table>
+                {/* Fondo opaco: es también lo que sostiene el header pegajoso. */}
+                <TableHeader className="bg-bg-app">
+                    {table.getHeaderGroups().map((headerGroup) => (
+                        <TableRow
+                            key={headerGroup.id}
+                            className="border-0 hover:bg-transparent"
+                        >
+                            {headerGroup.headers.map((header) => {
+                                const meta = header.column.columnDef.meta
 
-            <TableBody>
-                {table.getRowModel().rows.map((row) => (
-                    <TableRow key={row.id}>
-                        {row.getAllCells().map((cell) => (
-                            <TableCell key={cell.id}>
-                                <table.FlexRender cell={cell} />
-                            </TableCell>
-                        ))}
-                    </TableRow>
-                ))}
-            </TableBody>
-        </Table>
+                                return (
+                                    <TableHead
+                                        key={header.id}
+                                        className={cn(
+                                            'h-12 px-6 text-xs font-bold uppercase tracking-wider text-text-muted',
+                                            alignClasses[meta?.align ?? 'left'],
+                                            meta?.headerClassName,
+                                        )}
+                                    >
+                                        {header.isPlaceholder ? null : (
+                                            <table.FlexRender header={header} />
+                                        )}
+                                    </TableHead>
+                                )
+                            })}
+                        </TableRow>
+                    ))}
+                </TableHeader>
+
+                <TableBody className="divide-y divide-border-ui">
+                    {table.getRowModel().rows.map((row) => (
+                        <TableRow
+                            key={row.id}
+                            // `border-0` desactiva el borde de la primitiva, que
+                            // en Tailwind v4 sale del color del texto.
+                            className="border-0 transition-colors hover:bg-bg-app/60"
+                        >
+                            {row.getAllCells().map((cell) => {
+                                const meta = cell.column.columnDef.meta
+
+                                return (
+                                    <TableCell
+                                        key={cell.id}
+                                        className={cn(
+                                            'px-6 py-4 text-sm text-text-main',
+                                            alignClasses[meta?.align ?? 'left'],
+                                            meta?.cellClassName,
+                                        )}
+                                    >
+                                        <table.FlexRender cell={cell} />
+                                    </TableCell>
+                                )
+                            })}
+                        </TableRow>
+                    ))}
+                </TableBody>
+            </Table>
+        </div>
     )
 }
