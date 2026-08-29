@@ -3,6 +3,7 @@ import type { Sesion, Usuario } from '#/presentation/types/auth/auth.types'
 const CLAVE_TOKEN = 'auth_token'
 const CLAVE_USUARIO = 'auth_user'
 const CLAVE_REFRESH = 'auth_refresh'
+const CLAVE_PERMISOS = 'auth_permisos'
 
 const suscriptores = new Set<() => void>()
 
@@ -33,8 +34,23 @@ function limpiarStorage(storage: Storage): void {
         storage.removeItem(CLAVE_TOKEN)
         storage.removeItem(CLAVE_USUARIO)
         storage.removeItem(CLAVE_REFRESH)
+        storage.removeItem(CLAVE_PERMISOS)
     } catch {
         // Sin acceso a localStorage: no hay nada que limpiar.
+    }
+}
+
+// Los permisos corruptos degradan a `[]` sin lanzar: una lista ilegible no
+// invalida la sesión, igual que un refresh token ausente.
+function leerPermisosDe(storage: Storage): string[] {
+    try {
+        const crudo = storage.getItem(CLAVE_PERMISOS)
+        if (!crudo) return []
+
+        const permisos = JSON.parse(crudo)
+        return Array.isArray(permisos) ? permisos : []
+    } catch {
+        return []
     }
 }
 
@@ -56,7 +72,7 @@ export function leerSesion(): Sesion | null {
         // legítima (es la que emite el backend de hoy).
         const refreshToken = storage.getItem(CLAVE_REFRESH) ?? undefined
 
-        return { accessToken, usuario, refreshToken }
+        return { accessToken, usuario, refreshToken, permisos: leerPermisosDe(storage) }
     } catch {
         limpiarStorage(storage)
         return null
@@ -79,6 +95,8 @@ export function guardarSesion(sesion: Sesion): void {
         // de dejarlo colgado apuntando a un usuario que ya no está logueado.
         if (sesion.refreshToken) storage.setItem(CLAVE_REFRESH, sesion.refreshToken)
         else storage.removeItem(CLAVE_REFRESH)
+
+        storage.setItem(CLAVE_PERMISOS, JSON.stringify(sesion.permisos))
     } catch {
         // Cuota llena o escritura denegada: se sigue sin persistir.
     }
@@ -108,6 +126,34 @@ export function guardarTokens(tokens: { accessToken: string; refreshToken?: stri
         // Cuota llena o escritura denegada: se sigue con el token en memoria.
     }
     invalidarCache()
+}
+
+/**
+ * A diferencia de `guardarTokens`, este sí notifica: `<Can>` tiene que
+ * repintarse cuando la lista llega.
+ */
+export function guardarPermisos(permisos: string[]): void {
+    const storage = almacen()
+    if (!storage) {
+        invalidarCache()
+        notificar()
+        return
+    }
+
+    try {
+        storage.setItem(CLAVE_PERMISOS, JSON.stringify(permisos))
+    } catch {
+        // Cuota llena o escritura denegada: se sigue sin persistir.
+    }
+    invalidarCache()
+    notificar()
+}
+
+export function leerPermisos(): string[] {
+    const storage = almacen()
+    if (!storage) return []
+
+    return leerPermisosDe(storage)
 }
 
 export function limpiarSesion(): void {

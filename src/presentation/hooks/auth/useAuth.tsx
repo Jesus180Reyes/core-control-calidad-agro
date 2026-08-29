@@ -22,6 +22,7 @@ export function useAuth(): UseAuthResult {
             accessToken: respuesta.accessToken,
             usuario: respuesta.user,
             refreshToken: respuesta.refreshToken ?? '',
+            permisos: [],
         })
         return true
     }
