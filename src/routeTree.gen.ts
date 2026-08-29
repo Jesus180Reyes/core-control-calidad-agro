@@ -12,7 +12,6 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as portalPortalRouteImport } from './routes/(portal)/_portal'
 import { Route as authAuthRouteImport } from './routes/(auth)/_auth'
 import { Route as portalPortalIndexRouteImport } from './routes/(portal)/_portal.index'
-import { Route as portalPortalParametrosRouteImport } from './routes/(portal)/_portal.parametros'
 import { Route as portalPortalLotesClientesRouteImport } from './routes/(portal)/_portal.lotes-clientes'
 import { Route as portalPortalHistorialRouteImport } from './routes/(portal)/_portal.historial'
 import { Route as portalPortalCrearPesajeRouteImport } from './routes/(portal)/_portal.crear-pesaje'
@@ -31,11 +30,6 @@ const authAuthRoute = authAuthRouteImport.update({
 const portalPortalIndexRoute = portalPortalIndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => portalPortalRoute,
-} as any)
-const portalPortalParametrosRoute = portalPortalParametrosRouteImport.update({
-  id: '/parametros',
-  path: '/parametros',
   getParentRoute: () => portalPortalRoute,
 } as any)
 const portalPortalLotesClientesRoute =
@@ -78,7 +72,6 @@ export interface FileRoutesByFullPath {
   '/crear-pesaje': typeof portalPortalCrearPesajeRoute
   '/historial': typeof portalPortalHistorialRoute
   '/lotes-clientes': typeof portalPortalLotesClientesRoute
-  '/parametros': typeof portalPortalParametrosRoute
   '/': typeof portalPortalIndexRoute
 }
 export interface FileRoutesByTo {
@@ -88,7 +81,6 @@ export interface FileRoutesByTo {
   '/crear-pesaje': typeof portalPortalCrearPesajeRoute
   '/historial': typeof portalPortalHistorialRoute
   '/lotes-clientes': typeof portalPortalLotesClientesRoute
-  '/parametros': typeof portalPortalParametrosRoute
   '/': typeof portalPortalIndexRoute
 }
 export interface FileRoutesById {
@@ -101,7 +93,6 @@ export interface FileRoutesById {
   '/(portal)/_portal/crear-pesaje': typeof portalPortalCrearPesajeRoute
   '/(portal)/_portal/historial': typeof portalPortalHistorialRoute
   '/(portal)/_portal/lotes-clientes': typeof portalPortalLotesClientesRoute
-  '/(portal)/_portal/parametros': typeof portalPortalParametrosRoute
   '/(portal)/_portal/': typeof portalPortalIndexRoute
 }
 export interface FileRouteTypes {
@@ -113,7 +104,6 @@ export interface FileRouteTypes {
     | '/crear-pesaje'
     | '/historial'
     | '/lotes-clientes'
-    | '/parametros'
     | '/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -123,7 +113,6 @@ export interface FileRouteTypes {
     | '/crear-pesaje'
     | '/historial'
     | '/lotes-clientes'
-    | '/parametros'
     | '/'
   id:
     | '__root__'
@@ -135,7 +124,6 @@ export interface FileRouteTypes {
     | '/(portal)/_portal/crear-pesaje'
     | '/(portal)/_portal/historial'
     | '/(portal)/_portal/lotes-clientes'
-    | '/(portal)/_portal/parametros'
     | '/(portal)/_portal/'
   fileRoutesById: FileRoutesById
 }
@@ -165,13 +153,6 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof portalPortalIndexRouteImport
-      parentRoute: typeof portalPortalRoute
-    }
-    '/(portal)/_portal/parametros': {
-      id: '/(portal)/_portal/parametros'
-      path: '/parametros'
-      fullPath: '/parametros'
-      preLoaderRoute: typeof portalPortalParametrosRouteImport
       parentRoute: typeof portalPortalRoute
     }
     '/(portal)/_portal/lotes-clientes': {
@@ -237,7 +218,6 @@ interface portalPortalRouteChildren {
   portalPortalCrearPesajeRoute: typeof portalPortalCrearPesajeRoute
   portalPortalHistorialRoute: typeof portalPortalHistorialRoute
   portalPortalLotesClientesRoute: typeof portalPortalLotesClientesRoute
-  portalPortalParametrosRoute: typeof portalPortalParametrosRoute
   portalPortalIndexRoute: typeof portalPortalIndexRoute
 }
 
@@ -247,7 +227,6 @@ const portalPortalRouteChildren: portalPortalRouteChildren = {
   portalPortalCrearPesajeRoute: portalPortalCrearPesajeRoute,
   portalPortalHistorialRoute: portalPortalHistorialRoute,
   portalPortalLotesClientesRoute: portalPortalLotesClientesRoute,
-  portalPortalParametrosRoute: portalPortalParametrosRoute,
   portalPortalIndexRoute: portalPortalIndexRoute,
 }
 
