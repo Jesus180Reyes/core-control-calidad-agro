@@ -1,6 +1,6 @@
 # SPEC 08 — DataTable reutilizable
 
-> **Estado:** Approved
+> **Estado:** Implemented
 > **Depende de:** —
 > **Fecha:** 2026-08-29
 > **Objetivo:** Crear un componente `<DataTable>` genérico sobre `@tanstack/react-table` y la primitiva `table` de shadcn, con ordenamiento por columna, fila clickeable, header pegajoso, estado vacío y dark mode, y estrenarlo en `/inspeccion-clientes`.
