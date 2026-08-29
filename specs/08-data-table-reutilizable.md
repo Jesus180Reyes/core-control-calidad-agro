@@ -153,7 +153,7 @@ Cada paso deja el proyecto compilando y la suite en verde.
 5. **Ordenamiento.** Se suman al set de features `rowSortingFeature`, `sortedRowModel: createSortedRowModel()` y el registro `sortFns`. El estado arranca por `initialState: { sorting: defaultSorting }` y lo administra la tabla: en v9 `initialState.<slice>` es el mecanismo previsto para un estado interno con valor inicial, sin `useState` ni `onSortingChange`. Tres opciones más, porque los defaults de la librería no coinciden con lo que pide este spec: `defaultColumn.enableSorting: false` (la librería ordena **todas** las columnas por defecto; acá el orden es opt-in y cada columna lo pide con `enableSorting: true`), `defaultColumn.sortDescFirst: false` (sin esto una columna numérica arranca descendente y el ciclo sale al revés del resto de la tabla) y `enableSortingRemoval: true` para que el tercer click vuelva al orden original. En las columnas con orden habilitado, el contenido del `<th>` es un `<button>` con el título y un ícono de lucide (`ChevronUp` / `ChevronDown` / `ChevronsUpDown` cuando no hay orden), cableado a `column.getToggleSortingHandler()`. El `<th>` lleva `aria-sort` derivado de `column.getIsSorted()`. Las columnas sin orden (`column.getCanSort()` falso) se pintan como texto plano, sin botón ni cursor.
    Verificación: click en un header ordena asc, el segundo desc, el tercero vuelve al orden original.
 
-6. **Fila clickeable.** Con `onRowClick`, cada `<TableRow>` recibe `onClick`, `tabIndex={0}`, `role="button"`, `cursor-pointer` y un `onKeyDown` que dispara con Enter y Espacio (con `preventDefault` en Espacio, que si no scrollea la página). Sin `onRowClick`, la fila no recibe nada de eso: ni `tabIndex`, ni `role`, ni cursor.
+6. **Fila clickeable.** Con `onRowClick`, cada `<TableRow>` recibe `onClick`, `tabIndex={0}`, `cursor-pointer`, anillo de foco y un `onKeyDown` que dispara con Enter y Espacio (con `preventDefault` en Espacio, que si no scrollea la página). **Sin `role="button"`**: pisaría el rol implícito de fila y la tabla dejaría de anunciarse como tabla. Sin `onRowClick`, la fila no recibe nada de eso: ni `tabIndex`, ni handlers, ni cursor.
    Verificación: con teclado, Tab llega a las filas y Enter dispara el callback; sin la prop, Tab las saltea.
 
 7. **Estado vacío.** Con `data.length === 0`, el `<tbody>` es una sola fila con un `<TableCell colSpan={columns.length}>` que contiene el `<EmptyState>` de `shared/`, alimentado por `emptyTitle` (por defecto `'No hay registros'`) y `emptyDescription`. El header se sigue pintando: una tabla sin encabezados no comunica qué es lo que está vacío.
@@ -168,7 +168,8 @@ Cada paso deja el proyecto compilando y la suite en verde.
    - `defaultSorting` arranca con las filas ya ordenadas.
    - `onRowClick` se dispara con el objeto original de la fila, no con el modelo de react-table.
    - Con `onRowClick`, Enter sobre una fila enfocada dispara el callback.
-   - Sin `onRowClick`, las filas no tienen `tabIndex` ni `role="button"`.
+   - Sin `onRowClick`, las filas no tienen `tabIndex` ni handlers.
+   - Con `onRowClick`, las filas siguen teniendo el rol `row`: la tabla no pierde su semántica.
    - `data={[]}` pinta el estado vacío con el texto recibido y **no** pinta ninguna fila de datos.
    - `getRowId` se usa como key: cambiar el orden del array no remonta las filas.
    Verificación: `npx vitest run src/presentation/components/shared/table/DataTable.test.tsx` pasa.
@@ -193,6 +194,7 @@ Cada paso deja el proyecto compilando y la suite en verde.
 - [ ] Con `onRowClick`, un click en cualquier parte de la fila dispara el callback con el objeto original.
 - [ ] Con `onRowClick`, la fila es alcanzable con Tab y Enter dispara el callback.
 - [ ] Sin `onRowClick`, las filas no son enfocables con Tab y no muestran `cursor-pointer`.
+- [ ] Con `onRowClick`, las filas se siguen exponiendo con el rol `row`: ninguna lleva `role="button"`.
 - [ ] Con `maxHeight` y filas suficientes para scrollear, el header queda fijo y las filas **no** se ven a través de él.
 - [ ] Cuando las columnas no entran en el ancho, el contenedor scrollea en horizontal y la página **no**.
 - [ ] Con `data={[]}`, se ven los headers y un estado vacío con el texto de `emptyTitle` / `emptyDescription`, y ninguna fila de datos.
@@ -228,7 +230,9 @@ Cada paso deja el proyecto compilando y la suite en verde.
 - **Sí:** sin paginación. Decisión del usuario. Paginar de verdad exige un contrato de backend que hoy no está definido, y una paginación de cliente sobre un array parcial miente sobre el total — que es exactamente el problema que ya tiene `PesajesTable`.
 - **Sí:** sin búsqueda ni filtros. Decisión del usuario. Filtrar es del hook de dominio, que es quien conoce el endpoint y sus params; un filtro de cliente dentro de la tabla no escala al día que el backend filtre.
 - **No:** un slot `toolbar` libre. Sin lógica adentro, es un `<div>` que la pantalla puede poner arriba de la tabla por su cuenta.
-- **Sí:** la fila clickeable es accesible por teclado (`tabIndex`, `role="button"`, Enter y Espacio). Un `onClick` en un `<tr>` es invisible para quien no usa mouse, y en planta se opera con guantes y teclado más de lo que se admite.
+- **Sí:** la fila clickeable es accesible por teclado (`tabIndex`, Enter y Espacio). Un `onClick` en un `<tr>` es invisible para quien no usa mouse, y en planta se opera con guantes y teclado más de lo que se admite.
+- **No:** `role="button"` en la fila, aunque el spec lo pedía al aprobarse. Decisión del usuario, tomada durante la implementación: el rol explícito **reemplaza** al rol implícito `row`, así que un lector de pantalla deja de anunciar la tabla como tabla justo donde la estructura más ayuda. El foco y las teclas salen de `tabIndex` y del `onKeyDown`, que no dependen del rol: se pierde nada y se gana la semántica.
+- **Sí:** el anillo de foco se pinta con `outline`, no con `ring`. Un `box-shadow` sobre un `<tr>` con `border-collapse` no pinta de forma confiable en todos los navegadores.
 - **Sí:** ese tratamiento se aplica **solo** con `onRowClick`. Poner `tabIndex={0}` en filas que no hacen nada llena el recorrido de Tab de paradas muertas.
 - **Sí:** ninguna pantalla se migra en este spec. Decisión del usuario. Migrar `PesajesTable` obliga a decidir qué pasa con su paginación decorativa y con el texto "1-5 de 1,248", que es una discusión de producto, no de componentes.
 - **Sí:** identificadores en inglés (`DataTable`, `onRowClick`, `emptyTitle`, `getRowId`). Archivo nuevo, regla de `CLAUDE.md`.

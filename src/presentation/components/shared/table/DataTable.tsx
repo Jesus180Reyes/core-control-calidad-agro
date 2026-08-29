@@ -86,6 +86,8 @@ interface DataTableProps<TData extends RowData> {
     columns: DataTableColumns<TData>
     /** Id estable de fila. Sin esto, la tabla usa el índice del array. */
     getRowId?: (row: TData) => string
+    /** Vuelve las filas clickeables: cursor, hover, foco y Enter/Espacio. */
+    onRowClick?: (row: TData) => void
     /** Orden inicial. El estado vive dentro del componente. */
     defaultSorting?: SortingState
     /** Alto máximo del área scrolleable; es lo que activa el header pegajoso. */
@@ -97,6 +99,7 @@ export function DataTable<TData extends RowData>({
     data,
     columns,
     getRowId,
+    onRowClick,
     defaultSorting,
     maxHeight,
     className,
@@ -202,9 +205,40 @@ export function DataTable<TData extends RowData>({
                     {table.getRowModel().rows.map((row) => (
                         <TableRow
                             key={row.id}
+                            // Sin `role="button"`: pisaría el rol implícito de
+                            // fila y la tabla dejaría de anunciarse como tabla.
+                            // El foco y Enter/Espacio salen de `tabIndex` y del
+                            // handler, que no dependen del rol.
+                            tabIndex={onRowClick ? 0 : undefined}
+                            onClick={
+                                onRowClick
+                                    ? () => onRowClick(row.original)
+                                    : undefined
+                            }
+                            onKeyDown={
+                                onRowClick
+                                    ? (evento) => {
+                                          if (
+                                              evento.key !== 'Enter' &&
+                                              evento.key !== ' '
+                                          ) {
+                                              return
+                                          }
+
+                                          // El espacio scrollea la página si no
+                                          // se lo frena.
+                                          evento.preventDefault()
+                                          onRowClick(row.original)
+                                      }
+                                    : undefined
+                            }
                             // `border-0` desactiva el borde de la primitiva, que
                             // en Tailwind v4 sale del color del texto.
-                            className="border-0 transition-colors hover:bg-bg-app/60"
+                            className={cn(
+                                'border-0 transition-colors hover:bg-bg-app/60',
+                                onRowClick &&
+                                    'cursor-pointer focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-brand',
+                            )}
                         >
                             {row.getAllCells().map((cell) => {
                                 const meta = cell.column.columnDef.meta
