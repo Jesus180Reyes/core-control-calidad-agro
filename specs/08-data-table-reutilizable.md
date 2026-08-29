@@ -21,14 +21,14 @@ Este spec entrega la herramienta y **no** la usa. `PesajesTable` queda exactamen
 
 **Dentro:**
 
-- Dependencia nueva `@tanstack/react-table` (v8).
+- Dependencia nueva `@tanstack/react-table` (v9).
 - Primitiva `src/components/ui/table.tsx`, instalada con el CLI de shadcn y **sin modificar a mano**.
 - Componente `src/presentation/components/shared/table/DataTable.tsx`: genérico en `TData`, recibe `data` + `columns` y monta `useReactTable` por dentro.
 - Ordenamiento por columna: click en el header alterna asc → desc → sin orden, solo en las columnas que lo declaren.
 - Fila clickeable opcional (`onRowClick`), accesible con teclado.
 - Header pegajoso y scroll horizontal del contenedor.
 - Estado vacío propio: sin filas, la tabla pinta un `<EmptyState>` que ocupa todo el ancho.
-- Alineación y clases por columna a través de `meta`, con la augmentación de tipos correspondiente.
+- Alineación y clases por columna a través de `meta`, tipada con el `metaHelper` de v9.
 - Apariencia única alineada a los tokens del proyecto (`bg-surface`, `text-text-main`, `text-text-muted`, `border-border-ui`, `shadow-clay-card`), con dark mode.
 - Tests de vitest del componente.
 - Actualización de `CLAUDE.md` con la sección de tablas.
@@ -55,27 +55,40 @@ Este spec entrega la herramienta y **no** la usa. `PesajesTable` queda exactamen
 
 Este spec no introduce datos de dominio ni toca `localStorage`. Lo que introduce son los tipos del componente.
 
-### Columnas
+### El set de features
 
-Se usan los `ColumnDef` de `@tanstack/react-table` tal cual, sin envoltorio propio. Lo único que se agrega es la `meta` de columna, augmentando el módulo desde `DataTable.tsx`:
+En v9 las capacidades de la tabla no son opciones sueltas: se registran una sola vez en un objeto de features, y ese objeto es el que tipa todo lo demás. `DataTable.tsx` lo declara a nivel de módulo y lo exporta, porque las pantallas lo necesitan para tipar sus columnas:
 
 ```ts
-declare module '@tanstack/react-table' {
-    interface ColumnMeta<TData extends RowData, TValue> {
-        /** Alineación del header y de las celdas. Por defecto 'left'. */
-        align?: 'left' | 'center' | 'right'
-        /** Clases extra para el <th>. */
-        headerClassName?: string
-        /** Clases extra para el <td>. */
-        cellClassName?: string
-    }
+export const dataTableFeatures = tableFeatures({
+    rowSortingFeature,
+    sortedRowModel: createSortedRowModel(),
+    sortFns: { alphanumeric: sortFn_alphanumeric, text: sortFn_text },
+    columnMeta: metaHelper<DataTableColumnMeta>(),
+})
+```
+
+### La `meta` de columna
+
+En v8 esto se hacía con `declare module`. En v9 esa augmentación global está **desaconsejada** por la propia librería: la `meta` se tipa con `metaHelper` dentro del set de features, y así queda acotada a esta tabla en vez de a todo el proyecto.
+
+```ts
+export interface DataTableColumnMeta {
+    /** Alineación del header y de las celdas. Por defecto 'left'. */
+    align?: 'left' | 'center' | 'right'
+    /** Clases extra para el <th>. */
+    headerClassName?: string
+    /** Clases extra para el <td>. */
+    cellClassName?: string
 }
 ```
 
-Una definición de columnas queda así (ejemplo, no entra al repo):
+### Columnas
+
+Se usan los `ColumnDef` de `@tanstack/react-table` tal cual, sin envoltorio propio. Lo único que cambia frente a v8 es que el tipo lleva primero el genérico de features. Una definición de columnas queda así (ejemplo, no entra al repo):
 
 ```ts
-const columns: ColumnDef<Pesaje>[] = [
+const columns: DataTableColumns<Pesaje> = [
     {
         accessorKey: 'loteId',
         header: 'Lote ID',
@@ -90,12 +103,14 @@ const columns: ColumnDef<Pesaje>[] = [
 ]
 ```
 
+`DataTableColumns<TData>` es un alias exportado por `DataTable.tsx` sobre `ColumnDef<typeof dataTableFeatures, TData, any>[]`, para que la pantalla no escriba el genérico de features a mano.
+
 ### Props del componente
 
 ```ts
 interface DataTableProps<TData> {
     data: TData[]
-    columns: ColumnDef<TData, any>[]
+    columns: DataTableColumns<TData>
     /** Id estable de fila. Sin esto, react-table usa el índice del array. */
     getRowId?: (row: TData) => string
     /** Vuelve las filas clickeables: cursor, hover, foco y Enter/Espacio. */
@@ -111,7 +126,7 @@ interface DataTableProps<TData> {
 }
 ```
 
-`columns` y `SortingState` se importan de `@tanstack/react-table`; el consumidor no aprende un tipo nuevo.
+`SortingState` se importa de `@tanstack/react-table`; el único tipo propio que aprende el consumidor es `DataTableColumns<TData>`, que es un alias sobre `ColumnDef`.
 
 ---
 
@@ -120,20 +135,20 @@ interface DataTableProps<TData> {
 Cada paso deja el proyecto compilando y la suite en verde.
 
 1. **Instalar las dependencias.**
-   - `npm i @tanstack/react-table` (línea v8, la compatible con React 19).
+   - `npm i @tanstack/react-table` — instala la v9, que declara `react: ">=18"`.
    - `npx shadcn@latest add table` — deja `src/components/ui/table.tsx` con `Table`, `TableHeader`, `TableBody`, `TableRow`, `TableHead`, `TableCell`, `TableCaption`. El archivo **no se toca**: sus clases neutras se sobreescriben desde el `DataTable` por `className`.
    Verificación: `npx tsc --noEmit` pasa y `src/components/ui/table.tsx` existe.
 
-2. **Crear `src/presentation/components/shared/table/DataTable.tsx` con el camino mínimo.** Genérico `<TData>`, la augmentación de `ColumnMeta`, `useReactTable` con `getCoreRowModel`, `getRowId` opcional, y el render de header y filas con `flexRender` sobre las primitivas de shadcn. Sin orden, sin click, sin vacío todavía.
+2. **Crear `src/presentation/components/shared/table/DataTable.tsx` con el camino mínimo.** El set `dataTableFeatures` a nivel de módulo (por ahora solo con `columnMeta: metaHelper<DataTableColumnMeta>()`), el alias `DataTableColumns<TData>`, el componente genérico `<TData>`, `useTable({ features, columns, data, getRowId })` y el render de header y filas con `<table.FlexRender>` sobre las primitivas de shadcn. Sin orden, sin click, sin vacío todavía.
    Verificación: `npx tsc --noEmit` pasa.
 
 3. **Aplicar la identidad visual.** Contenedor `bg-surface rounded-3xl border border-border-ui shadow-clay-card overflow-hidden`; header en `text-xs font-bold uppercase tracking-wider text-text-muted` sobre `bg-bg-app`; celdas en `text-sm text-text-main`; separadores con `divide-y divide-border-ui`; hover de fila sutil. Solo tokens semánticos: **ningún** `slate-*`, `white` ni `indigo-*` crudo. La alineación sale de `column.columnDef.meta.align`, resuelta con un mapa `{ left, center, right }`, más `headerClassName` / `cellClassName` si vienen.
    Verificación: `npm run dev`, montar la tabla con datos de prueba y alternar el tema; nada queda ilegible en oscuro.
 
-4. **Header pegajoso y scroll horizontal.** El `<table>` va dentro de un `div` con `overflow-auto` y el `maxHeight` recibido (por defecto sin límite); el `<thead>` lleva `sticky top-0 z-10` con fondo opaco propio — sin fondo opaco, las filas se ven **a través** del header al scrollear.
+4. **Header pegajoso y scroll horizontal.** La primitiva `Table` ya se envuelve sola en un `div[data-slot=table-container]` con `overflow-x-auto`, que es el contenedor de scroll real; lo único que le falta es el alto máximo. El `DataTable` se lo aplica desde su propio wrapper con una variante arbitraria sobre ese slot, sin editar la primitiva. El `<thead>` lleva `sticky top-0 z-10` con fondo opaco propio — sin fondo opaco, las filas se ven **a través** del header al scrollear.
    Verificación: manual, con veinte filas y `maxHeight="24rem"`: el header queda fijo y no se transparenta.
 
-5. **Ordenamiento.** `getSortedRowModel`, `useState<SortingState>(defaultSorting ?? [])` y `onSortingChange`. En las columnas con orden habilitado, el contenido del `<th>` es un `<button>` con el título y un ícono de lucide (`ChevronUp` / `ChevronDown` / `ChevronsUpDown` cuando no hay orden). El `<th>` lleva `aria-sort` con `ascending` / `descending` / `none`. Las columnas sin orden se pintan como texto plano, sin botón ni cursor.
+5. **Ordenamiento.** Se suman al set de features `rowSortingFeature`, `sortedRowModel: createSortedRowModel()` y las `sortFns` que se usen. El estado arranca por `initialState: { sorting: defaultSorting }` y lo administra la tabla: en v9 `initialState.<slice>` es el mecanismo previsto para un estado interno con valor inicial, sin `useState` ni `onSortingChange`. En las columnas con orden habilitado, el contenido del `<th>` es un `<button>` con el título y un ícono de lucide (`ChevronUp` / `ChevronDown` / `ChevronsUpDown` cuando no hay orden), cableado a `column.getToggleSortingHandler()`. El `<th>` lleva `aria-sort` derivado de `column.getIsSorted()`. Las columnas sin orden (`column.getCanSort()` falso) se pintan como texto plano, sin botón ni cursor.
    Verificación: click en un header ordena asc, el segundo desc, el tercero vuelve al orden original.
 
 6. **Fila clickeable.** Con `onRowClick`, cada `<TableRow>` recibe `onClick`, `tabIndex={0}`, `role="button"`, `cursor-pointer` y un `onKeyDown` que dispara con Enter y Espacio (con `preventDefault` en Espacio, que si no scrollea la página). Sin `onRowClick`, la fila no recibe nada de eso: ni `tabIndex`, ni `role`, ni cursor.
@@ -188,10 +203,16 @@ Cada paso deja el proyecto compilando y la suite en verde.
 ## Decisiones
 
 - **Sí:** `@tanstack/react-table` como motor. Decisión del usuario. Es el camino oficial de shadcn para data-table y encaja con el stack, que ya es TanStack de punta a punta; el ordenamiento y los modelos de fila vienen probados en vez de escritos y testeados acá.
-- **No:** una tabla propia sin dependencias. Ahorra ~14kb y termina reimplementando `getSortedRowModel` con peor cobertura.
+- **No:** una tabla propia sin dependencias. Ahorra ~14kb y termina reimplementando el modelo de filas ordenadas con peor cobertura.
+- **Sí:** v9, no v8. Decisión del usuario, tomada durante la implementación: el spec se escribió asumiendo v8 y `npm i` instaló la 9.2.4. v9 es la línea que recibe soporte, declara `react: ">=18"` y trae skills oficiales para agentes dentro del paquete. Se paga con menos ejemplos dando vueltas: los data-table de shadcn que circulan siguen siendo de v8.
+- **No:** fijar `@tanstack/react-table@^8`. Entrar con una línea que ya tiene sucesora deja la migración pendiente desde el día uno, para un componente que recién nace.
+- **Sí:** la `meta` de columna se tipa con `metaHelper` dentro del set de features. Es lo que v9 indica explícitamente, y mantiene el tipo acotado a esta tabla.
+- **No:** la augmentación global `declare module '@tanstack/table-core'`. Era el camino de v8 y la propia librería lo marca como error en v9: ensucia el tipo de cualquier otra tabla del proyecto.
+- **Sí:** el orden interno arranca con `initialState: { sorting }`. En v9 esa es la forma prevista de un estado que la tabla administra con un valor inicial; `state` + `on[State]Change` es para estado controlado desde afuera, que este spec descartó.
 - **Sí:** API encapsulada, `data` + `columns`. Decisión del usuario. El `useReactTable` vive dentro del componente y la pantalla solo declara columnas; el boilerplate no se repite en cada consumidor.
 - **No:** recibir la instancia `table` ya creada. Es más flexible, pero obliga a montar el hook y los row models en cada pantalla para un caso que todavía no existe. El día que una pantalla necesite agrupar o filtrar del lado de react-table, se agrega el escape hatch entonces.
-- **Sí:** `ColumnDef` de la librería tal cual, sin un tipo `Column<T>` propio. Un envoltorio propio obliga a mantener una traducción y a documentar por qué la del upstream no sirve. Lo único que se agrega es `meta`, que es el punto de extensión que la librería ya provee.
+- **Sí:** `ColumnDef` de la librería tal cual, sin un tipo `Column<T>` propio. Un envoltorio propio obliga a mantener una traducción y a documentar por qué la del upstream no sirve. Lo único que se agrega es `meta`, que es el punto de extensión que la librería ya provee. `DataTableColumns<TData>` no es un tipo nuevo: es un alias que ahorra repetir el genérico de features.
+- **No:** un `createTableHook` propio que envuelva features, hook y componentes. Es más prolijo en el punto de uso, pero agrega una capa de API que este spec no contempla.
 - **Sí:** la primitiva `table.tsx` se instala con el CLI y no se toca. Decisión del usuario. Es la regla de `CLAUDE.md`, y deja el archivo actualizable con un `shadcn add` futuro.
 - **Sí:** los tokens del proyecto se aplican por `className` desde `DataTable.tsx`. Es la única forma de tener el look correcto sin editar la primitiva, y concentra la apariencia de todas las tablas de la app en un archivo.
 - **Sí:** una sola apariencia, sin variantes. Decisión del usuario. El punto de tener una tabla común es que todas se vean iguales; una prop `density` o `zebra` es la puerta para que cada pantalla se vea distinta.
@@ -218,9 +239,9 @@ Cada paso deja el proyecto compilando y la suite en verde.
 | --- | --- |
 | El componente entra sin ningún consumidor: código no ejercitado en producción, y una API diseñada contra casos imaginados. | Los tests del paso 8 lo cubren, y las columnas del historial —badge por estado, peso formateado, celda de dos líneas, fila teñida— fueron el caso real contra el que se dimensionó la API. Aun así, la primera migración real es la que va a decir si la `meta` alcanza. |
 | El `<thead>` pegajoso se transparenta y las filas se ven a través. | El paso 4 le pone fondo opaco propio (`bg-bg-app`), no heredado del contenedor, y hay un criterio de aceptación específico. |
-| La augmentación de `ColumnMeta` es global: afecta a cualquier uso futuro de react-table en el proyecto. | Es el mecanismo previsto por la librería y hay un solo lugar donde se declara (`DataTable.tsx`). Si aparece un segundo consumidor con otras necesidades, la `meta` crece ahí, no se duplica. |
+| La `meta` de columna queda atada al set `dataTableFeatures`: una segunda tabla del proyecto con otras necesidades tendría que compartir ese tipo o declarar su propio set. | Es el diseño de v9 y es preferible al problema inverso de v8, donde la augmentación global contaminaba cualquier tabla. Con un solo `DataTable` en el proyecto, la `meta` crece en su archivo. |
 | Las clases de la primitiva de shadcn (`bg-muted`, `text-muted-foreground`) apuntan a variables que este proyecto no define, así que caen a un valor vacío o heredado. | El `DataTable` pasa `className` con los tokens del proyecto en cada slot, y `tailwind-merge` (ya instalado) resuelve el conflicto a favor del último. El criterio de dark mode es lo que verifica que ninguna clase quedó sin sobreescribir. |
-| `@tanstack/react-table` v8 y React 19: el `package.json` de la librería podría marcar un peer dependency viejo. | La v8.21 declara soporte de React 19. Si `npm i` reclama peers, se resuelve en el paso 1 —que es el primero— antes de escribir una línea del componente. |
+| v9 es reciente: los ejemplos de data-table de shadcn que circulan son de v8 (`useReactTable`, `getCoreRowModel`, `flexRender`), y copiar uno produce código que no compila. | El paquete trae skills oficiales en `node_modules/@tanstack/react-table/skills/` y `node_modules/@tanstack/table-core/skills/`, incluida `migrate-v8-to-v9`. Son la referencia al tocar este componente, por encima de cualquier ejemplo de internet. |
 | Sin virtualización, una tabla de miles de filas monta miles de `<tr>` y traba la pestaña. | Hoy no hay endpoint que devuelva esos volúmenes de una vez. Cuando lo haya, el problema real es la paginación de servidor, que ya está anotada como spec futuro. |
 
 ---
