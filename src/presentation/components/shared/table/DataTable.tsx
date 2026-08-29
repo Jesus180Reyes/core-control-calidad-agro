@@ -21,6 +21,7 @@ import {
     TableRow,
 } from '@/components/ui/table'
 import { cn } from '@/lib/utils'
+import { EmptyState } from '#/presentation/components/shared/EmptyState'
 
 /**
  * Lo que una columna puede pedirle a la tabla más allá de su contenido.
@@ -90,6 +91,9 @@ interface DataTableProps<TData extends RowData> {
     onRowClick?: (row: TData) => void
     /** Orden inicial. El estado vive dentro del componente. */
     defaultSorting?: SortingState
+    /** Texto del estado vacío. */
+    emptyTitle?: string
+    emptyDescription?: string
     /** Alto máximo del área scrolleable; es lo que activa el header pegajoso. */
     maxHeight?: string
     className?: string
@@ -101,6 +105,8 @@ export function DataTable<TData extends RowData>({
     getRowId,
     onRowClick,
     defaultSorting,
+    emptyTitle = 'No hay registros',
+    emptyDescription,
     maxHeight,
     className,
 }: DataTableProps<TData>) {
@@ -123,6 +129,8 @@ export function DataTable<TData extends RowData>({
         // Tercer click sobre el header: vuelve al orden original.
         enableSortingRemoval: true,
     })
+
+    const rows = table.getRowModel().rows
 
     return (
         <div
@@ -202,7 +210,26 @@ export function DataTable<TData extends RowData>({
                 </TableHeader>
 
                 <TableBody className="divide-y divide-border-ui">
-                    {table.getRowModel().rows.map((row) => (
+                    {rows.length === 0 && (
+                        <TableRow className="border-0 hover:bg-transparent">
+                            {/* El header se sigue pintando: sin encabezados,
+                                nadie sabe qué es lo que está vacío. */}
+                            <TableCell
+                                colSpan={table.getAllLeafColumns().length}
+                                className="p-0 whitespace-normal"
+                            >
+                                <EmptyState
+                                    title={emptyTitle}
+                                    description={emptyDescription}
+                                    // La card ya tiene su borde: adentro, el
+                                    // recuadro punteado sería un marco doble.
+                                    className="border-0"
+                                />
+                            </TableCell>
+                        </TableRow>
+                    )}
+
+                    {rows.map((row) => (
                         <TableRow
                             key={row.id}
                             // Sin `role="button"`: pisaría el rol implícito de
