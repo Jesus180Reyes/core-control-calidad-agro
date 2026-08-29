@@ -64,7 +64,7 @@ export function Sidebar() {
 
         {
             label: 'Clientes',
-            to: '/prueba',
+            to: '/inspeccion-clientes',
             permission: PERMISSIONS.MODULOCLIENTES,
             icon: (
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2.2} viewBox="0 0 24 24">
