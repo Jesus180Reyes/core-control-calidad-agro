@@ -5,9 +5,11 @@ import { useNavigate } from '@tanstack/react-router'
 
 import { useExecuteMutation } from '#/presentation/hooks/shared/useExecuteMutation'
 import { useAuth } from '#/presentation/hooks/auth/useAuth'
+import { guardarPermisos } from '#/presentation/hooks/auth/almacenamientoSesion'
 import { loginSchema, type LoginFormValues } from '#/presentation/hooks/auth/loginSchema'
-import { esDeRed, esHttpError, esTimeout, mensajeDelServidor } from '#/infrastructure/http/http-client'
-import type { LoginResponse } from '#/presentation/types/auth/auth.types'
+import { esDeRed, esHttpError, esTimeout, httpGet, mensajeDelServidor } from '#/infrastructure/http/http-client'
+import type { LoginResponse, PermisosResponse } from '#/presentation/types/auth/auth.types'
+import { advertirPermisosDesconocidos } from '#/presentation/types/auth/permissions'
 
 interface UseLoginResult {
     control: Control<LoginFormValues>
@@ -40,6 +42,7 @@ export function useLogin(): UseLoginResult {
     const { iniciarSesion } = useAuth()
     const [verPassword, setVerPassword] = useState(false)
     const [errorLogin, setErrorLogin] = useState<string | null>(null)
+    const [cargandoPermisos, setCargandoPermisos] = useState(false)
 
     const { control, handleSubmit } = useForm<LoginFormValues>({
         resolver: zodResolver(loginSchema),
@@ -48,15 +51,28 @@ export function useLogin(): UseLoginResult {
     })
 
     const mutation = useExecuteMutation<LoginResponse, LoginFormValues>('/auth/login', {
-        onSuccess: (data) => {
+        onSuccess: async (data) => {
             if (!iniciarSesion(data)) {
                 setErrorLogin('No se pudo iniciar sesión. Intentá de nuevo.')
                 return
             }
+
+            // Después de `iniciarSesion`: el `Bearer` lo inyecta el interceptor
+            // leyendo el token de `localStorage`, que recién ahora existe.
+            setCargandoPermisos(true)
+            try {
+                const respuesta = await httpGet<PermisosResponse>('/permisos/me')
+                advertirPermisosDesconocidos(respuesta.permisos)
+                guardarPermisos(respuesta.permisos)
+            } catch {
+                // Un fallo acá no bloquea la entrada: se sigue con `permisos: []`.
+            } finally {
+                setCargandoPermisos(false)
+            }
+
             navigate({ to: '/' })
         },
         onError: (error) => {
-            console.log(error);
             setErrorLogin(derivarErrorLogin(error))
         },
     })
@@ -69,7 +85,7 @@ export function useLogin(): UseLoginResult {
     return {
         control,
         onSubmit,
-        enviando: mutation.isPending,
+        enviando: mutation.isPending || cargandoPermisos,
         errorLogin,
         verPassword,
         alternarVerPassword: () => setVerPassword((valor) => !valor),

@@ -1,6 +1,6 @@
 # SPEC 07 — Permisos del usuario
 
-> **Estado:** Approved
+> **Estado:** Implemented
 > **Depende de:** SPEC 02, SPEC 06
 > **Fecha:** 2026-08-29
 > **Objetivo:** Pedir `GET /permisos/me` inmediatamente después de un login correcto, persistir la lista devuelta junto a la sesión y exponer un catálogo tipado (`PERMISSIONS`) con un hook `usePermissions` y un componente `<Can>`, sin que todavía ninguna pantalla cambie de comportamiento.
@@ -223,8 +223,8 @@ Cada paso deja el proyecto compilando y la suite en verde.
 
 ## Criterios de aceptación
 
-- [ ] `npx tsc --noEmit` pasa sin errores.
-- [ ] `npx vitest run` pasa completo, incluido `usePermissions.test.tsx`.
+- [X] `npx tsc --noEmit` pasa sin errores.
+- [X] `npx vitest run` pasa completo, incluido `usePermissions.test.tsx`.
 - [ ] Un login correcto dispara `GET /permisos/me` **después** de `POST /auth/login`, con el header `Authorization: Bearer <token>` del token recién emitido (verificable en Network).
 - [ ] Tras el login, `localStorage` tiene `auth_permisos` con `["clientes.listar","lotes.crear"]`.
 - [ ] Mientras `/permisos/me` está en vuelo, el botón del login sigue deshabilitado y diciendo "Ingresando…".
