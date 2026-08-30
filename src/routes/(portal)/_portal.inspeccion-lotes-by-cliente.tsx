@@ -26,6 +26,7 @@ function RouteComponent() {
     return (
         <div className="space-y-8">
             <ClientesHeader
+                backTo="/inspeccion-clientes"
                 titulo="Lotes registrados"
                 descripcion={
                     cliente
