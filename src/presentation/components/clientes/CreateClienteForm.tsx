@@ -1,4 +1,4 @@
-import { useFormContext, type SubmitHandler } from 'react-hook-form'
+import { useFormContext } from 'react-hook-form'
 import { ControlledInput } from '#/presentation/components/shared/inputs/ControlledInput'
 import { ControlledMultiSelector } from '#/presentation/components/shared/inputs/ControlledMultiSelector'
 import { ControlledSelector } from '#/presentation/components/shared/inputs/ControlledSelector'

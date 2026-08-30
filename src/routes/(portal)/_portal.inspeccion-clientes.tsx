@@ -1,4 +1,4 @@
-import { Suspense, useState } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
 import { Plus } from 'lucide-react'
 
@@ -26,21 +26,25 @@ function RouteComponent() {
         resolver: zodResolver(createClienteSchema),
     });
 
-    const { mutateAsync: crearCliente, isPending } = useCrearCliente();
+    const { mutate: crearCliente, isPending, isSuccess } = useCrearCliente();
 
     const handleOpenChange = (open: boolean) => {
         setDialogoCrearAbierto(open)
         if (!open) form.reset();
     }
 
+    useEffect(() => {
+        if (isSuccess) handleOpenChange(false)
+    }, [isSuccess])
+
     const onSuccess: SubmitHandler<CreateClienteSchema> = (data) => {
-        handleOpenChange(false);
         crearCliente(data);
     }
 
     const onError: SubmitErrorHandler<CreateClienteSchema> = (errors) => {
         console.error("Errores de validación:", errors);
     }
+
 
     return (
         <div className="space-y-8">

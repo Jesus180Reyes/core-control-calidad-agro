@@ -11,7 +11,7 @@ export function useCrearCliente() {
             queryClient.invalidateQueries({ queryKey: ['clientes'] })
         },
         onError(error) {
-            toast.error(`Error al crear cliente: ${error.message}`)
+            toast.error(error.message)
         },
     })
 
