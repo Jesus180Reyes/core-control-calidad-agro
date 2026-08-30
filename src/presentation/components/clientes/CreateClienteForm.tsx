@@ -81,7 +81,7 @@ export function CreateClienteForm() {
             <ControlledMultiSelector
                 control={control}
                 name="usuario_ids"
-                label="Usuarios vinculados"
+                label="Usuarios vinculados a este cliente"
                 placeholder="Elegí uno o más usuarios"
                 searchPlaceholder="Buscar usuario..."
                 emptyMessage="Sin usuarios"
