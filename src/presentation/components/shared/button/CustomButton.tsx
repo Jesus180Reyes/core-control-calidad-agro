@@ -6,6 +6,8 @@ interface CustomButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
     variant?: ButtonVariant
     isLoading?: boolean
     icon?: ReactNode
+    /** Por defecto ocupa todo el ancho; en `false` se ajusta a su contenido. */
+    fullWidth?: boolean
     children: ReactNode
 }
 
@@ -13,13 +15,14 @@ export function CustomButton({
     variant = 'primary',
     isLoading = false,
     icon,
+    fullWidth = true,
     children,
     className = '',
     disabled,
     ...props
 }: CustomButtonProps) {
 
-    const baseStyles = "w-full font-bold rounded-2xl flex items-center justify-center gap-3 transition-all active:scale-[0.98] cursor-pointer disabled:cursor-not-allowed disabled:active:scale-100"
+    const baseStyles = `${fullWidth ? 'w-full' : 'w-auto px-5'} font-bold rounded-2xl flex items-center justify-center gap-3 transition-all active:scale-[0.98] cursor-pointer disabled:cursor-not-allowed disabled:active:scale-100`
 
     const variantStyles: Record<ButtonVariant, string> = {
         primary: "bg-[#3F3FD4] hover:bg-[#3434B8] text-white py-4.5 lg:py-5 text-sm lg:text-base shadow-lg shadow-blue-500/10 dark:shadow-none disabled:bg-slate-100 dark:disabled:bg-zinc-800 disabled:text-slate-400 dark:disabled:text-zinc-600",
