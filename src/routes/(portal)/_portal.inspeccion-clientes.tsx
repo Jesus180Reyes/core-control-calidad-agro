@@ -25,10 +25,14 @@ function RouteComponent() {
         resolver: zodResolver(createClienteSchema),
     });
 
+    const handleOpenChange = (open: boolean) => {
+        setDialogoCrearAbierto(open)
+        if (!open) form.reset()
+    }
+
     const onSuccess: SubmitHandler<CreateClienteSchema> = (data) => {
         console.log("Cliente creado:", data)
-        setDialogoCrearAbierto(false)
-        form.reset()
+        handleOpenChange(false)
     }
 
     const onError: SubmitErrorHandler<CreateClienteSchema> = (errors) => {
@@ -57,7 +61,7 @@ function RouteComponent() {
 
             <CustomDialog
                 open={dialogoCrearAbierto}
-                onOpenChange={setDialogoCrearAbierto}
+                onOpenChange={handleOpenChange}
                 title="Nuevo cliente"
                 description="Completá los datos del cliente para darlo de alta."
                 size="lg"
@@ -66,7 +70,7 @@ function RouteComponent() {
                         <CustomButton
                             variant="secondary"
                             fullWidth={false}
-                            onClick={() => setDialogoCrearAbierto(false)}
+                            onClick={() => handleOpenChange(false)}
                         >
                             Cancelar
                         </CustomButton>
