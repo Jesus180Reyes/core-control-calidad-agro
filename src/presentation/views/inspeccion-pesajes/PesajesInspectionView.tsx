@@ -1,4 +1,5 @@
 import { cn } from '#/lib/utils'
+import { PesajeRowActions } from '#/presentation/components/inspeccion-pesajes/PesajeRowActions'
 import {
     DataTable,
     type DataTableColumns,
@@ -51,11 +52,23 @@ function EstadoCalidad({ pesaje }: { pesaje: PesajeData }) {
 function crearColumnas(): DataTableColumns<PesajeData> {
     return [
         {
+            id: 'acciones',
+            header: 'Acciones',
+            meta: { align: 'center', cellClassName: 'py-2' },
+            cell: ({ row }) => <PesajeRowActions pesaje={row.original} />,
+        },
+        {
             accessorKey: 'created_at',
             header: 'Fecha creacion Pesaje',
             enableSorting: true,
             meta: { cellClassName: 'font-bold whitespace-nowrap' },
             cell: ({ row }) => formatDate(row.original.created_at),
+        },
+        {
+            accessorKey: 'id',
+            header: 'ID',
+            enableSorting: true,
+            meta: { align: 'right' },
         },
         {
             accessorKey: 'peso_bruto',
