@@ -41,7 +41,14 @@ Capas bajo `src/`, con alias `#/*` y `@/*` apuntando ambos a `src/` (`#/` es el 
 
 Varios hooks de dominio (`useControlCalidad`, `useParametros`) todavía devuelven datos mock en `useState`; al conectarlos al backend, reemplazar solo el interior del hook.
 
-Las notificaciones van por `sonner` (`toast.success` / `toast.error`), con el `<Toaster />` montado en `__root.tsx` dentro del `ThemeProvider`. Una mutación reporta su resultado por el toast, no por el `ErrorBoundary`, y el texto del error se deriva con los helpers de `http-errors.ts` (ver `derivarErrorPesaje` en `usePesajes`).
+Las notificaciones van por `sonner` (`toast.success` / `toast.error`), con el `<Toaster />` montado en `__root.tsx` dentro del `ThemeProvider`. Una mutación reporta su resultado por el toast, no por el `ErrorBoundary`.
+
+El **toast de éxito lo escribe cada hook**; el **de error sale solo**. Los `useExecute*Mutation` traen el `onError` puesto (`shared/errorToast.ts`), porque en planta un guardado que falló y no avisó nada se descubre al cerrar el turno. No hay nada que configurar: la regla es la ausencia del callback.
+
+- Un hook **sin `onError`** recibe el toast, con el texto que ya trae el error (ver `HttpError` más abajo). No hay que escribir un `onError` para avisar de un fallo, ni llamar a `mensajeDeError`: `useCrearCliente` y `usePesajes` sólo declaran su `onSuccess`.
+- Un hook **con `onError`** está diciendo que del error se encarga él, y el toast no sale. Es el caso de `useLogin`, que lo pinta dentro del formulario en vez de flotando.
+
+Una `RequestCancelado` no toastea: cancelar al desmontar la pantalla no es un fallo que el operario tenga que ver.
 
 ### Cliente HTTP
 
@@ -50,6 +57,8 @@ Las notificaciones van por `sonner` (`toast.success` / `toast.error`), con el `<
 **`core/`** — el núcleo puro.
 
 - `http-errors.ts` — jerarquía con raíz `ErrorHttpBase`: `HttpError` (`status`, `body`), `NetworkError`, `TimeoutError`, `RequestCancelado`. Más los helpers `esHttpError`/`esDeRed`/`esTimeout`/`esNoAutorizado`/... Discriminar siempre con ellos, nunca por descarte. `esReintentable` es la **única** definición de qué se reintenta (red, timeout, 408, 429, 5xx) y la consume `query-client.ts`. `mensajeDelServidor(body)` cubre las dos formas del backend: el `message` string, y el objeto con el array de errores de Zod, que aplana a una línea por campo (`• lote_id: Required`).
+
+  Todo error del cliente nace con un `message` **ya presentable**, y es lo que hace innecesario derivarlo en la capa de presentación. `HttpError` lo resuelve en su constructor: el `message` del backend → el texto por status de `MENSAJES_POR_STATUS` (o el genérico de 5xx) → recién ahí el `"400 Bad Request"` técnico, que además queda siempre en `mensajeTecnico` para los logs. Los otros tres ya lo traen de `traducirFallo`. Por eso `mensajeDeError(error, respaldo)` es un `instanceof ErrorHttpBase` y nada más —su trabajo es no filtrar el mensaje de un error ajeno, un `TypeError` del propio front, a la pantalla del operario—; si hay que mejorar un texto, se mejora acá y lo ve toda la app. En una mutación no hay que llamarlo: lo llama el toast automático (ver arriba).
 - `query-params.ts` — armado de la URL. Arrays como clave repetida (`ids=1&ids=2`), `Date` a ISO, `undefined`/`null` omitidos, `''` sí se manda. Un endpoint absoluto (`https://...`) ignora la base.
 - `config-http.ts` — `BASE_URL` y `TIMEOUT_POR_DEFECTO_MS`. El **único** lugar donde se lee `import.meta.env`.
 - `create-http-client.ts` — `createHttpClient(config)`: `baseUrl`, `timeoutMs` (sobreescribible por petición y combinado con el `signal` de quien llama), `fetch` inyectable, e interceptores `onPeticion`/`onRespuesta`/`onError` que observan y mutan el contexto pero **nunca** cortocircuitan. No reintenta ni sabe del 401: de los reintentos por error se encarga TanStack Query, y del 401 la fachada. La opción `parsear: 'json' | 'blob'` elige el transporte.

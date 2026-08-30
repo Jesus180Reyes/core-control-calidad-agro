@@ -1,5 +1,6 @@
 import { useMutation, type UseMutationOptions } from '@tanstack/react-query'
 import { httpRequest, type HttpMethod } from '#/infrastructure/http/http-client'
+import { withErrorToast } from '#/presentation/hooks/shared/errorToast'
 
 type UseExecuteMutationOptions<TData, TVariables> = Omit<
   UseMutationOptions<TData, Error, TVariables>,
@@ -22,5 +23,6 @@ export function useExecuteMutation<TData, TVariables = void>(
       return httpRequest<TData>(url, { method, body: variables, headers })
     },
     ...mutationOptions,
+    onError: withErrorToast(mutationOptions.onError),
   })
 }

@@ -10,15 +10,26 @@
 /** Raíz común de todos los errores del cliente. */
 export abstract class ErrorHttpBase extends Error {}
 
-/** El servidor respondió con un status fuera de 2xx. */
+/**
+ * El servidor respondió con un status fuera de 2xx.
+ *
+ * El `message` es el texto que manda el backend en el body (`"El codigo de
+ * exportacion 'X' ya esta registrado"`), no el `"400 Bad Request"` del status:
+ * derivarlo acá es lo que evita que cada hook repita su propio
+ * `mensajeDelServidor(error.body) ?? ...` para poder pintar un toast útil. El
+ * técnico queda en `mensajeTecnico` para los logs.
+ */
 export class HttpError extends ErrorHttpBase {
+  public readonly mensajeTecnico: string
+
   constructor(
     message: string,
     public readonly status: number,
     public readonly body: unknown,
   ) {
-    super(message)
+    super(mensajeLegible(status, body, message))
     this.name = 'HttpError'
+    this.mensajeTecnico = message
   }
 }
 
@@ -142,4 +153,38 @@ export function mensajeDelServidor(body: unknown): string | null {
   if (!errores || errores.length === 0) return null
 
   return errores.map(formatearError).join('\n')
+}
+
+/**
+ * Último recurso cuando el backend no manda `message`: al operario "400 Bad
+ * Request" no le dice nada. Sólo los statuses que la app puede recibir; el
+ * resto cae al texto técnico, que al menos es rastreable.
+ */
+const MENSAJES_POR_STATUS: Record<number, string> = {
+  400: 'La petición tiene datos inválidos.',
+  401: 'Tu sesión expiró. Volvé a iniciar sesión.',
+  403: 'No tenés permiso para esta operación.',
+  404: 'No se encontró lo que buscabas.',
+  409: 'El dato que intentás guardar ya existe.',
+  422: 'Los datos enviados no son válidos.',
+  429: 'Demasiadas peticiones. Esperá un momento.',
+}
+
+function mensajeLegible(status: number, body: unknown, mensajeTecnico: string): string {
+  return (
+    mensajeDelServidor(body) ??
+    MENSAJES_POR_STATUS[status] ??
+    (status >= 500 ? 'El servidor tuvo un error. Intentá de nuevo.' : mensajeTecnico)
+  )
+}
+
+/**
+ * El texto que se le muestra al usuario ante cualquier fallo de una mutación.
+ *
+ * Los cuatro errores del cliente ya traen su `message` en español y listo para
+ * mostrar, así que el trabajo real es no filtrar el mensaje de un error ajeno
+ * —un `TypeError` del propio front— a la pantalla del operario.
+ */
+export function mensajeDeError(error: unknown, respaldo = 'Ocurrió un error inesperado.'): string {
+  return error instanceof ErrorHttpBase && error.message.length > 0 ? error.message : respaldo
 }

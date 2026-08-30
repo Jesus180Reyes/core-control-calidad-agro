@@ -1,6 +1,7 @@
 import { useMutation, type UseMutationOptions } from '@tanstack/react-query'
 import { httpRequest, type HttpMethod } from '#/infrastructure/http/http-client'
 import { aFormData } from '#/infrastructure/http/transportes/cuerpo-multipart'
+import { withErrorToast } from '#/presentation/hooks/shared/errorToast'
 
 /**
  * Igual que `useExecuteMutation`, pero manda el cuerpo como `multipart/form-data`.
@@ -34,5 +35,6 @@ export function useExecuteFilesMutation<TData, TVariables extends Record<string,
       return httpRequest<TData>(url, { method, body: aFormData(variables), headers })
     },
     ...mutationOptions,
+    onError: withErrorToast(mutationOptions.onError),
   })
 }

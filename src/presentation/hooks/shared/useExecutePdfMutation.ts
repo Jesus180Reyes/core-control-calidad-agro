@@ -6,6 +6,7 @@ import {
   type HttpRequestOptions,
   type QueryParams,
 } from '#/infrastructure/http/http-client'
+import { withErrorToast } from '#/presentation/hooks/shared/errorToast'
 
 /**
  * Pide un documento binario —un PDF— y deja lista una object URL para abrirlo
@@ -76,6 +77,7 @@ export function useExecutePdfMutation<TVariables = void>(
       return httpRequest<Blob>(destino, peticion)
     },
     ...mutationOptions,
+    onError: withErrorToast(mutationOptions.onError),
   })
 
   const { mutateAsync } = mutation

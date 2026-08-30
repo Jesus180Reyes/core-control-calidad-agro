@@ -7,7 +7,7 @@ import { useExecuteMutation } from '#/presentation/hooks/shared/useExecuteMutati
 import { useAuth } from '#/presentation/hooks/auth/useAuth'
 import { guardarPermisos } from '#/presentation/hooks/auth/almacenamientoSesion'
 import { loginSchema, type LoginFormValues } from '#/presentation/hooks/auth/loginSchema'
-import { esDeRed, esHttpError, esTimeout, httpGet, mensajeDelServidor } from '#/infrastructure/http/http-client'
+import { httpGet, mensajeDeError } from '#/infrastructure/http/http-client'
 import type { LoginResponse, PermisosResponse } from '#/presentation/types/auth/auth.types'
 import { advertirPermisosDesconocidos } from '#/presentation/types/auth/permissions'
 
@@ -18,23 +18,6 @@ interface UseLoginResult {
     errorLogin: string | null
     verPassword: boolean
     alternarVerPassword: () => void
-}
-
-/**
- * Tres fallos distintos, tres mensajes distintos: "contraseña incorrecta"
- * cuando en realidad el backend está apagado hace perder mucho tiempo en planta.
- */
-function derivarErrorLogin(error: Error): string {
-    if (esDeRed(error) || esTimeout(error)) {
-        return 'No se pudo contactar al servidor.'
-    }
-
-    if (esHttpError(error)) {
-        return mensajeDelServidor(error.body) ?? 'El servidor no está disponible. Intentá de nuevo.'
-    }
-
-    // Un bug del propio front ya no se disfraza de problema de red.
-    return 'Ocurrió un error inesperado.'
 }
 
 export function useLogin(): UseLoginResult {
@@ -72,8 +55,10 @@ export function useLogin(): UseLoginResult {
 
             navigate({ to: '/' })
         },
+        // Con `onError` propio no sale el toast automático: el login pinta el
+        // error dentro del formulario, no flotando.
         onError: (error) => {
-            setErrorLogin(derivarErrorLogin(error))
+            setErrorLogin(mensajeDeError(error))
         },
     })
 

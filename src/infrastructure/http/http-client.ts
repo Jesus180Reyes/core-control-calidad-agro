@@ -110,6 +110,7 @@ export {
   esReintentable,
   esTimeout,
   esValidacion,
+  mensajeDeError,
   mensajeDelServidor,
 } from '#/infrastructure/http/core/http-errors'
 

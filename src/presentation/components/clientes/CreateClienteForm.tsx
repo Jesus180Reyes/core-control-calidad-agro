@@ -17,7 +17,7 @@ const PRODUCTOS = [
 
 const USUARIOS = [
     { value: 1, label: 'Usuario 1' },
-    { value: 2, label: 'Usuario 2' },
+    { value: 17, label: 'Usuario 2' },
 ]
 
 

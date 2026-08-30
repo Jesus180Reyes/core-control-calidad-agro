@@ -14,6 +14,7 @@ import { ClientInspectionView } from '#/presentation/views/inspeccion-clientes/C
 import { FormProvider, useForm, type SubmitErrorHandler, type SubmitHandler } from 'react-hook-form'
 import { createClienteSchema, type CreateClienteSchema } from '#/presentation/schema/crear-cliente/crearClienteSchema'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { useCrearCliente } from '#/presentation/hooks/clientes/useCrearCliente'
 
 export const Route = createFileRoute('/(portal)/_portal/inspeccion-clientes')({
     component: RouteComponent,
@@ -25,18 +26,20 @@ function RouteComponent() {
         resolver: zodResolver(createClienteSchema),
     });
 
+    const { mutateAsync: crearCliente, isPending } = useCrearCliente();
+
     const handleOpenChange = (open: boolean) => {
         setDialogoCrearAbierto(open)
-        if (!open) form.reset()
+        if (!open) form.reset();
     }
 
     const onSuccess: SubmitHandler<CreateClienteSchema> = (data) => {
-        console.log("Cliente creado:", data)
-        handleOpenChange(false)
+        handleOpenChange(false);
+        crearCliente(data);
     }
 
     const onError: SubmitErrorHandler<CreateClienteSchema> = (errors) => {
-        console.error("Errores de validación:", errors)
+        console.error("Errores de validación:", errors);
     }
 
     return (
@@ -74,8 +77,8 @@ function RouteComponent() {
                         >
                             Cancelar
                         </CustomButton>
-                        <CustomButton fullWidth={false} type="submit" form={CREATE_CLIENTE_FORM_ID}>
-                            Guardar cliente
+                        <CustomButton fullWidth={false} type="submit" form={CREATE_CLIENTE_FORM_ID} disabled={isPending} >
+                            {isPending ? 'Creando...' : 'Crear cliente'}
                         </CustomButton>
                     </>
                 }
