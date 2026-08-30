@@ -1,6 +1,6 @@
 # SPEC 09 — Endpoint `/clientes/all` en Inspección de clientes
 
-> **Estado:** Approved
+> **Estado:** Implemented
 > **Depende de:** SPEC 08
 > **Fecha:** 2026-08-29
 > **Objetivo:** Reemplazar el array en duro de `useClientInspection` por un `useExecuteQuery` contra `GET /clientes/all`, sin tocar la vista ni la ruta.
@@ -82,16 +82,16 @@ Un solo paso, porque es un solo archivo.
 
 ## Criterios de aceptación
 
-- [ ] `npx tsc --noEmit` pasa sin errores.
-- [ ] `npx vitest run` pasa completo, sin tests nuevos ni tests rotos.
-- [ ] `useClientInspection.tsx` no contiene ningún dato de cliente en duro.
-- [ ] Con el backend arriba, `/inspeccion-clientes` pinta una fila por cliente devuelto por `GET /clientes/all`.
-- [ ] Mientras la petición está en vuelo, se ve el `LoadingState` con "Cargando clientes..." que ya monta la ruta.
-- [ ] Si la petición falla, la pantalla muestra el fallback del `ErrorBoundary` del layout ("No se pudo cargar la información") con su botón de reintento, y el reintento vuelve a pedir.
-- [ ] Si el backend devuelve `clientes: []`, se ve el estado vacío del `DataTable` con "No hay clientes para inspeccionar".
-- [ ] Las columnas nulas (`producto`, `codigo_exportacion`, `telefono`, `direccion_planta` en `null`) siguen pintando el guión largo del componente `Dato`.
-- [ ] `ClientInspectionView.tsx` y `_portal.inspeccion-clientes.tsx` quedan sin cambios respecto de SPEC 08.
-- [ ] `/clientes` sigue funcionando igual: `useClientes` no se toca y su caché `['clientes']` no se pisa.
+- [X] `npx tsc --noEmit` pasa sin errores.
+- [X] `npx vitest run` pasa completo, sin tests nuevos ni tests rotos.
+- [X] `useClientInspection.tsx` no contiene ningún dato de cliente en duro.
+- [X] Con el backend arriba, `/inspeccion-clientes` pinta una fila por cliente devuelto por `GET /clientes/all`.
+- [X] Mientras la petición está en vuelo, se ve el `LoadingState` con "Cargando clientes..." que ya monta la ruta.
+- [X] Si la petición falla, la pantalla muestra el fallback del `ErrorBoundary` del layout ("No se pudo cargar la información") con su botón de reintento, y el reintento vuelve a pedir.
+- [X] Si el backend devuelve `clientes: []`, se ve el estado vacío del `DataTable` con "No hay clientes para inspeccionar".
+- [X] Las columnas nulas (`producto`, `codigo_exportacion`, `telefono`, `direccion_planta` en `null`) siguen pintando el guión largo del componente `Dato`.
+- [X] `ClientInspectionView.tsx` y `_portal.inspeccion-clientes.tsx` quedan sin cambios respecto de SPEC 08.
+- [X] `/clientes` sigue funcionando igual: `useClientes` no se toca y su caché `['clientes']` no se pisa.
 
 ---
 
