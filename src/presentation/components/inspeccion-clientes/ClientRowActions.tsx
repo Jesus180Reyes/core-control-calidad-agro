@@ -16,6 +16,7 @@ import {
     PopoverTrigger,
 } from '@/components/ui/popover'
 import type { Cliente } from '#/presentation/types/clientes/clientes.types'
+import { useNavigate } from '@tanstack/react-router'
 
 interface ClientRowActionsProps {
     cliente: Cliente
@@ -24,6 +25,7 @@ interface ClientRowActionsProps {
 
 export function ClientRowActions({ cliente }: ClientRowActionsProps) {
     const [abierto, setAbierto] = useState(false);
+    const navigate = useNavigate()
 
     const actions = [
         {
@@ -34,7 +36,12 @@ export function ClientRowActions({ cliente }: ClientRowActionsProps) {
         {
             label: 'Ver lotes registrados',
             icon: Package,
-            run: () => console.log('Ver lotes', cliente.id),
+            run: () =>
+                navigate({
+                    to: '/inspeccion-lotes-by-cliente',
+                    search: { clienteId: cliente.id },
+                    state: { cliente },
+                }),
         },
         {
             label: 'Ver Reporte de Lotes',

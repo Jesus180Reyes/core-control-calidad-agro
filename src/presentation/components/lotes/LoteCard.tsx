@@ -6,7 +6,12 @@ const SIN_VARIEDAD = 'Sin variedad o talla'
 
 const CARD_STYLES = cn(
     'w-full text-left bg-surface border border-border-ui/50 rounded-[28px] p-6',
-    'shadow-clay-card space-y-5 cursor-pointer transition-all duration-200',
+    'shadow-clay-card space-y-5',
+)
+
+// Sólo cuando la card es accionable: sin `onSeleccionar` se pinta como bloque de lectura.
+const CARD_INTERACTIVE_STYLES = cn(
+    'cursor-pointer transition-all duration-200',
     'hover:-translate-y-0.5 hover:border-indigo-200 dark:hover:border-indigo-900/50',
     'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600',
 )
@@ -22,13 +27,13 @@ const BADGE_STYLES = cn(
 
 interface LoteCardProps {
     lote: Lote
-    onSeleccionar: (lote: Lote) => void
+    /** Si no se pasa, la card es sólo de lectura (no es un botón). */
+    onSeleccionar?: (lote: Lote) => void
 }
 
 export function LoteCard({ lote, onSeleccionar }: LoteCardProps) {
-
-    return (
-        <button type="button" onClick={() => onSeleccionar(lote)} className={CARD_STYLES}>
+    const contenido = (
+        <>
             <div className="flex items-center gap-4">
                 <span className={ICON_STYLES}>
                     <Boxes className="w-5 h-5" strokeWidth={2.2} />
@@ -58,6 +63,20 @@ export function LoteCard({ lote, onSeleccionar }: LoteCardProps) {
                 <PesoReferencia etiqueta="Ideal" valor={lote.peso_ideal} unidad={lote.unidad_medida} destacado />
                 <PesoReferencia etiqueta="Máximo" valor={lote.peso_maximo} unidad={lote.unidad_medida} />
             </div>
+        </>
+    )
+
+    if (!onSeleccionar) {
+        return <div className={CARD_STYLES}>{contenido}</div>
+    }
+
+    return (
+        <button
+            type="button"
+            onClick={() => onSeleccionar(lote)}
+            className={cn(CARD_STYLES, CARD_INTERACTIVE_STYLES)}
+        >
+            {contenido}
         </button>
     )
 }
