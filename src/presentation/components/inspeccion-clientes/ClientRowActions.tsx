@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Edit, MoreHorizontal, Package, DownloadCloud } from 'lucide-react'
+import { Edit, MoreHorizontal, Package, DownloadCloud, Trash } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import {
@@ -47,6 +47,11 @@ export function ClientRowActions({ cliente }: ClientRowActionsProps) {
             label: 'Ver Reporte de Lotes',
             icon: DownloadCloud,
             run: () => console.log('Ver lotes', cliente.id),
+        },
+        {
+            label: 'Eliminar Cliente',
+            icon: Trash,
+            run: () => console.log('Eliminar cliente', cliente.id),
         },
     ]
 
