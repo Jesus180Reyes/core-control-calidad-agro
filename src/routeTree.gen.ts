@@ -13,6 +13,7 @@ import { Route as portalPortalRouteImport } from './routes/(portal)/_portal'
 import { Route as authAuthRouteImport } from './routes/(auth)/_auth'
 import { Route as portalPortalIndexRouteImport } from './routes/(portal)/_portal.index'
 import { Route as portalPortalLotesClientesRouteImport } from './routes/(portal)/_portal.lotes-clientes'
+import { Route as portalPortalInspeccionPesajesByLoteRouteImport } from './routes/(portal)/_portal.inspeccion-pesajes-by-lote'
 import { Route as portalPortalInspeccionLotesByClienteRouteImport } from './routes/(portal)/_portal.inspeccion-lotes-by-cliente'
 import { Route as portalPortalInspeccionClientesRouteImport } from './routes/(portal)/_portal.inspeccion-clientes'
 import { Route as portalPortalHistorialRouteImport } from './routes/(portal)/_portal.historial'
@@ -38,6 +39,12 @@ const portalPortalLotesClientesRoute =
   portalPortalLotesClientesRouteImport.update({
     id: '/lotes-clientes',
     path: '/lotes-clientes',
+    getParentRoute: () => portalPortalRoute,
+  } as any)
+const portalPortalInspeccionPesajesByLoteRoute =
+  portalPortalInspeccionPesajesByLoteRouteImport.update({
+    id: '/inspeccion-pesajes-by-lote',
+    path: '/inspeccion-pesajes-by-lote',
     getParentRoute: () => portalPortalRoute,
   } as any)
 const portalPortalInspeccionLotesByClienteRoute =
@@ -87,6 +94,7 @@ export interface FileRoutesByFullPath {
   '/historial': typeof portalPortalHistorialRoute
   '/inspeccion-clientes': typeof portalPortalInspeccionClientesRoute
   '/inspeccion-lotes-by-cliente': typeof portalPortalInspeccionLotesByClienteRoute
+  '/inspeccion-pesajes-by-lote': typeof portalPortalInspeccionPesajesByLoteRoute
   '/lotes-clientes': typeof portalPortalLotesClientesRoute
   '/': typeof portalPortalIndexRoute
 }
@@ -98,6 +106,7 @@ export interface FileRoutesByTo {
   '/historial': typeof portalPortalHistorialRoute
   '/inspeccion-clientes': typeof portalPortalInspeccionClientesRoute
   '/inspeccion-lotes-by-cliente': typeof portalPortalInspeccionLotesByClienteRoute
+  '/inspeccion-pesajes-by-lote': typeof portalPortalInspeccionPesajesByLoteRoute
   '/lotes-clientes': typeof portalPortalLotesClientesRoute
   '/': typeof portalPortalIndexRoute
 }
@@ -112,6 +121,7 @@ export interface FileRoutesById {
   '/(portal)/_portal/historial': typeof portalPortalHistorialRoute
   '/(portal)/_portal/inspeccion-clientes': typeof portalPortalInspeccionClientesRoute
   '/(portal)/_portal/inspeccion-lotes-by-cliente': typeof portalPortalInspeccionLotesByClienteRoute
+  '/(portal)/_portal/inspeccion-pesajes-by-lote': typeof portalPortalInspeccionPesajesByLoteRoute
   '/(portal)/_portal/lotes-clientes': typeof portalPortalLotesClientesRoute
   '/(portal)/_portal/': typeof portalPortalIndexRoute
 }
@@ -125,6 +135,7 @@ export interface FileRouteTypes {
     | '/historial'
     | '/inspeccion-clientes'
     | '/inspeccion-lotes-by-cliente'
+    | '/inspeccion-pesajes-by-lote'
     | '/lotes-clientes'
     | '/'
   fileRoutesByTo: FileRoutesByTo
@@ -136,6 +147,7 @@ export interface FileRouteTypes {
     | '/historial'
     | '/inspeccion-clientes'
     | '/inspeccion-lotes-by-cliente'
+    | '/inspeccion-pesajes-by-lote'
     | '/lotes-clientes'
     | '/'
   id:
@@ -149,6 +161,7 @@ export interface FileRouteTypes {
     | '/(portal)/_portal/historial'
     | '/(portal)/_portal/inspeccion-clientes'
     | '/(portal)/_portal/inspeccion-lotes-by-cliente'
+    | '/(portal)/_portal/inspeccion-pesajes-by-lote'
     | '/(portal)/_portal/lotes-clientes'
     | '/(portal)/_portal/'
   fileRoutesById: FileRoutesById
@@ -186,6 +199,13 @@ declare module '@tanstack/react-router' {
       path: '/lotes-clientes'
       fullPath: '/lotes-clientes'
       preLoaderRoute: typeof portalPortalLotesClientesRouteImport
+      parentRoute: typeof portalPortalRoute
+    }
+    '/(portal)/_portal/inspeccion-pesajes-by-lote': {
+      id: '/(portal)/_portal/inspeccion-pesajes-by-lote'
+      path: '/inspeccion-pesajes-by-lote'
+      fullPath: '/inspeccion-pesajes-by-lote'
+      preLoaderRoute: typeof portalPortalInspeccionPesajesByLoteRouteImport
       parentRoute: typeof portalPortalRoute
     }
     '/(portal)/_portal/inspeccion-lotes-by-cliente': {
@@ -259,6 +279,7 @@ interface portalPortalRouteChildren {
   portalPortalHistorialRoute: typeof portalPortalHistorialRoute
   portalPortalInspeccionClientesRoute: typeof portalPortalInspeccionClientesRoute
   portalPortalInspeccionLotesByClienteRoute: typeof portalPortalInspeccionLotesByClienteRoute
+  portalPortalInspeccionPesajesByLoteRoute: typeof portalPortalInspeccionPesajesByLoteRoute
   portalPortalLotesClientesRoute: typeof portalPortalLotesClientesRoute
   portalPortalIndexRoute: typeof portalPortalIndexRoute
 }
@@ -271,6 +292,8 @@ const portalPortalRouteChildren: portalPortalRouteChildren = {
   portalPortalInspeccionClientesRoute: portalPortalInspeccionClientesRoute,
   portalPortalInspeccionLotesByClienteRoute:
     portalPortalInspeccionLotesByClienteRoute,
+  portalPortalInspeccionPesajesByLoteRoute:
+    portalPortalInspeccionPesajesByLoteRoute,
   portalPortalLotesClientesRoute: portalPortalLotesClientesRoute,
   portalPortalIndexRoute: portalPortalIndexRoute,
 }
