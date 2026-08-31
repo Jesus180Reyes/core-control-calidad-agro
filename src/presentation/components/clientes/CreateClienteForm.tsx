@@ -6,19 +6,16 @@ import {
     type CreateClienteSchema,
 } from '#/presentation/schema/crear-cliente/crearClienteSchema'
 import { useGetCatalogosProductos } from '#/presentation/hooks/catalogos/useGetCatalogosProductos'
+import { useGetCatalogosUsuarios } from '#/presentation/hooks/catalogos/useGetCatalogosUsuarios'
 
 export const CREATE_CLIENTE_FORM_ID = 'form-crear-cliente'
 
 
-const USUARIOS = [
-    { value: 1, label: 'Usuario 1' },
-    { value: 17, label: 'Usuario 2' },
-]
 
 export function CreateClienteForm() {
-
     const { control } = useFormContext<CreateClienteSchema>()
     const { productos } = useGetCatalogosProductos();
+    const { usuarios } = useGetCatalogosUsuarios();
 
     return (
         <>
@@ -79,7 +76,7 @@ export function CreateClienteForm() {
                 placeholder="Elegí uno o más usuarios"
                 searchPlaceholder="Buscar usuario..."
                 emptyMessage="Sin usuarios"
-                options={USUARIOS}
+                options={usuarios.map(item => ({ value: item.id, label: item.nombre }))}
             />
         </>
     )
