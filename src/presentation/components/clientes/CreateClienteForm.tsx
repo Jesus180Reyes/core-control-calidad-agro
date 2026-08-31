@@ -5,26 +5,20 @@ import { ControlledSelector } from '#/presentation/components/shared/inputs/Cont
 import {
     type CreateClienteSchema,
 } from '#/presentation/schema/crear-cliente/crearClienteSchema'
+import { useGetCatalogosProductos } from '#/presentation/hooks/catalogos/useGetCatalogosProductos'
 
-/** Id del `<form>`: lo usa el botón de guardar, que vive fuera del formulario (en el footer del diálogo). */
 export const CREATE_CLIENTE_FORM_ID = 'form-crear-cliente'
 
-// TODO: reemplazar por los catálogos del backend.
-const PRODUCTOS = [
-    { value: '1', label: 'Producto 1' },
-    { value: '2', label: 'Producto 2' },
-]
 
 const USUARIOS = [
     { value: 1, label: 'Usuario 1' },
     { value: 17, label: 'Usuario 2' },
 ]
 
-
-
-
 export function CreateClienteForm() {
+
     const { control } = useFormContext<CreateClienteSchema>()
+    const { productos } = useGetCatalogosProductos();
 
     return (
         <>
@@ -74,7 +68,7 @@ export function CreateClienteForm() {
                 name="producto_id"
                 label="Producto"
                 placeholder="Elegí el producto"
-                options={PRODUCTOS}
+                options={productos.map(item => ({ value: item.id, label: item.nombre }))}
                 valueAsNumber
                 showSearch
             />

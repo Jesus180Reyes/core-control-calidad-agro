@@ -12,7 +12,7 @@ import {
 import { FieldError } from '#/presentation/components/shared/inputs/FieldError'
 
 interface SelectOption {
-    value: string
+    value: number
     label: string
 }
 
@@ -61,7 +61,7 @@ export function ControlledSelector<TFieldValues extends FieldValues>({
             render={({ field, fieldState: { error } }) => {
                 const idError = `${name}-error`
                 const valorActual = field.value == null ? '' : String(field.value)
-                const seleccionada = options.find((opt) => opt.value === valorActual)
+                const seleccionada = options.find((opt) => opt.value === Number(valorActual))
 
                 return (
                     // `group` habilita que label e ícono reaccionen al foco del campo.
