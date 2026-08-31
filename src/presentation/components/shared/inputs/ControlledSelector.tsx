@@ -12,7 +12,7 @@ import {
 import { FieldError } from '#/presentation/components/shared/inputs/FieldError'
 
 interface SelectOption {
-    value: number
+    value: number | string
     label: string
 }
 
@@ -60,8 +60,14 @@ export function ControlledSelector<TFieldValues extends FieldValues>({
             control={control}
             render={({ field, fieldState: { error } }) => {
                 const idError = `${name}-error`
-                const valorActual = field.value == null ? '' : String(field.value)
-                const seleccionada = options.find((opt) => opt.value === Number(valorActual))
+                // El form guarda el id como número o como string según `valueAsNumber`,
+                // pero la primitiva empareja el valor de la raíz con el del item por
+                // `Object.is`: con `'7'` contra `7` no marcaría ninguno. Por eso el
+                // valor sale de la opción encontrada, no del campo.
+                const seleccionada = field.value == null || field.value === ''
+                    ? undefined
+                    : options.find((opt) => String(opt.value) === String(field.value))
+                const valorActual = seleccionada ? String(seleccionada.value) : null
 
                 return (
                     // `group` habilita que label e ícono reaccionen al foco del campo.
@@ -174,7 +180,7 @@ export function ControlledSelector<TFieldValues extends FieldValues>({
                                 {visibles.map((opt) => (
                                     <SelectItem
                                         key={opt.value}
-                                        value={opt.value}
+                                        value={String(opt.value)}
                                         className="rounded-lg py-2 pl-3 pr-8 text-sm font-medium text-text-main transition-colors duration-150 focus:bg-brand/10 focus:text-brand data-highlighted:bg-brand/10 data-highlighted:text-brand"
                                     >
                                         {opt.label}
