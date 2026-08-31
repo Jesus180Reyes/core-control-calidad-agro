@@ -15,6 +15,7 @@ import { FormProvider, useForm, type SubmitErrorHandler, type SubmitHandler } fr
 import { createClienteSchema, type CreateClienteSchema } from '#/presentation/schema/crear-cliente/crearClienteSchema'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useCrearCliente } from '#/presentation/hooks/clientes/useCrearCliente'
+import { Can } from '#/presentation/components/shared/Can'
 
 export const Route = createFileRoute('/(portal)/_portal/inspeccion-clientes')({
     component: RouteComponent,
@@ -52,13 +53,16 @@ function RouteComponent() {
                 titulo="Inspección de clientes"
                 descripcion="Revisá los datos de cada cliente antes de habilitarlo para pesar."
                 actions={
-                    <CustomButton
-                        fullWidth={false}
-                        icon={<Plus className="size-4" />}
-                        onClick={() => setDialogoCrearAbierto(true)}
-                    >
-                        Crear Nuevo cliente
-                    </CustomButton>
+                    <Can permission='CREAR-CLIENTE-NUEVO'>
+
+                        <CustomButton
+                            fullWidth={false}
+                            icon={<Plus className="size-4" />}
+                            onClick={() => setDialogoCrearAbierto(true)}
+                        >
+                            Crear Nuevo cliente
+                        </CustomButton>
+                    </Can>
                 }
             />
 

@@ -14,6 +14,7 @@ import { CustomDialog } from '#/presentation/components/shared/dialog/CustomDial
 import { LoadingState } from '#/presentation/components/shared/LoadingState'
 import { LotesInspectionView } from '#/presentation/views/inspeccion-lotes/LotesInspectionView'
 import { createLoteSchema, type CreateLoteSchema } from '#/presentation/schema/crear-lote/crearLoteSchema'
+import { Can } from '#/presentation/components/shared/Can'
 
 export const Route = createFileRoute(
     '/(portal)/_portal/inspeccion-lotes-by-cliente',
@@ -68,13 +69,16 @@ function RouteComponent() {
                         : 'Todos los lotes del cliente, activos e inactivos.'
                 }
                 actions={
-                    <CustomButton
-                        fullWidth={false}
-                        icon={<Plus className="size-4" />}
-                        onClick={() => handleOpenChange(true)}
-                    >
-                        Crear nuevo lote
-                    </CustomButton>
+                    <Can permission='CREAR-CLIENTE-LOTE-NUEVO'>
+
+                        <CustomButton
+                            fullWidth={false}
+                            icon={<Plus className="size-4" />}
+                            onClick={() => handleOpenChange(true)}
+                        >
+                            Crear nuevo lote
+                        </CustomButton>
+                    </Can>
                 }
             />
 
