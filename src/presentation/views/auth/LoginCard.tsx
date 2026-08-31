@@ -31,6 +31,7 @@ export function LoginCard({ control, onSubmit, enviando, errorLogin, verPassword
                 />
 
                 <ControlledInput
+                    autoComplete="off"
                     name="password"
                     control={control}
                     label="Contraseña"

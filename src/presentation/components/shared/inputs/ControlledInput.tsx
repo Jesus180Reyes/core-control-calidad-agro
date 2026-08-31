@@ -15,6 +15,8 @@ interface ControlledInputProps<TFieldValues extends FieldValues> {
     uppercase?: boolean
     disabled?: boolean
     autoComplete?: string
+    /** Para campos numéricos: guarda el valor como número en vez de string. */
+    valueAsNumber?: boolean
 }
 
 export function ControlledInput<TFieldValues extends FieldValues>({
@@ -28,7 +30,8 @@ export function ControlledInput<TFieldValues extends FieldValues>({
     accionDerecha,
     uppercase = false,
     disabled = false,
-    autoComplete
+    autoComplete,
+    valueAsNumber = false
 }: ControlledInputProps<TFieldValues>) {
     return (
         <Controller
@@ -59,7 +62,18 @@ export function ControlledInput<TFieldValues extends FieldValues>({
                             )}
                             <Input
                                 {...field}
-                                onChange={(e) => field.onChange(uppercase ? e.target.value.toUpperCase() : e.target.value)}
+                                onChange={(e) => {
+                                    const valor = e.target.value
+
+                                    // El campo vacío vuelve a `undefined`: `Number('')`
+                                    // guardaría un 0 que parece un peso cargado.
+                                    if (valueAsNumber) {
+                                        field.onChange(valor === '' ? undefined : Number(valor))
+                                        return
+                                    }
+
+                                    field.onChange(uppercase ? valor.toUpperCase() : valor)
+                                }}
                                 id={name}
                                 type={type}
                                 placeholder={placeholder}
