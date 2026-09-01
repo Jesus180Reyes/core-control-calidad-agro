@@ -17,6 +17,8 @@ import {
 } from '@/components/ui/popover'
 import { RejectPesajeDialog } from '#/presentation/components/inspeccion-pesajes/RejectPesajeDialog'
 import type { PesajeData } from '#/presentation/types/pesajes/pesajesResponse'
+import { Can } from '../shared/Can'
+import { PERMISSIONS, type Permission } from '#/presentation/types/auth/permissions'
 
 interface PesajeRowActionsProps {
     pesaje: PesajeData
@@ -30,6 +32,7 @@ interface ActionsMenuItem {
     icon: LucideIcon
     /** Se ejecuta después de cerrar el menú. */
     run: () => void
+    permission?: Permission
 }
 
 interface ActionsMenuProps {
@@ -47,12 +50,14 @@ export function PesajeRowActions({ pesaje }: PesajeRowActionsProps) {
             label: 'Descargar comprobante',
             icon: DownloadCloud,
             run: () => console.log('Descargar comprobante', pesaje.id),
+
         },
         {
             action: 'RECHAZAR_PESAJE',
             label: 'Rechazar Pesaje',
             icon: Trash,
             run: () => setSelected('RECHAZAR_PESAJE'),
+            permission: PERMISSIONS.RECHAZARPESAJELOTE,
         },
     ]
 
@@ -102,17 +107,19 @@ function ActionsMenu({ items, triggerLabel }: ActionsMenuProps) {
                         </CommandEmpty>
 
                         <CommandGroup>
-                            {items.map(({ action, label, icon: Icon, run }) => (
-                                <CommandItem
-                                    key={action}
-                                    onSelect={() => {
-                                        setAbierto(false)
-                                        run()
-                                    }}
-                                >
-                                    <Icon />
-                                    {label}
-                                </CommandItem>
+                            {items.map(({ action, label, icon: Icon, run, permission }) => (
+                                <Can permission={permission}>
+                                    <CommandItem
+                                        key={action}
+                                        onSelect={() => {
+                                            setAbierto(false)
+                                            run()
+                                        }}
+                                    >
+                                        <Icon />
+                                        {label}
+                                    </CommandItem>
+                                </Can>
                             ))}
                         </CommandGroup>
                     </CommandList>
