@@ -28,6 +28,11 @@ function crearColumnas(
             ),
         },
         {
+            accessorKey: 'id',
+            header: 'ID',
+            meta: { cellClassName: 'font-bold' },
+        },
+        {
             accessorKey: 'nombre',
             header: 'Cliente',
             enableSorting: true,
