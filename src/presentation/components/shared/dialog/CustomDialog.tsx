@@ -70,7 +70,8 @@ export function CustomDialog({
                     )}
                 </DialogHeader>
 
-                <div className="max-h-[70vh] overflow-y-auto">
+                {/* El padding compensado evita que el scroll recorte el ring de foco de los inputs. */}
+                <div className="-mx-1 max-h-[70vh] overflow-y-auto px-1">
                     {children}
                 </div>
 

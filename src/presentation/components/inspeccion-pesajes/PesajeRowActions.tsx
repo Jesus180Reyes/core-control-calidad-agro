@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { DownloadCloud, MoreHorizontal, Trash } from 'lucide-react'
+import { DownloadCloud, MoreHorizontal, Trash, type LucideIcon } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import {
@@ -15,28 +15,65 @@ import {
     PopoverContent,
     PopoverTrigger,
 } from '@/components/ui/popover'
-import { formatDate } from '#/presentation/helpers/date/formatDate'
+import { RejectPesajeDialog } from '#/presentation/components/inspeccion-pesajes/RejectPesajeDialog'
 import type { PesajeData } from '#/presentation/types/pesajes/pesajesResponse'
 
 interface PesajeRowActionsProps {
     pesaje: PesajeData
 }
+type ItemActionSelected = 'RECHAZAR_PESAJE' | 'DESCARGAR_COMPROBANTE' | null;
+
+interface ActionsMenuItem {
+    /** Identificador de la acción; se usa como key de la lista. */
+    action: NonNullable<ItemActionSelected>
+    label: string
+    icon: LucideIcon
+    /** Se ejecuta después de cerrar el menú. */
+    run: () => void
+}
+
+interface ActionsMenuProps {
+    items: readonly ActionsMenuItem[]
+    triggerLabel: string
+}
+
 
 export function PesajeRowActions({ pesaje }: PesajeRowActionsProps) {
-    const [abierto, setAbierto] = useState(false)
+    const [selected, setSelected] = useState<ItemActionSelected>(null)
 
-    const actions = [
+    const actions: ActionsMenuItem[] = [
         {
+            action: 'DESCARGAR_COMPROBANTE',
             label: 'Descargar comprobante',
             icon: DownloadCloud,
             run: () => console.log('Descargar comprobante', pesaje.id),
         },
         {
+            action: 'RECHAZAR_PESAJE',
             label: 'Rechazar Pesaje',
             icon: Trash,
-            run: () => console.log('Rechazar Pesaje', pesaje.id),
+            run: () => setSelected('RECHAZAR_PESAJE'),
         },
     ]
+
+    return (
+        <>
+            <ActionsMenu
+                items={actions}
+                triggerLabel={`Acciones del pesaje del ${pesaje.id}`}
+            />
+
+            <RejectPesajeDialog
+                pesaje={pesaje}
+                open={selected === 'RECHAZAR_PESAJE'}
+                onOpenChange={(open) => !open && setSelected(null)}
+            />
+        </>
+    )
+}
+
+function ActionsMenu({ items, triggerLabel }: ActionsMenuProps) {
+    const [abierto, setAbierto] = useState(false)
 
     return (
         <Popover open={abierto} onOpenChange={setAbierto}>
@@ -45,7 +82,7 @@ export function PesajeRowActions({ pesaje }: PesajeRowActionsProps) {
                     <Button
                         variant="ghost"
                         size="icon"
-                        aria-label={`Acciones del pesaje del ${formatDate(pesaje.created_at)}`}
+                        aria-label={triggerLabel}
                     />
                 }
             >
@@ -65,9 +102,9 @@ export function PesajeRowActions({ pesaje }: PesajeRowActionsProps) {
                         </CommandEmpty>
 
                         <CommandGroup>
-                            {actions.map(({ label, icon: Icon, run }) => (
+                            {items.map(({ action, label, icon: Icon, run }) => (
                                 <CommandItem
-                                    key={label}
+                                    key={action}
                                     onSelect={() => {
                                         setAbierto(false)
                                         run()
