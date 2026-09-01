@@ -1,4 +1,4 @@
-import { Suspense, useState } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 import { createFileRoute, redirect, useLocation } from '@tanstack/react-router'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Plus } from 'lucide-react'
@@ -15,6 +15,7 @@ import { LoadingState } from '#/presentation/components/shared/LoadingState'
 import { LotesInspectionView } from '#/presentation/views/inspeccion-lotes/LotesInspectionView'
 import { createLoteSchema, type CreateLoteSchema } from '#/presentation/schema/crear-lote/crearLoteSchema'
 import { Can } from '#/presentation/components/shared/Can'
+import { useCrearLote } from '#/presentation/hooks/crear-lote/useCrearLote'
 
 export const Route = createFileRoute(
     '/(portal)/_portal/inspeccion-lotes-by-cliente',
@@ -33,6 +34,7 @@ export const Route = createFileRoute(
 function RouteComponent() {
     const { clienteId } = Route.useSearch()
     const cliente = useLocation({ select: (location) => location.state.cliente })
+    const { mutate: crearLote, isPending, isSuccess, reset } = useCrearLote();
 
     const [dialogoCrearAbierto, setDialogoCrearAbierto] = useState(false);
 
@@ -49,14 +51,21 @@ function RouteComponent() {
         if (!open) form.reset()
     }
 
-    const onSubmit: SubmitHandler<CreateLoteSchema> = (data) => {
-        // TODO: conectar con el endpoint de creación de lote.
-        console.log('Nuevo lote', data)
+
+    useEffect(() => {
+        if (!isSuccess) return
         handleOpenChange(false)
+        reset()
+    }, [isSuccess])
+
+    const onSubmit: SubmitHandler<CreateLoteSchema> = (data) => {
+        console.log('Nuevo lote', data)
+        crearLote(data);
     }
     const onError: SubmitErrorHandler<CreateLoteSchema> = (errors) => {
         console.error("Errores de validación:", errors);
     }
+
 
     return (
         <div className="space-y-8">
@@ -109,8 +118,10 @@ function RouteComponent() {
                             fullWidth={false}
                             type="submit"
                             form={CREATE_LOTE_FORM_ID}
+                            disabled={isPending}
+                            isLoading={isPending}
                         >
-                            Crear lote
+                            {isPending ? 'Creando...' : 'Crear lote'}
                         </CustomButton>
                     </>
                 }

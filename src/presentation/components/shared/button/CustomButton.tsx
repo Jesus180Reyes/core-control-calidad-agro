@@ -22,14 +22,17 @@ export function CustomButton({
     ...props
 }: CustomButtonProps) {
 
-    const baseStyles = `${fullWidth ? 'w-full' : 'w-auto px-5'} font-bold rounded-2xl flex items-center justify-center gap-3 transition-all active:scale-[0.98] cursor-pointer disabled:cursor-not-allowed disabled:active:scale-100`
+    const baseStyles = `${fullWidth ? 'w-full' : 'w-auto px-5'} font-bold rounded-2xl flex items-center justify-center gap-3 transition-all active:scale-[0.98] cursor-pointer disabled:cursor-not-allowed disabled:active:scale-100 disabled:shadow-none`
+
+    /** Gris parejo para todos los variants: deshabilitado se ve igual en toda la app. */
+    const disabledStyles = "disabled:bg-gray-200 disabled:text-gray-500 disabled:border-gray-200 dark:disabled:bg-gray-800 dark:disabled:text-gray-500 dark:disabled:border-gray-800"
 
     const variantStyles: Record<ButtonVariant, string> = {
-        primary: "bg-[#3F3FD4] hover:bg-[#3434B8] text-white py-4.5 lg:py-5 text-sm lg:text-base shadow-lg shadow-blue-500/10 dark:shadow-none disabled:bg-slate-100 dark:disabled:bg-zinc-800 disabled:text-slate-400 dark:disabled:text-zinc-600",
+        primary: "bg-[#3F3FD4] hover:bg-[#3434B8] text-white py-4.5 lg:py-5 text-sm lg:text-base shadow-lg shadow-blue-500/10 dark:shadow-none",
 
-        secondary: "bg-slate-50 dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800/80 hover:bg-slate-100 dark:hover:bg-zinc-800 text-slate-700 dark:text-zinc-300 py-4 px-4 text-xs lg:text-sm disabled:bg-slate-100/50 dark:disabled:bg-zinc-800/50 disabled:text-slate-400 dark:disabled:text-zinc-600",
+        secondary: "bg-slate-50 dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800/80 hover:bg-slate-100 dark:hover:bg-zinc-800 text-slate-700 dark:text-zinc-300 py-4 px-4 text-xs lg:text-sm",
 
-        danger: "bg-red-600 hover:bg-red-700 text-white py-4 px-4 text-sm disabled:bg-red-100 dark:disabled:bg-red-950/20 disabled:text-red-400",
+        danger: "bg-red-600 hover:bg-red-700 text-white py-4 px-4 text-sm",
 
         success: "bg-emerald-100 text-emerald-700 hover:bg-emerald-200 dark:bg-emerald-950/30 dark:text-emerald-400 py-3 px-4 text-xs"
     }
@@ -39,7 +42,7 @@ export function CustomButton({
     return (
         <button
             disabled={isBtnDisabled}
-            className={`${baseStyles} ${variantStyles[variant]} ${className}`}
+            className={`${baseStyles} ${variantStyles[variant]} ${disabledStyles} ${className}`}
             {...props}
         >
             {isLoading ? (

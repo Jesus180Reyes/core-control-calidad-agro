@@ -8,7 +8,7 @@ export const createClienteSchema = z
         codigo_exportacion: z.string({ error: 'Codigo de exportacion requerido' }),
         correo_contacto: z.email().optional(),
         telefono: z.string().optional(),
-        direccion_planta: z.string().optional(),
+        direccion_planta: z.string().toUpperCase().optional(),
         ubicacionLongitud: z.string().optional(),
         ubicacionLatitude: z.string().optional(),
         usuario_ids: z

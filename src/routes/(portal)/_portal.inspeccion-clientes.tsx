@@ -27,15 +27,17 @@ function RouteComponent() {
         resolver: zodResolver(createClienteSchema),
     });
 
-    const { mutate: crearCliente, isPending, isSuccess } = useCrearCliente();
+    const { mutate: crearCliente, isPending, isSuccess, reset } = useCrearCliente();
 
     const handleOpenChange = (open: boolean) => {
-        setDialogoCrearAbierto(open)
+        setDialogoCrearAbierto(open);
         if (!open) form.reset();
     }
 
     useEffect(() => {
-        if (isSuccess) handleOpenChange(false)
+        if (!isSuccess) return;
+        handleOpenChange(false);
+        reset();
     }, [isSuccess])
 
     const onSuccess: SubmitHandler<CreateClienteSchema> = (data) => {
@@ -85,7 +87,7 @@ function RouteComponent() {
                         >
                             Cancelar
                         </CustomButton>
-                        <CustomButton fullWidth={false} type="submit" form={CREATE_CLIENTE_FORM_ID} disabled={isPending} >
+                        <CustomButton fullWidth={false} type="submit" form={CREATE_CLIENTE_FORM_ID} disabled={isPending} isLoading={isPending} >
                             {isPending ? 'Creando...' : 'Crear cliente'}
                         </CustomButton>
                     </>
