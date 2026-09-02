@@ -1,4 +1,5 @@
 import { Link, useLocation } from '@tanstack/react-router'
+import { ClipboardCheck, History, LogOut, Scale, SlidersHorizontal, Users } from 'lucide-react'
 
 import { Can } from '#/presentation/components/shared/Can'
 import { useAuth } from '#/presentation/hooks/auth/useAuth'
@@ -13,11 +14,19 @@ interface NavItem {
     permission?: Permission
 }
 
-const CLASES_ITEM = 'group flex items-center gap-4 px-4.5 py-3 rounded-xl transition-all duration-200 text-sm font-semibold cursor-pointer'
+const CLASES_ITEM = 'group relative flex items-center gap-3.5 px-3.5 py-2.5 rounded-2xl text-sm font-semibold cursor-pointer outline-none transition-all duration-200 ease-out active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-brand/40'
 
-const CLASES_ACTIVO = 'bg-indigo-50/70 dark:bg-indigo-950/20 text-indigo-600 dark:text-indigo-400 font-bold border-r-[3.5px] border-indigo-600 dark:border-indigo-500 shadow-sm'
+const CLASES_ACTIVO = 'bg-brand/10 text-brand'
 
-const CLASES_INACTIVO = 'text-text-muted hover:bg-slate-50 dark:hover:bg-slate-900/40 hover:text-text-main'
+const CLASES_INACTIVO = 'text-text-muted hover:bg-muted/70 hover:text-text-main hover:translate-x-0.5'
+
+const CLASES_MARCA_ACTIVA = 'absolute left-0 top-1/2 h-6 w-1 -translate-y-1/2 rounded-r-full bg-brand shadow-[0_0_10px_-1px_var(--brand)] animate-in fade-in zoom-in-50 duration-300'
+
+const CLASES_CHIP = 'shrink-0 grid place-items-center size-8 rounded-xl transition-all duration-200 ease-out group-hover:scale-110'
+
+const CLASES_ITEM_PIE = 'group flex w-full items-center gap-3.5 px-3.5 py-2.5 rounded-2xl text-sm font-semibold cursor-pointer outline-none text-left transition-all duration-200 ease-out active:scale-[0.98] focus-visible:ring-2'
+
+const CLASES_ENTRADA = 'animate-in fade-in slide-in-from-left-3 fill-mode-both'
 
 function inicialesDe(nombreCompleto: string): string {
     const palabras = nombreCompleto.trim().split(/\s+/)
@@ -34,11 +43,7 @@ export function Sidebar() {
         // {
         //     label: 'Dashboard',
         //     to: '/',
-        //     icon: (
-        //         <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2.2} viewBox="0 0 24 24">
-        //             <path strokeLinecap="round" strokeLinejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
-        //         </svg>
-        //     ),
+        //     icon: <LayoutDashboard className="size-[18px]" strokeWidth={2.1} />,
         // },
         {
 
@@ -46,57 +51,46 @@ export function Sidebar() {
             to: '/clientes',
             rutasActivas: ['/control-calidad'],
             permission: PERMISSIONS.MODULOCONTROLCALIDAD,
-            icon: (
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2.2} viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
-                </svg>
-            ),
+            icon: <ClipboardCheck className="size-4.5" strokeWidth={2.1} />,
         },
         {
             label: 'Historial',
             to: '/historial',
-            icon: (
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2.2} viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-            ),
+            icon: <History className="size-4.5" strokeWidth={2.1} />,
         },
 
         {
             label: 'Clientes',
             to: '/inspeccion-clientes',
             permission: PERMISSIONS.MODULOCLIENTES,
-            icon: (
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2.2} viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0" />
-                </svg>
-            ),
+            icon: <Users className="size-4.5" strokeWidth={2.1} />,
         },
     ]
 
     return (
-        <aside className="w-72 h-[calc(100vh-2rem)] my-4 ml-4 bg-surface border border-border-ui/50 rounded-[28px] p-5 shadow-clay-card flex flex-col justify-between transition-colors duration-300">
+        <aside className="w-72 h-[calc(100vh-2rem)] my-4 ml-4 bg-surface border border-border-ui/60 rounded-[28px] p-4 shadow-clay-card flex flex-col justify-between transition-colors animate-in fade-in slide-in-from-left-6 duration-500 ease-out">
 
-            <div className="space-y-6">
-                <div className="flex items-center gap-3.5 px-3 py-2">
-                    <div className="w-11 h-11 bg-indigo-600 dark:bg-indigo-500 rounded-2xl flex items-center justify-center text-white shadow-clay-btn">
-                        <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v17M19 9l-7-6-7 6M5 19h14" />
-                        </svg>
+            <div className="space-y-7">
+                <div className="flex items-center gap-3.5 px-2.5 pt-2">
+                    <div className="relative w-11 h-11 rounded-2xl bg-linear-to-br from-brand to-brand/70 flex items-center justify-center text-white shadow-clay-btn ring-1 ring-inset ring-white/20 transition-transform duration-300 ease-out hover:scale-105 hover:rotate-6">
+                        <Scale className="size-5.5" strokeWidth={2.2} />
                     </div>
                     <div className="leading-tight">
-                        <h1 className="text-lg font-black tracking-tight text-text-main">
+                        <h1 className="text-[17px] font-extrabold tracking-tight text-text-main">
                             Bascula
                         </h1>
-                        <p className="text-[10px] font-bold tracking-widest uppercase text-text-muted/70">
+                        <p className="text-[10px] font-bold tracking-[0.18em] uppercase text-text-muted/70">
                             Quality Inspector
                         </p>
                     </div>
                 </div>
 
-                <nav className="space-y-1">
-                    {menuItems.map((item) => {
+                <nav className="space-y-1.5">
+                    <p className="px-3.5 pb-1 text-[10px] font-bold uppercase tracking-[0.16em] text-text-muted/50">
+                        Operación
+                    </p>
+
+                    {menuItems.map((item, indice) => {
 
                         if (item.permission !== undefined && !has(item.permission)) return null
 
@@ -106,49 +100,54 @@ export function Sidebar() {
                             <Link
                                 key={item.to}
                                 to={item.to}
-                                className={`${CLASES_ITEM} ${activo ? CLASES_ACTIVO : CLASES_INACTIVO}`}
+                                aria-current={activo ? 'page' : undefined}
+                                style={{ animationDelay: `${indice * 70}ms`, animationDuration: '400ms' }}
+                                className={`${CLASES_ITEM} ${CLASES_ENTRADA} ${activo ? CLASES_ACTIVO : CLASES_INACTIVO}`}
                             >
-                                <span className="shrink-0 transition-colors duration-200">
+                                {activo && <span className={CLASES_MARCA_ACTIVA} aria-hidden />}
+                                <span
+                                    className={`${CLASES_CHIP} ${activo
+                                        ? 'bg-brand/15 text-brand'
+                                        : 'bg-muted/60 text-text-muted group-hover:text-text-main'
+                                        }`}
+                                >
                                     {item.icon}
                                 </span>
-                                <span>{item.label}</span>
+                                <span className="truncate">{item.label}</span>
                             </Link>
                         )
                     })}
                 </nav>
             </div>
 
-            <div className="space-y-5">
+            <div className="space-y-3 animate-in fade-in slide-in-from-bottom-3 duration-500 delay-200 fill-mode-both">
                 {usuario && (
-                    <div className="flex items-center gap-3 px-3">
-                        <div className="w-9 h-9 shrink-0 rounded-full bg-indigo-100 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-xs font-black">
+                    <div className="group flex items-center gap-3 rounded-2xl bg-muted/50 border border-border-ui/60 p-2.5 transition-colors duration-200 hover:bg-muted/80">
+                        <div className="size-9 shrink-0 rounded-xl bg-brand/12 text-brand flex items-center justify-center text-[11px] font-black tracking-wide transition-transform duration-200 ease-out group-hover:scale-105">
                             {inicialesDe(usuario.complete_name)}
                         </div>
                         <div className="leading-tight overflow-hidden">
-                            <p className="text-text-main font-bold truncate">
+                            <p className="text-text-main text-sm font-bold truncate">
                                 {usuario.complete_name}
                             </p>
-                            <p className="text-text-muted text-[10px] uppercase tracking-widest">
+                            <p className="text-text-muted text-[10px] font-semibold uppercase tracking-[0.14em] truncate">
                                 {usuario.rol}
                             </p>
                         </div>
                     </div>
                 )}
 
-                <div className="pt-4 border-t border-border-ui/30 space-y-1">
-                    {/* Apunta a una ruta del módulo: sin el permiso el link rebotaría. */}
+                <div className="pt-3 border-t border-border-ui/60 space-y-1">
                     <Can permission={PERMISSIONS.MODULOCONTROLCALIDAD}>
                         <Link
-                            to="/control-calidad"
+                            to="/"
                             inactiveProps={{
-                                className: 'text-text-muted hover:bg-slate-50 dark:hover:bg-slate-900/40 hover:text-text-main',
+                                className: 'text-text-muted hover:bg-muted/70 hover:text-text-main',
                             }}
-                            className="group flex items-center gap-4.5 px-4.5 py-2.5 rounded-xl transition-all duration-200 text-sm font-semibold cursor-pointer"
+                            className={`${CLASES_ITEM_PIE} focus-visible:ring-brand/40`}
                         >
-                            <span className="shrink-0">
-                                <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2.2} viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
-                                </svg>
+                            <span className={`${CLASES_CHIP} bg-muted/60 group-hover:rotate-45`}>
+                                <SlidersHorizontal className="size-4.5" strokeWidth={2.1} />
                             </span>
                             <span>Ajustes</span>
                         </Link>
@@ -156,12 +155,10 @@ export function Sidebar() {
 
                     <button
                         onClick={logout}
-                        className="w-full group flex items-center gap-4.5 px-4.5 py-2.5 rounded-xl transition-all duration-200 text-sm font-semibold text-rose-600 hover:bg-rose-50/50 dark:hover:bg-rose-950/10 cursor-pointer text-left"
+                        className={`${CLASES_ITEM_PIE} text-rose-600 dark:text-rose-400 hover:bg-rose-500/10 focus-visible:ring-rose-500/40`}
                     >
-                        <span className="shrink-0">
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2.2} viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                            </svg>
+                        <span className={`${CLASES_CHIP} bg-rose-500/10`}>
+                            <LogOut className="size-4.5 transition-transform duration-200 ease-out group-hover:translate-x-0.5" strokeWidth={2.1} />
                         </span>
                         <span>Cerrar Sesión</span>
                     </button>

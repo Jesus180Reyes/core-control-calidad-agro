@@ -8,6 +8,18 @@
   body {
     font-family: 'Inter', sans-serif;
   }
+
+  /* Ni `animate-in` ni las transiciones de Tailwind miran esta preferencia por
+     su cuenta: hay que apagarlas acá. `0.01ms` y no `0` para que el evento
+     `animationend` siga disparando donde alguien lo espere. */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
 }
 @theme {
   --color-brand: var(--brand);         
