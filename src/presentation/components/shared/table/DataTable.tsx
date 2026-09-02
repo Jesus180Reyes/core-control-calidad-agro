@@ -70,6 +70,16 @@ const alignClasses: Record<Align, string> = {
     right: 'text-right',
 }
 
+/**
+ * Una columna alineada a la derecha es, casi siempre, numérica: las cifras
+ * tabulares mantienen el punto decimal en la misma vertical fila a fila.
+ */
+const numericClasses: Record<Align, string> = {
+    left: '',
+    center: '',
+    right: 'tabular-nums',
+}
+
 /** El botón de orden ocupa todo el ancho del <th>, así que se alinea solo. */
 const justifyClasses: Record<Align, string> = {
     left: 'justify-start',
@@ -135,7 +145,10 @@ export function DataTable<TData extends RowData>({
     return (
         <div
             className={cn(
-                'bg-surface rounded-3xl border border-border-ui shadow-clay-card overflow-hidden',
+                'bg-surface rounded-2xl border border-border-ui shadow-clay-card overflow-hidden',
+                // La franja superior separa la tabla de lo que tenga arriba sin
+                // sumar otra línea dura al diseño.
+                'relative before:pointer-events-none before:absolute before:inset-x-0 before:top-0 before:z-20 before:h-px before:bg-linear-to-r before:from-transparent before:via-brand/20 before:to-transparent',
                 // El contenedor de scroll real es el div que monta la primitiva
                 // `Table`, que no acepta className: el alto máximo se le aplica
                 // desde acá, apuntando a su slot, para no editar table.tsx.
@@ -151,12 +164,15 @@ export function DataTable<TData extends RowData>({
         >
             <Table>
                 {/* El fondo opaco es lo que sostiene el header pegajoso: sin él,
-                    las filas se ven a través al scrollear. */}
-                <TableHeader className="sticky top-0 z-10 bg-bg-app">
+                    las filas se ven a través al scrollear. El `backdrop-blur`
+                    es sólo el matiz; el color de abajo no puede faltar. */}
+                <TableHeader className="sticky top-0 z-10 bg-bg-app/90 backdrop-blur-sm">
                     {table.getHeaderGroups().map((headerGroup) => (
                         <TableRow
                             key={headerGroup.id}
-                            className="border-0 hover:bg-transparent"
+                            // Sin color, el `border-b` de la primitiva sale del
+                            // color del texto; acá se le pasa el token.
+                            className="border-b border-border-ui hover:bg-transparent"
                         >
                             {headerGroup.headers.map((header) => {
                                 const meta = header.column.columnDef.meta
@@ -175,7 +191,7 @@ export function DataTable<TData extends RowData>({
                                                 : undefined
                                         }
                                         className={cn(
-                                            'h-12 px-6 text-xs font-bold uppercase tracking-wider text-text-muted',
+                                            'h-11 px-6 text-[0.6875rem] font-semibold uppercase tracking-[0.09em] text-text-muted',
                                             alignClasses[align],
                                             meta?.headerClassName,
                                         )}
@@ -185,19 +201,40 @@ export function DataTable<TData extends RowData>({
                                                 type="button"
                                                 onClick={header.column.getToggleSortingHandler()}
                                                 className={cn(
-                                                    'flex w-full cursor-pointer select-none items-center gap-1.5 rounded-lg uppercase transition-colors hover:text-text-main focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/40',
+                                                    'group/sort -mx-2 flex w-[calc(100%+1rem)] cursor-pointer select-none items-center gap-1.5 rounded-lg px-2 py-1.5 uppercase transition-colors hover:bg-brand/5 hover:text-text-main focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/40',
+                                                    // La columna activa se lee de
+                                                    // un vistazo, sin buscar la
+                                                    // flechita.
+                                                    orden && 'text-text-main',
                                                     justifyClasses[align],
                                                 )}
                                             >
                                                 <table.FlexRender header={header} />
 
-                                                {orden === 'asc' ? (
-                                                    <ChevronUp className="size-3.5 shrink-0" />
-                                                ) : orden === 'desc' ? (
-                                                    <ChevronDown className="size-3.5 shrink-0" />
-                                                ) : (
-                                                    <ChevronsUpDown className="size-3.5 shrink-0 opacity-40" />
-                                                )}
+                                                {/* El indicador vive en su propio
+                                                    chip: reserva el espacio, así
+                                                    el título no se corre al
+                                                    cambiar el orden. */}
+                                                <span
+                                                    className={cn(
+                                                        'flex size-4 shrink-0 items-center justify-center rounded-md transition-colors',
+                                                        orden
+                                                            ? 'bg-brand/10 text-brand'
+                                                            // Nunca invisible: en
+                                                            // una pantalla táctil
+                                                            // no hay hover que lo
+                                                            // revele.
+                                                            : 'text-text-muted opacity-35 group-hover/sort:opacity-70',
+                                                    )}
+                                                >
+                                                    {orden === 'asc' ? (
+                                                        <ChevronUp className="size-3" />
+                                                    ) : orden === 'desc' ? (
+                                                        <ChevronDown className="size-3" />
+                                                    ) : (
+                                                        <ChevronsUpDown className="size-3" />
+                                                    )}
+                                                </span>
                                             </button>
                                         ) : (
                                             <table.FlexRender header={header} />
@@ -209,7 +246,9 @@ export function DataTable<TData extends RowData>({
                     ))}
                 </TableHeader>
 
-                <TableBody className="divide-y divide-border-ui">
+                {/* La última fila no lleva línea: el borde de la card ya cierra
+                    la tabla, y dos líneas juntas se ven como un error. */}
+                <TableBody className="divide-y divide-border-ui/70">
                     {rows.length === 0 && (
                         <TableRow className="border-0 hover:bg-transparent">
                             {/* El header se sigue pintando: sin encabezados,
@@ -262,20 +301,31 @@ export function DataTable<TData extends RowData>({
                             // `border-0` desactiva el borde de la primitiva, que
                             // en Tailwind v4 sale del color del texto.
                             className={cn(
-                                'border-0 transition-colors hover:bg-bg-app/60',
+                                'group/row border-0 transition-colors duration-150 hover:bg-brand/[0.035]',
                                 onRowClick &&
                                     'cursor-pointer focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-brand',
                             )}
                         >
-                            {row.getAllCells().map((cell) => {
+                            {row.getAllCells().map((cell, indice) => {
                                 const meta = cell.column.columnDef.meta
+                                const align = meta?.align ?? 'left'
 
                                 return (
                                     <TableCell
                                         key={cell.id}
                                         className={cn(
-                                            'px-6 py-4 text-sm text-text-main',
-                                            alignClasses[meta?.align ?? 'left'],
+                                            'px-6 py-3.5 text-sm text-text-main',
+                                            alignClasses[align],
+                                            numericClasses[align],
+                                            // La barra de la izquierda marca la
+                                            // fila apuntada. Va en la primera
+                                            // celda y no en el <tr>, porque con
+                                            // los bordes colapsados de la tabla
+                                            // una sombra sobre la fila no se
+                                            // pinta parejo.
+                                            indice === 0 &&
+                                                onRowClick &&
+                                                'transition-shadow group-hover/row:shadow-[inset_2px_0_0_0_var(--color-brand)]',
                                             meta?.cellClassName,
                                         )}
                                     >
