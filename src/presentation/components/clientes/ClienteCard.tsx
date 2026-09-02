@@ -1,19 +1,29 @@
-import { Building2 } from 'lucide-react'
+import { Building2, ChevronRight, MapPin, Package } from 'lucide-react'
 import { cn } from '#/lib/utils'
 import type { Cliente } from '#/presentation/types/clientes/clientes.types'
 
 const SIN_DIRECCION = 'Sin dirección registrada'
 
 const CARD_STYLES = cn(
-    'w-full text-left bg-surface border border-border-ui/50 rounded-[28px] p-6',
-    'shadow-clay-card space-y-5 cursor-pointer transition-all duration-200',
-    'hover:-translate-y-0.5 hover:border-indigo-200 dark:hover:border-indigo-900/50',
-    'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600',
+    'relative w-full overflow-hidden text-left cursor-pointer',
+    'rounded-3xl border border-border-ui bg-surface p-5',
+    'shadow-clay-card transition-[background-color,border-color] duration-150 ease-out',
+    'hover:border-brand/40 hover:bg-muted/50',
+    'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand',
 )
 
 const ICON_STYLES = cn(
-    'w-11 h-11 shrink-0 rounded-xl flex items-center justify-center',
-    'bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600',
+    'grid h-12 w-12 shrink-0 place-items-center rounded-2xl',
+    'bg-gradient-to-br from-brand to-indigo-400 text-white dark:to-indigo-600',
+    'shadow-lg shadow-brand/25',
+)
+
+const CHEVRON_STYLES = 'ml-auto h-5 w-5 shrink-0 text-text-muted/60'
+
+const BADGE_STYLES = cn(
+    'inline-flex max-w-full items-center gap-1.5 rounded-full',
+    'border border-border-ui bg-bg-app px-2.5 py-1',
+    'text-[11px] font-semibold text-text-muted',
 )
 
 interface ClienteCardProps {
@@ -26,18 +36,32 @@ export function ClienteCard({ cliente, onSeleccionar }: ClienteCardProps) {
         <button type="button" onClick={() => onSeleccionar(cliente)} className={CARD_STYLES}>
             <div className="flex items-center gap-4">
                 <span className={ICON_STYLES}>
-                    <Building2 className="w-5 h-5" strokeWidth={2.2} />
+                    <Building2 className="h-5 w-5" strokeWidth={2.2} />
                 </span>
 
-                <div className="min-w-0">
-                    <p className="text-text-main font-extrabold truncate">
+                <div className="min-w-0 flex-1">
+                    <p className="truncate text-[15px] font-extrabold tracking-tight text-text-main">
                         {cliente.nombre}
                     </p>
-                    <p className="text-text-muted text-[11px] font-medium truncate">
-                        {cliente.direccion_planta ?? SIN_DIRECCION}
+                    <p className="mt-1 flex items-center gap-1.5 text-text-muted">
+                        <MapPin className="h-3.5 w-3.5 shrink-0" strokeWidth={2.2} />
+                        <span className="truncate text-[11px] font-medium">
+                            {cliente.direccion_planta ?? SIN_DIRECCION}
+                        </span>
                     </p>
                 </div>
+
+                <ChevronRight className={CHEVRON_STYLES} strokeWidth={2.5} />
             </div>
+
+            {cliente.producto && (
+                <div className="mt-4 flex items-center gap-2 border-t border-border-ui pt-4">
+                    <span className={BADGE_STYLES}>
+                        <Package className="h-3 w-3 shrink-0" strokeWidth={2.4} />
+                        <span className="truncate">{cliente.producto}</span>
+                    </span>
+                </div>
+            )}
         </button>
     )
 }
