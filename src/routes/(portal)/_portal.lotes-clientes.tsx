@@ -17,12 +17,19 @@ export const Route = createFileRoute('/(portal)/_portal/lotes-clientes')({
 function RouteComponent() {
     const navigate = useNavigate()
     const cliente = useLocation({ select: (location) => location.state.cliente }) ?? null
+    const pathname = useLocation({ select: (location) => location.pathname })
 
     useEffect(() => {
+        // El router publica la ubicación destino apenas arranca la navegación,
+        // con esta pantalla todavía montada. Sin el chequeo de `pathname`, salir
+        // hacia una ruta sin `state.cliente` (el Sidebar, por ejemplo) haría que
+        // este respaldo se disparara y reemplazara ese destino por `/clientes`.
+        if (pathname !== Route.fullPath) return
+
         if (!cliente) {
             navigate({ to: '/clientes', replace: true })
         }
-    }, [cliente, navigate])
+    }, [cliente, pathname, navigate])
 
     if (!cliente) return null
 
