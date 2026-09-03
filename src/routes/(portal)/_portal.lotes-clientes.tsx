@@ -37,6 +37,7 @@ function RouteComponent() {
         <div className="space-y-8">
             <ClientesHeader
                 paso="Paso 2 de 2"
+                backTo="/clientes"
                 titulo="Seleccioná un lote"
                 descripcion={`Elegí el lote de ${cliente.nombre} que vas a pesar. Después de eso se abre la báscula.`}
             />

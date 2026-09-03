@@ -30,15 +30,8 @@ function ControlCalidadPage() {
     const lote = useLocation({ select: (location) => location.state.lote }) ?? null
     const pathname = useLocation({ select: (location) => location.pathname })
 
-    // Respaldo del lado del cliente, por el mismo motivo documentado en
-    // `_portal.tsx`: cuando el HTML llega ya renderizado por el SSR, TanStack
-    // Start no repite `router.load()` al hidratar y el `beforeLoad` de arriba
-    // no vuelve a correr.
+
     useEffect(() => {
-        // El router publica la ubicación destino apenas arranca la navegación,
-        // con esta pantalla todavía montada. Sin el chequeo de `pathname`, salir
-        // hacia una ruta sin `state.cliente` (el Sidebar, por ejemplo) haría que
-        // este respaldo se disparara y reemplazara ese destino por `/clientes`.
         if (pathname !== Route.fullPath) return
 
         if (!cliente) {
@@ -73,7 +66,7 @@ function ControlCalidadPage() {
                 onConnect={() => selector.abrir()}
                 onDisconnect={() => void scale.disconnectSerial()}
                 onReintentar={() => void scale.reconectar()}
-                onVolver={() => navigate({ to: '/lotes-clientes', state: { cliente: cliente ?? undefined } })}
+                onVolver={() => navigate({ to: '/clientes', state: { cliente: cliente ?? undefined } })}
             />
 
             <BannerEstadoBascula
