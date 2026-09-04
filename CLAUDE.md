@@ -134,4 +134,4 @@ Cuatro comportamientos que conviene saber antes de tocarlo:
 - **Filtrar y paginar son del hook de dominio**, que es quien conoce el endpoint y sus params. El componente pinta todas las filas que recibe; no tiene paginación ni búsqueda.
 - **`maxHeight` es lo que activa el header pegajoso.** El contenedor de scroll real es el `div[data-slot=table-container]` que monta la primitiva, y no acepta `className`: el alto máximo se le aplica desde el wrapper con una variante arbitraria sobre ese slot.
 
-`presentation/views/historial/PesajesTable.tsx` es anterior a esto: `<table>` a mano, colores crudos sin modo oscuro y una paginación decorativa. Queda pendiente de migración y **no** es el modelo a copiar.
+Ya no queda ninguna tabla a mano: `PesajesTable.tsx` (el `<table>` crudo del historial, con colores hardcodeados y paginación decorativa) se borró al migrar el historial a `/pesajes/historial`. Las celdas compartidas de pesajes —peso, badge de estado de calidad, valor vacío— viven en `presentation/components/pesajes/PesajeCells.tsx` y las usan tanto el historial como la inspección por lote.

@@ -19,6 +19,7 @@ export interface PesajeData {
     dispositivo_identificador: null;
     secuencia_dispositivo: null;
     created_at: Date;
+    unidad_medida: string;
 }
 
 

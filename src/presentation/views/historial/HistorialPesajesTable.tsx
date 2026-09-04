@@ -1,4 +1,3 @@
-import { PesajeRowActions } from '#/presentation/components/inspeccion-pesajes/PesajeRowActions'
 import { QualityStatusBadge } from '#/presentation/components/pesajes/PesajeCells'
 import {
     DataTable,
@@ -6,29 +5,35 @@ import {
 } from '#/presentation/components/shared/table/DataTable'
 import { formatDate } from '#/presentation/helpers/date/formatDate'
 import { formatWeight } from '#/presentation/helpers/number/formatWeight'
-import { useGetInspeccionPesajes } from '#/presentation/hooks/inspeccion-pesajes/useInspeccionPesajes'
+import { useHistorialPesajes } from '#/presentation/hooks/historial/useHistorialPesajes'
 import type { PesajeData } from '#/presentation/types/pesajes/pesajesResponse'
 
-function crearColumnas(): DataTableColumns<PesajeData> {
+function createColumns(): DataTableColumns<PesajeData> {
     return [
         {
-            id: 'acciones',
-            header: 'Acciones',
-            meta: { align: 'center', cellClassName: 'py-2' },
-            cell: ({ row }) => <PesajeRowActions pesaje={row.original} />,
-        },
-        {
             accessorKey: 'created_at',
-            header: 'Fecha creacion Pesaje',
+            header: 'Fecha',
             enableSorting: true,
             meta: { cellClassName: 'font-bold whitespace-nowrap' },
-            cell: ({ row }) => formatDate(row.original.created_at),
+            cell: ({ row }) => formatDate(row.original.created_at.toLocaleString()),
         },
         {
             accessorKey: 'id',
             header: 'ID',
             enableSorting: true,
             meta: { align: 'right' },
+        },
+        {
+            accessorKey: 'nombre_lote',
+            header: 'Lote',
+            enableSorting: true,
+            meta: { cellClassName: 'font-bold' },
+        },
+        {
+            accessorKey: 'unidad_medida',
+            header: 'Unidad de medida',
+            enableSorting: true,
+            meta: { cellClassName: 'font-bold' },
         },
         {
             accessorKey: 'peso_bruto',
@@ -59,25 +64,17 @@ function crearColumnas(): DataTableColumns<PesajeData> {
         },
         {
             accessorKey: 'fuera_de_rango',
-            header: 'Peso fuera de rango',
-            cell: ({ row }) => (row.original.fuera_de_rango ? 'Si' : 'No'),
-        },
-        {
-            accessorKey: 'usuario',
-            header: 'Usuario Creacion Pesaje',
-            enableSorting: true,
+            header: 'Fuera de rango',
+            meta: { align: 'center' },
+            cell: ({ row }) => (row.original.fuera_de_rango ? 'Sí' : 'No'),
         },
     ]
 }
 
-interface PesajesInspectionViewProps {
-    loteId: number
-}
+export function HistorialPesajesTable() {
+    const { pesajes } = useHistorialPesajes();
 
-export function PesajesInspectionView({ loteId }: PesajesInspectionViewProps) {
-    const { pesajes } = useGetInspeccionPesajes({ loteId })
-
-    const columns = crearColumnas()
+    const columns = createColumns();
 
     return (
         <DataTable
@@ -85,9 +82,9 @@ export function PesajesInspectionView({ loteId }: PesajesInspectionViewProps) {
             columns={columns}
             getRowId={(pesaje) => String(pesaje.id)}
             defaultSorting={[{ id: 'created_at', desc: true }]}
-            maxHeight="32rem"
-            emptyTitle="Este lote no tiene pesajes"
-            emptyDescription="Todavía no se registraron pesajes para este lote."
+            maxHeight="34rem"
+            emptyTitle="No hay pesajes registrados"
+            emptyDescription="Todavía no se registró ningún pesaje en la planta."
         />
     )
 }
