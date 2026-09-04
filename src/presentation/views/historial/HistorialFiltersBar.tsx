@@ -19,7 +19,6 @@ const FUERA_DE_RANGO_OPTIONS = [
     { value: 'false', label: 'Sólo dentro de rango' },
 ]
 
-/** Cuántos filtros están aplicados hoy; alimenta el badge y habilita "Limpiar". */
 function contarFiltrosActivos(filtros: FiltrosHistorial) {
     return Object.values(filtros).filter((valor) => valor !== undefined && valor !== '').length
 }
@@ -125,8 +124,6 @@ export function HistorialFiltersBar({ filtros, onApply }: HistorialFiltersBarPro
                 >
                     Limpiar Filtros
                 </CustomButton>
-                {/* El primary trae `py-4.5 lg:py-5`; se iguala al secondary para que
-                    los dos botones midan lo mismo puestos en fila. */}
                 <CustomButton
                     type="submit"
                     fullWidth={false}
