@@ -1,7 +1,8 @@
 import { useEffect } from 'react'
 import { useForm, useWatch } from 'react-hook-form'
-import { RotateCcw, Search } from 'lucide-react'
+import { RotateCcw, Search, SlidersHorizontal } from 'lucide-react'
 
+import { SectionCardHeader } from '#/presentation/components/shared/SectionCardHeader'
 import { CustomButton } from '#/presentation/components/shared/button/CustomButton'
 import { ControlledDatePicker } from '#/presentation/components/shared/inputs/ControlledDatePicker'
 import { ControlledInput } from '#/presentation/components/shared/inputs/ControlledInput'
@@ -17,6 +18,11 @@ const FUERA_DE_RANGO_OPTIONS = [
     { value: 'false', label: 'Sólo dentro de rango' },
 ]
 
+/** Cuántos filtros están aplicados hoy; alimenta el badge y habilita "Limpiar". */
+function contarFiltrosActivos(filtros: FiltrosHistorial) {
+    return Object.values(filtros).filter((valor) => valor !== undefined && valor !== '').length
+}
+
 interface HistorialFiltersBarProps {
     filtros: FiltrosHistorial
     onApply: (filtros: FiltrosHistorial) => void
@@ -27,6 +33,8 @@ export function HistorialFiltersBar({ filtros, onApply }: HistorialFiltersBarPro
     useEffect(() => {
         form.reset(filtros)
     }, [filtros])
+
+    const filtrosActivos = contarFiltrosActivos(filtros)
 
     const desde = useWatch({ control: form.control, name: 'desde' })
     const hasta = useWatch({ control: form.control, name: 'hasta' })
@@ -39,9 +47,21 @@ export function HistorialFiltersBar({ filtros, onApply }: HistorialFiltersBarPro
     return (
         <form
             onSubmit={form.handleSubmit((valores) => onApply(filtrosHistorialSchema.parse(valores)))}
-            className="space-y-5 rounded-2xl border border-border-ui bg-surface p-5 shadow-clay-card sm:p-6"
+            aria-label="Filtros del historial de pesajes"
+            className="rounded-2xl border border-border-ui bg-surface shadow-clay-card"
         >
-            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            <SectionCardHeader
+                title="Filtros"
+                description="Acotá el historial por lote, cliente, fecha o estado."
+                icon={<SlidersHorizontal className="size-[18px]" />}
+                badge={
+                    filtrosActivos > 0
+                        ? `${filtrosActivos} ${filtrosActivos === 1 ? 'activo' : 'activos'}`
+                        : undefined
+                }
+            />
+
+            <div className="grid gap-4 p-5 sm:grid-cols-2 sm:p-6 xl:grid-cols-4">
                 <ControlledInput
                     control={form.control}
                     name="nombre"
@@ -71,7 +91,7 @@ export function HistorialFiltersBar({ filtros, onApply }: HistorialFiltersBarPro
                     name="desde"
                     label="Desde"
                     placeholder="Cualquier fecha"
-                    maxDate={hasta}
+                    maxDate={hasta || new Date()}
                 />
                 <ControlledDatePicker
                     control={form.control}
@@ -79,6 +99,7 @@ export function HistorialFiltersBar({ filtros, onApply }: HistorialFiltersBarPro
                     label="Hasta"
                     placeholder="Cualquier fecha"
                     minDate={desde}
+                    maxDate={new Date()}
                 />
                 <ControlledSelector
                     control={form.control}
@@ -97,17 +118,25 @@ export function HistorialFiltersBar({ filtros, onApply }: HistorialFiltersBarPro
                 />
             </div>
 
-            <div className="flex flex-col-reverse gap-3 border-t border-border-ui/70 pt-4 sm:flex-row sm:justify-end">
+            <div className="flex flex-col-reverse gap-3 border-t border-border-ui/70 px-5 py-4 sm:flex-row sm:justify-end sm:px-6">
                 <CustomButton
                     type="button"
                     variant="secondary"
                     fullWidth={false}
+                    disabled={filtrosActivos === 0}
                     onClick={limpiar}
                     icon={<RotateCcw className="size-4" />}
                 >
                     Limpiar Filtros
                 </CustomButton>
-                <CustomButton type="submit" fullWidth={false} icon={<Search className="size-4" />}>
+                {/* El primary trae `py-4.5 lg:py-5`; se iguala al secondary para que
+                    los dos botones midan lo mismo puestos en fila. */}
+                <CustomButton
+                    type="submit"
+                    fullWidth={false}
+                    className="py-4 text-xs lg:py-4 lg:text-sm"
+                    icon={<Search className="size-4" />}
+                >
                     Buscar
                 </CustomButton>
             </div>
