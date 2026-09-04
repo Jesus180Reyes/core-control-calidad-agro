@@ -58,7 +58,7 @@ export function HistorialFiltersBar({ filtros, onApply }: HistorialFiltersBarPro
                 icon={<SlidersHorizontal className="size-4.5" />}
                 badge={
                     filtrosActivos > 0
-                        ? `${filtrosActivos} ${filtrosActivos === 1 ? 'activo' : 'activos'}`
+                        ? `${filtrosActivos} ${filtrosActivos === 1 ? 'filtro activo' : 'filtros activos'}`
                         : undefined
                 }
             />
@@ -71,6 +71,7 @@ export function HistorialFiltersBar({ filtros, onApply }: HistorialFiltersBarPro
                     placeholder="Buscar por nombre de lote..."
                     icon={<Search className="size-4" />}
                     className="sm:col-span-2"
+                    uppercase
                 />
                 <ControlledSelector
                     control={form.control}

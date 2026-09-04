@@ -5,7 +5,7 @@ export const filtrosHistorialSchema = z.object({
     cliente_id: z.coerce.number().int().positive().optional(),
     estado_calidad_id: z.coerce.number().int().positive().optional(),
     fuera_de_rango: z.enum(['true', 'false']).optional(),
-    nombre: z.string().trim().min(1).optional(),
+    nombre: z.string().trim().min(1).toUpperCase().optional(),
     desde: z.coerce.date().optional(),
     hasta: z.coerce.date().optional(),
 });
