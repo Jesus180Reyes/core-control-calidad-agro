@@ -54,7 +54,7 @@ export function Sidebar() {
             icon: <ClipboardCheck className="size-4.5" strokeWidth={2.1} />,
         },
         {
-            label: 'Historial',
+            label: 'Historial Pesajes',
             to: '/historial',
             icon: <History className="size-4.5" strokeWidth={2.1} />,
         },
