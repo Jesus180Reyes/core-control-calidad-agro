@@ -6,7 +6,9 @@ import { ApproveLoteDialog } from '#/presentation/components/lotes/ApproveLoteDi
 import { LoteCard } from '#/presentation/components/lotes/LoteCard'
 import { RejectLoteDialog } from '#/presentation/components/lotes/RejectLoteDialog'
 import { LoadingState } from '#/presentation/components/shared/LoadingState'
+import { PesajesFiltersBar } from '#/presentation/views/inspeccion-pesajes/PesajesFiltersBar'
 import { PesajesInspectionView } from '#/presentation/views/inspeccion-pesajes/PesajesInspectionView'
+import type { FiltrosPesajes } from '#/presentation/schema/inspeccion-pesajes/filtrosPesajesSchema'
 import { Can } from '#/presentation/components/shared/Can'
 import { CustomButton } from '#/presentation/components/shared/button/CustomButton'
 import { PERMISSIONS } from '#/presentation/types/auth/permissions'
@@ -31,6 +33,7 @@ function RouteComponent() {
     const lote = useLocation({ select: (location) => location.state.lote })
     const [rechazoAbierto, setRechazoAbierto] = useState(false)
     const [approveOpen, setApproveOpen] = useState(false)
+    const [filtros, setFiltros] = useState<FiltrosPesajes>({})
 
     return (
         <div className="space-y-8">
@@ -87,9 +90,12 @@ function RouteComponent() {
                     <LoteCard lote={lote} />
                 </div>
             )}
+            <Suspense fallback={<LoadingState label="Cargando filtros..." />}>
+                <PesajesFiltersBar filtros={filtros} onApply={setFiltros} />
+            </Suspense>
 
             <Suspense fallback={<LoadingState label="Cargando pesajes..." />}>
-                <PesajesInspectionView loteId={loteId} />
+                <PesajesInspectionView loteId={loteId} filtros={filtros} />
             </Suspense>
         </div>
     )

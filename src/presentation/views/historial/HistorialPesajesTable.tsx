@@ -16,7 +16,7 @@ function createColumns(): DataTableColumns<PesajeData> {
             header: 'Fecha',
             enableSorting: true,
             meta: { cellClassName: 'font-bold whitespace-nowrap' },
-            cell: ({ row }) => formatDate(row.original.created_at.toLocaleString()),
+            cell: ({ row }) => formatDate(row.original.created_at),
         },
         {
             accessorKey: 'id',

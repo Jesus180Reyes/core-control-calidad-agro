@@ -7,6 +7,7 @@ import {
 import { formatDate } from '#/presentation/helpers/date/formatDate'
 import { formatWeight } from '#/presentation/helpers/number/formatWeight'
 import { useGetInspeccionPesajes } from '#/presentation/hooks/inspeccion-pesajes/useInspeccionPesajes'
+import type { FiltrosPesajes } from '#/presentation/schema/inspeccion-pesajes/filtrosPesajesSchema'
 import type { PesajeData } from '#/presentation/types/pesajes/pesajesResponse'
 
 function crearColumnas(): DataTableColumns<PesajeData> {
@@ -72,10 +73,11 @@ function crearColumnas(): DataTableColumns<PesajeData> {
 
 interface PesajesInspectionViewProps {
     loteId: number
+    filtros: FiltrosPesajes
 }
 
-export function PesajesInspectionView({ loteId }: PesajesInspectionViewProps) {
-    const { pesajes } = useGetInspeccionPesajes({ loteId })
+export function PesajesInspectionView({ loteId, filtros }: PesajesInspectionViewProps) {
+    const { pesajes } = useGetInspeccionPesajes({ loteId, filtros })
 
     const columns = crearColumnas()
 

@@ -15,6 +15,7 @@ import { Calendar } from '@/components/ui/calendar'
 import { Label } from '@/components/ui/label'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { FieldError } from '#/presentation/components/shared/inputs/FieldError'
+import { toDate } from '#/presentation/helpers/date/toDate'
 
 interface ControlledDatePickerProps<TFieldValues extends FieldValues> {
     name: FieldPath<TFieldValues>
@@ -104,7 +105,7 @@ function DatePickerField<TFieldValues extends FieldValues>({
 
     const { name, value, onChange, onBlur, ref } = field
     const idError = `${name}-error`
-    const fecha = aFecha(value)
+    const fecha = toDate(value)
 
     // `disabled` del calendario recibe rangos, no fechas sueltas.
     const fueraDeRango =
@@ -207,17 +208,4 @@ function DatePickerField<TFieldValues extends FieldValues>({
             <FieldError id={idError} message={error?.message} />
         </div>
     )
-}
-
-/**
- * El valor del form puede llegar como `Date` (lo que guarda este campo), como
- * string ISO (un search param ya parseado) o vacío. Una fecha inválida cuenta
- * como vacío: es preferible el placeholder a un "Invalid Date" en pantalla.
- */
-function aFecha(valor: unknown): Date | undefined {
-    if (valor == null || valor === '') return undefined
-
-    const fecha = valor instanceof Date ? valor : new Date(valor as string | number)
-
-    return Number.isNaN(fecha.getTime()) ? undefined : fecha
 }

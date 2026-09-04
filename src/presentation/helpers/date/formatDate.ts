@@ -1,12 +1,14 @@
+import { toDate } from '#/presentation/helpers/date/toDate'
+
 const formatoFecha = new Intl.DateTimeFormat('es', {
     dateStyle: 'short',
     timeStyle: 'short',
 })
 
-export function formatDate(valor: string | number | Date) {
-    const fecha = valor instanceof Date ? valor : new Date(valor)
+export function formatDate(valor: unknown) {
+    const fecha = toDate(valor)
 
-    if (Number.isNaN(fecha.getTime())) return ''
+    if (!fecha) return ''
 
     return formatoFecha.format(fecha)
 }
