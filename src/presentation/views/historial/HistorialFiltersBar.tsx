@@ -11,6 +11,7 @@ import {
     filtrosHistorialSchema,
     type FiltrosHistorial,
 } from '#/presentation/schema/historial/filtrosHistorialSchema'
+import { useClientInspection } from '#/presentation/hooks/inspeccion-clientes/useClientInspection'
 
 const FUERA_DE_RANGO_OPTIONS = [
     { value: '', label: 'Todos' },
@@ -29,6 +30,7 @@ interface HistorialFiltersBarProps {
 }
 
 export function HistorialFiltersBar({ filtros, onApply }: HistorialFiltersBarProps) {
+    const { clientes } = useClientInspection();
     const form = useForm<FiltrosHistorial>({ defaultValues: filtros })
     useEffect(() => {
         form.reset(filtros)
@@ -53,7 +55,7 @@ export function HistorialFiltersBar({ filtros, onApply }: HistorialFiltersBarPro
             <SectionCardHeader
                 title="Filtros"
                 description="Acotá el historial por lote, cliente, fecha o estado."
-                icon={<SlidersHorizontal className="size-[18px]" />}
+                icon={<SlidersHorizontal className="size-4.5" />}
                 badge={
                     filtrosActivos > 0
                         ? `${filtrosActivos} ${filtrosActivos === 1 ? 'activo' : 'activos'}`
@@ -65,26 +67,19 @@ export function HistorialFiltersBar({ filtros, onApply }: HistorialFiltersBarPro
                 <ControlledInput
                     control={form.control}
                     name="nombre"
-                    label="Nombre"
+                    label="Nombre de lote"
                     placeholder="Buscar por nombre de lote..."
                     icon={<Search className="size-4" />}
                     className="sm:col-span-2"
                 />
-                <ControlledInput
-                    control={form.control}
-                    name="lote_id"
-                    label="ID de lote"
-                    type="number"
-                    placeholder="Ej. 128"
-                    valueAsNumber
-                />
-                <ControlledInput
+                <ControlledSelector
                     control={form.control}
                     name="cliente_id"
-                    label="ID de cliente"
-                    type="number"
-                    placeholder="Ej. 7"
+                    label="Cliente"
+                    placeholder="Ej. Ejemplo"
                     valueAsNumber
+                    className="sm:col-span-2"
+                    options={clientes.map(item => ({ value: item.id, label: item.nombre }))}
                 />
                 <ControlledDatePicker
                     control={form.control}
