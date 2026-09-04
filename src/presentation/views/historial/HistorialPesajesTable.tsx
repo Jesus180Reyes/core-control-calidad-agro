@@ -6,6 +6,7 @@ import {
 import { formatDate } from '#/presentation/helpers/date/formatDate'
 import { formatWeight } from '#/presentation/helpers/number/formatWeight'
 import { useHistorialPesajes } from '#/presentation/hooks/historial/useHistorialPesajes'
+import type { FiltrosHistorial } from '#/presentation/schema/historial/filtrosHistorialSchema'
 import type { PesajeData } from '#/presentation/types/pesajes/pesajesResponse'
 
 function createColumns(): DataTableColumns<PesajeData> {
@@ -71,8 +72,12 @@ function createColumns(): DataTableColumns<PesajeData> {
     ]
 }
 
-export function HistorialPesajesTable() {
-    const { pesajes } = useHistorialPesajes();
+interface HistorialPesajesTableProps {
+    filtros: FiltrosHistorial
+}
+
+export function HistorialPesajesTable({ filtros }: HistorialPesajesTableProps) {
+    const { pesajes } = useHistorialPesajes(filtros);
 
     const columns = createColumns();
 
@@ -84,7 +89,7 @@ export function HistorialPesajesTable() {
             defaultSorting={[{ id: 'created_at', desc: true }]}
             maxHeight="34rem"
             emptyTitle="No hay pesajes registrados"
-            emptyDescription="Todavía no se registró ningún pesaje en la planta."
+            emptyDescription="Ningún pesaje coincide con los filtros aplicados."
         />
     )
 }
