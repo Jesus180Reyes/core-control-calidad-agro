@@ -1,9 +1,6 @@
 import z from 'zod'
 
-/**
- * Un campo que se escribió y después se borró llega como `''`, y `''` no es un
- * filtro: sin esto el `.min(1)` lo rechaza y el `parse` del submit tira.
- */
+
 const vacioAUndefined = (valor: unknown) => (valor === '' ? undefined : valor)
 
 export const filtrosPesajesSchema = z.object({
