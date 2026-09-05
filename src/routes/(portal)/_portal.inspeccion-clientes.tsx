@@ -11,6 +11,8 @@ import { CustomButton } from '#/presentation/components/shared/button/CustomButt
 import { CustomDialog } from '#/presentation/components/shared/dialog/CustomDialog'
 import { LoadingState } from '#/presentation/components/shared/LoadingState'
 import { ClientInspectionView } from '#/presentation/views/inspeccion-clientes/ClientInspectionView'
+import { ClientesFiltersBar } from '#/presentation/views/inspeccion-clientes/ClientesFiltersBar'
+import type { FiltrosClientes } from '#/presentation/schema/inspeccion-clientes/filtrosClientesSchema'
 import { FormProvider, useForm, type SubmitErrorHandler, type SubmitHandler } from 'react-hook-form'
 import { createClienteSchema, type CreateClienteSchema } from '#/presentation/schema/crear-cliente/crearClienteSchema'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -23,6 +25,7 @@ export const Route = createFileRoute('/(portal)/_portal/inspeccion-clientes')({
 
 function RouteComponent() {
     const [dialogoCrearAbierto, setDialogoCrearAbierto] = useState(false)
+    const [filtros, setFiltros] = useState<FiltrosClientes>({})
     const form = useForm<CreateClienteSchema>({
         resolver: zodResolver(createClienteSchema),
     });
@@ -68,8 +71,12 @@ function RouteComponent() {
                 }
             />
 
+            <Suspense fallback={<LoadingState label="Cargando filtros..." />}>
+                <ClientesFiltersBar filtros={filtros} onApply={setFiltros} />
+            </Suspense>
+
             <Suspense fallback={<LoadingState label="Cargando clientes..." />}>
-                <ClientInspectionView />
+                <ClientInspectionView filtros={filtros} />
             </Suspense>
 
             <CustomDialog

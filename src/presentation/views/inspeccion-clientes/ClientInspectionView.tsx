@@ -6,6 +6,7 @@ import {
 } from '#/presentation/components/shared/table/DataTable'
 import type { Cliente } from '#/presentation/types/clientes/clientes.types'
 import { useClientInspection } from '#/presentation/hooks/inspeccion-clientes/useClientInspection'
+import type { FiltrosClientes } from '#/presentation/schema/inspeccion-clientes/filtrosClientesSchema'
 
 function Dato({ valor }: { valor: string | null }) {
     if (!valor) return <span className="text-text-muted">—</span>
@@ -63,8 +64,12 @@ function crearColumnas(
     ]
 }
 
-export function ClientInspectionView() {
-    const { clientes } = useClientInspection()
+interface ClientInspectionViewProps {
+    filtros: FiltrosClientes
+}
+
+export function ClientInspectionView({ filtros }: ClientInspectionViewProps) {
+    const { clientes } = useClientInspection(filtros)
 
     const columns = crearColumnas();
 
