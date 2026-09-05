@@ -84,29 +84,55 @@ export function useControlCalidad(cliente: Cliente | null, lote: Lote | null) {
 
     const [mostrarBloqueo, setMostrarBloqueo] = useState<boolean>(false)
 
+    /**
+     * Un peso crítico ya autorizado con PIN no vuelve a bloquear mientras se
+     * pide la tara: la lectura viva sigue llegando y reevaluaría el rango.
+     */
+    const [autorizado, setAutorizado] = useState<boolean>(false)
+
     useEffect(() => {
         // Solo se bloquea con lecturas confiables: la báscula debe estar
         // transmitiendo y el peso ya estabilizado (evita disparos durante la carga).
         // Sin muestra confirmada no hay nada que autorizar ni que guardar.
         setMostrarBloqueo(
-            esAltoRango && scale.hayFlujoDatos && !scale.isStabilizing && scale.pesoEstable !== null,
+            !autorizado && esAltoRango && scale.hayFlujoDatos && !scale.isStabilizing && scale.pesoEstable !== null,
         )
-    }, [esAltoRango, scale.hayFlujoDatos, scale.isStabilizing, scale.pesoEstable])
+    }, [autorizado, esAltoRango, scale.hayFlujoDatos, scale.isStabilizing, scale.pesoEstable])
 
     const pesajes = usePesajes(lote)
 
+    /** El dialog de tara es la única puerta al `POST /pesajes`. */
+    const [taraAbierta, setTaraAbierta] = useState<boolean>(false)
+
+    const solicitarTara = () => {
+        if (scale.pesoEstable === null) return
+        setTaraAbierta(true)
+    }
+
     /**
      * Guarda la muestra ya confirmada —no la lectura viva— y solo si el
-     * servidor la aceptó prepara la siguiente. Si falla, el peso se queda en
-     * pantalla: el producto sigue sobre la plataforma y se puede reintentar.
+     * servidor la aceptó prepara la siguiente. Si falla, el dialog se queda
+     * abierto con el peso en pantalla: el producto sigue sobre la plataforma y
+     * se puede reintentar sin volver a pesar.
      */
-    const guardarPesaje = async (): Promise<boolean> => {
-        if (scale.pesoEstable === null) return false
+    const confirmarTara = async (tara: number): Promise<void> => {
+        if (scale.pesoEstable === null) return
 
-        const guardado = await pesajes.guardarPesaje(scale.pesoEstable)
-        if (guardado) scale.reiniciarPesaje()
+        const guardado = await pesajes.guardarPesaje(scale.pesoEstable, tara)
+        if (!guardado) return
 
-        return guardado
+        scale.reiniciarPesaje()
+        setTaraAbierta(false)
+        setAutorizado(false)
+    }
+
+    const cancelarTara = () => {
+        if (pesajes.guardando) return
+
+        setTaraAbierta(false)
+        // Cancelar la tara de un peso crítico devuelve el bloqueo: el pesaje
+        // sigue fuera de rango y no puede quedar sin autorizar.
+        setAutorizado(false)
     }
 
     const handleRechazarPesaje = () => {
@@ -115,12 +141,13 @@ export function useControlCalidad(cliente: Cliente | null, lote: Lote | null) {
         scale.reiniciarPesaje()
     }
 
-    const handleAutorizarConPin = async (pinIngresado: string): Promise<boolean> => {
+    /** El PIN sólo autoriza; el guardado ocurre al confirmar la tara. */
+    const handleAutorizarConPin = (pinIngresado: string): boolean => {
         const pinCorrecto = "1234"
         if (pinIngresado !== pinCorrecto) return false
 
-        const guardado = await guardarPesaje()
-        if (guardado) setMostrarBloqueo(false)
+        setAutorizado(true)
+        setTaraAbierta(true)
 
         return true
     }
@@ -134,8 +161,14 @@ export function useControlCalidad(cliente: Cliente | null, lote: Lote | null) {
             diferencia,
             requiereReajuste,
         },
-        guardarPesaje,
         guardando: pesajes.guardando,
+        tara: {
+            abierta: taraAbierta,
+            pesoBruto: scale.pesoEstable ?? 0,
+            solicitar: solicitarTara,
+            cancelar: cancelarTara,
+            confirmar: confirmarTara,
+        },
         bloqueo: {
             mostrar: mostrarBloqueo,
             handleRechazar: handleRechazarPesaje,

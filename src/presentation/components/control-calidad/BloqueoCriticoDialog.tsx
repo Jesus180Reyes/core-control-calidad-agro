@@ -14,7 +14,7 @@ const LARGO_PIN = 4
 
 interface BloqueoCriticoDialogProps {
     isOpen: boolean
-    onAutorizar: (pin: string) => Promise<boolean> | void
+    onAutorizar: (pin: string) => boolean | Promise<boolean> | void
     onRechazar: () => void
 }
 

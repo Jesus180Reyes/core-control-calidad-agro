@@ -16,13 +16,14 @@ export function usePesajes(lote: Lote | null) {
         onError: (error) => toast.error(error.message),
     });
 
-    const guardarPesaje = (pesoBruto: number): Promise<boolean> => {
+    const guardarPesaje = (pesoBruto: number, tara: number): Promise<boolean> => {
         if (!lote) return Promise.resolve(false)
 
         return mutation
             .mutateAsync({
                 lote_id: lote.id,
                 peso_bruto: pesoBruto,
+                tara,
             })
             .then(() => true, () => false)
     }

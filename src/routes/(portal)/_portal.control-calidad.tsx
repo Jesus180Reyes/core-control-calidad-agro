@@ -3,6 +3,7 @@ import { BannerEstabilizacion } from '#/presentation/components/control-calidad/
 import { BloqueoCriticoDialog } from '#/presentation/components/control-calidad/BloqueoCriticoDialog'
 import { HeaderControlCalidad } from '#/presentation/components/control-calidad/HeaderControlCalidad'
 import { SelectorBasculaDialog } from '#/presentation/components/control-calidad/SelectorBasculaDialog'
+import { TaraPesajeDialog } from '#/presentation/components/control-calidad/TaraPesajeDialog'
 import { useControlCalidad } from '#/presentation/hooks/bascula/useControlCalidad'
 import { DetallesOperacionCard } from '#/presentation/views/control-calidad/DetallesOperacionCard'
 import { MonitoreoBasculaCard } from '#/presentation/views/control-calidad/MonitoreoBasculaCard'
@@ -50,7 +51,7 @@ function ControlCalidadPage() {
         selector,
         pesajeInfo,
         bloqueo,
-        guardarPesaje,
+        tara,
         guardando,
 
     } = useControlCalidad(cliente, lote)
@@ -96,11 +97,20 @@ function ControlCalidadPage() {
                         isStabilizing={scale.isStabilizing}
                         unidad={parametros.unidad}
                         guardando={guardando}
-                        onGuardar={() => void guardarPesaje()}
+                        onGuardar={tara.solicitar}
                         onImprimirEtiqueta={() => console.log('Vamos a imprimir')}
                     />
                 </div>
             </div>
+
+            <TaraPesajeDialog
+                open={tara.abierta}
+                onOpenChange={(abierto) => { if (!abierto) tara.cancelar() }}
+                pesoBruto={tara.pesoBruto}
+                unidad={parametros.unidad}
+                guardando={guardando}
+                onConfirm={(valor) => void tara.confirmar(valor)}
+            />
 
             <BloqueoCriticoDialog
                 isOpen={bloqueo.mostrar}
