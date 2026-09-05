@@ -107,6 +107,7 @@ function ControlCalidadPage() {
                 open={tara.abierta}
                 onOpenChange={(abierto) => { if (!abierto) tara.cancelar() }}
                 pesoBruto={tara.pesoBruto}
+                tiempoRestante={tara.tiempoRestante}
                 unidad={parametros.unidad}
                 guardando={guardando}
                 onConfirm={(valor) => void tara.confirmar(valor)}

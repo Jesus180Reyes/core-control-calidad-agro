@@ -210,6 +210,8 @@ export function useSerialScale({
     const pesoFlujoRef = useRef<number>(0)
     const objetoEnBasculaRef = useRef<boolean>(false)
     const pesajeCompletadoRef = useRef<boolean>(false)
+    /** Valor de la muestra confirmada; sirve para detectar que el peso cambió después. */
+    const pesoConfirmadoRef = useRef<number | null>(null)
     const referenciaEstabilidadRef = useRef<number>(0)
     const inicioEstabilidadRef = useRef<number | null>(null)
 
@@ -249,6 +251,7 @@ export function useSerialScale({
         detenerTicker()
         objetoEnBasculaRef.current = false
         pesajeCompletadoRef.current = false
+        pesoConfirmadoRef.current = null
         inicioEstabilidadRef.current = null
         referenciaEstabilidadRef.current = 0
         setIsStabilizing(false)
@@ -264,6 +267,7 @@ export function useSerialScale({
         }
 
         pesajeCompletadoRef.current = true
+        pesoConfirmadoRef.current = peso
         inicioEstabilidadRef.current = null
         detenerTicker()
         setIsStabilizing(false)
@@ -321,16 +325,31 @@ export function useSerialScale({
             return
         }
 
-        // Muestra ya confirmada: se espera a que retiren el producto (o a reiniciarPesaje()).
-        if (pesajeCompletadoRef.current) return
-
-        if (!objetoEnBasculaRef.current) {
+        const abrirVentana = () => {
             objetoEnBasculaRef.current = true
             referenciaEstabilidadRef.current = peso
             inicioEstabilidadRef.current = Date.now()
             setIsStabilizing(true)
             setTiempoRestante(segundos)
             iniciarTicker()
+        }
+
+        if (pesajeCompletadoRef.current) {
+            const confirmado = pesoConfirmadoRef.current
+            // Muestra ya confirmada y producto quieto: no hay nada que recalcular.
+            if (confirmado === null || Math.abs(peso - confirmado) <= tolerancia) return
+
+            // Cambió lo que hay sobre la plataforma: la muestra confirmada quedó
+            // vieja y no puede guardarse. Se invalida y la ventana corre de nuevo.
+            pesajeCompletadoRef.current = false
+            pesoConfirmadoRef.current = null
+            setPesoEstable(null)
+            abrirVentana()
+            return
+        }
+
+        if (!objetoEnBasculaRef.current) {
+            abrirVentana()
             return
         }
 

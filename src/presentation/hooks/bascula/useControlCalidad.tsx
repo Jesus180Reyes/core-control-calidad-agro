@@ -90,6 +90,15 @@ export function useControlCalidad(cliente: Cliente | null, lote: Lote | null) {
      */
     const [autorizado, setAutorizado] = useState<boolean>(false)
 
+    /**
+     * La autorización vive atada a una muestra concreta. Si la muestra se
+     * invalida —el operario agregó o quitó producto y la báscula reestabiliza—
+     * el PIN anterior ya no cubre el peso nuevo y hay que volver a pedirlo.
+     */
+    useEffect(() => {
+        if (scale.pesoEstable === null) setAutorizado(false)
+    }, [scale.pesoEstable])
+
     useEffect(() => {
         // Solo se bloquea con lecturas confiables: la báscula debe estar
         // transmitiendo y el peso ya estabilizado (evita disparos durante la carga).
@@ -164,7 +173,10 @@ export function useControlCalidad(cliente: Cliente | null, lote: Lote | null) {
         guardando: pesajes.guardando,
         tara: {
             abierta: taraAbierta,
-            pesoBruto: scale.pesoEstable ?? 0,
+            /** `null` mientras la báscula reestabiliza: no hay muestra que guardar. */
+            pesoBruto: scale.pesoEstable,
+            reestabilizando: scale.pesoEstable === null,
+            tiempoRestante: scale.tiempoRestante,
             solicitar: solicitarTara,
             cancelar: cancelarTara,
             confirmar: confirmarTara,

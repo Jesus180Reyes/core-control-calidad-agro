@@ -152,6 +152,33 @@ describe('useSerialScale', () => {
         expect(onPesajeEstable).toHaveBeenCalledWith(240)
     })
 
+    it('invalida la muestra y reestabiliza si el peso cambia después de confirmarla', async () => {
+        const onPesajeEstable = vi.fn()
+        const { result } = montarHook({ onPesajeEstable })
+
+        await act(async () => { await result.current.connectSerial() })
+
+        await emitir('57,34\r\n')
+        await avanzar(5100)
+        expect(result.current.pesoEstable).toBe(57.34)
+
+        // Ruido dentro de la tolerancia sobre la muestra ya confirmada: no toca nada.
+        await emitir('59,00\r\n')
+        expect(result.current.pesoEstable).toBe(57.34)
+        expect(result.current.isStabilizing).toBe(false)
+
+        // Se agrega producto: la muestra vieja ya no sirve.
+        await emitir('119,02\r\n')
+        expect(result.current.pesoEstable).toBeNull()
+        expect(result.current.isStabilizing).toBe(true)
+        expect(result.current.tiempoRestante).toBe(5)
+
+        await avanzar(5100)
+        expect(result.current.pesoEstable).toBe(119.02)
+        expect(onPesajeEstable).toHaveBeenLastCalledWith(119.02)
+        expect(onPesajeEstable).toHaveBeenCalledTimes(2)
+    })
+
     it('interpreta el signo negativo aunque venga separado del número', async () => {
         const { result } = montarHook({ umbralCero: 1 })
 
