@@ -5,18 +5,14 @@ import { TanStackDevtools } from '@tanstack/react-devtools'
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 
 import { Toaster } from '@/components/ui/sonner'
+import { NotFound } from '#/presentation/components/shared/NotFound'
 import { ThemeProvider } from '#/presentation/theme/ThemeProvider'
 import { queryClient } from '#/infrastructure/query-client/query-client'
 import appCss from '../styles.css?url'
 const isDev = process.env.NODE_ENV === 'development'
 
 export const Route = createRootRoute({
-  notFoundComponent: () => (
-    <div>
-      <h1>404</h1>
-      <p>Page not found.</p>
-    </div>
-  ),
+  notFoundComponent: () => <NotFound />,
 
   head: () => ({
     meta: [
