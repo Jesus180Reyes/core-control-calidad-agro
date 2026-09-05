@@ -111,6 +111,6 @@
   --destructive: #f87171;
 }
 
-@variant dark (.dark &);
-@variant light (.light &);
+@custom-variant dark (.dark &);
+@custom-variant light (.light &);
 
