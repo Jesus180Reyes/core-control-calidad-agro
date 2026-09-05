@@ -122,9 +122,8 @@ function DatePickerField<TFieldValues extends FieldValues>({
             {label && (
                 <Label
                     htmlFor={name}
-                    className={`text-[11px] font-bold tracking-wider uppercase transition-colors duration-200 ${
-                        error ? 'text-rose-500' : 'text-text-muted group-focus-within:text-brand'
-                    }`}
+                    className={`text-[11px] font-bold tracking-wider uppercase transition-colors duration-200 ${error ? 'text-rose-500' : 'text-text-muted group-focus-within:text-brand'
+                        }`}
                 >
                     {label}
                 </Label>
@@ -154,7 +153,7 @@ function DatePickerField<TFieldValues extends FieldValues>({
                         'focus-visible:bg-surface focus-visible:border-brand/60 focus-visible:ring-4 focus-visible:ring-brand/15 focus-visible:outline-none',
                         'aria-invalid:border-rose-500/70 aria-invalid:ring-rose-500/15 dark:aria-invalid:border-rose-500/60',
                         'disabled:cursor-not-allowed disabled:opacity-60',
-                        'data-[popup-open]:bg-surface data-[popup-open]:border-brand/60',
+                        'data-popup-open:bg-surface data-popup-open:border-brand/60',
                     ].join(' ')}
                 >
                     {icon && (

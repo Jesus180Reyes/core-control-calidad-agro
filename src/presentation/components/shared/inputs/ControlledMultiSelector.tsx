@@ -85,7 +85,7 @@ export function ControlledMultiSelector<TFieldValues extends FieldValues>({
                                     'hover:border-brand/30 focus-visible:border-brand/60 focus-visible:ring-4 focus-visible:ring-brand/15 outline-none',
                                     'aria-invalid:border-rose-500/70 aria-invalid:ring-rose-500/15',
                                     // La flecha gira mientras el panel está abierto.
-                                    '[&>svg:last-child]:transition-transform [&>svg:last-child]:duration-200 data-[popup-open]:[&>svg:last-child]:rotate-180',
+                                    '[&>svg:last-child]:transition-transform [&>svg:last-child]:duration-200 data-popup-open:[&>svg:last-child]:rotate-180',
                                 ].join(' ')}
                             >
                                 {elegidas.length === 0 ? (

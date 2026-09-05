@@ -117,7 +117,7 @@ export function ControlledSelector<TFieldValues extends FieldValues>({
                                     'aria-invalid:border-rose-500/70 aria-invalid:ring-rose-500/15 dark:aria-invalid:border-rose-500/60',
                                     '[&_svg]:text-text-muted/70 group-focus-within:[&_svg]:text-brand',
                                     // La flecha gira mientras el panel está abierto.
-                                    '[&>svg:last-child]:transition-transform [&>svg:last-child]:duration-200 data-[popup-open]:[&>svg:last-child]:rotate-180',
+                                    '[&>svg:last-child]:transition-transform [&>svg:last-child]:duration-200 data-popup-open:[&>svg:last-child]:rotate-180',
                                     icon ? 'pl-10' : ''
                                 ].join(' ')}
                             >

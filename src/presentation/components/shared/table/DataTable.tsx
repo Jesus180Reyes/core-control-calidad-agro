@@ -153,7 +153,7 @@ export function DataTable<TData extends RowData>({
                 // `Table`, que no acepta className: el alto máximo se le aplica
                 // desde acá, apuntando a su slot, para no editar table.tsx.
                 maxHeight &&
-                    '[&>[data-slot=table-container]]:max-h-[var(--data-table-max-h)] [&>[data-slot=table-container]]:overflow-y-auto',
+                '*:data-[slot=table-container]:max-h-(--data-table-max-h) *:data-[slot=table-container]:overflow-y-auto',
                 className,
             )}
             style={
@@ -284,18 +284,18 @@ export function DataTable<TData extends RowData>({
                             onKeyDown={
                                 onRowClick
                                     ? (evento) => {
-                                          if (
-                                              evento.key !== 'Enter' &&
-                                              evento.key !== ' '
-                                          ) {
-                                              return
-                                          }
+                                        if (
+                                            evento.key !== 'Enter' &&
+                                            evento.key !== ' '
+                                        ) {
+                                            return
+                                        }
 
-                                          // El espacio scrollea la página si no
-                                          // se lo frena.
-                                          evento.preventDefault()
-                                          onRowClick(row.original)
-                                      }
+                                        // El espacio scrollea la página si no
+                                        // se lo frena.
+                                        evento.preventDefault()
+                                        onRowClick(row.original)
+                                    }
                                     : undefined
                             }
                             // `border-0` desactiva el borde de la primitiva, que
@@ -303,7 +303,7 @@ export function DataTable<TData extends RowData>({
                             className={cn(
                                 'group/row border-0 transition-colors duration-150 hover:bg-brand/[0.035]',
                                 onRowClick &&
-                                    'cursor-pointer focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-brand',
+                                'cursor-pointer focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-brand',
                             )}
                         >
                             {row.getAllCells().map((cell, indice) => {
@@ -324,8 +324,8 @@ export function DataTable<TData extends RowData>({
                                             // una sombra sobre la fila no se
                                             // pinta parejo.
                                             indice === 0 &&
-                                                onRowClick &&
-                                                'transition-shadow group-hover/row:shadow-[inset_2px_0_0_0_var(--color-brand)]',
+                                            onRowClick &&
+                                            'transition-shadow group-hover/row:shadow-[inset_2px_0_0_0_var(--color-brand)]',
                                             meta?.cellClassName,
                                         )}
                                     >
