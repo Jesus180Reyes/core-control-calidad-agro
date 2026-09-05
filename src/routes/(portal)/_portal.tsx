@@ -1,21 +1,16 @@
-import { useEffect } from 'react'
+import { Suspense, useEffect } from 'react'
 import { useQueryErrorResetBoundary } from '@tanstack/react-query'
 import { createFileRoute, Outlet, redirect, useLocation, useNavigate } from '@tanstack/react-router'
 
 import { Button } from '#/components/ui/button'
 import { ErrorBoundary } from '#/presentation/components/shared/ErrorBoundary'
+import { LoadingState } from '#/presentation/components/shared/LoadingState'
 import { Sidebar } from '#/presentation/components/shared/SideBar'
 import { leerToken } from '#/presentation/hooks/auth/almacenamientoSesion'
 import { useAuth } from '#/presentation/hooks/auth/useAuth'
 
 export const Route = createFileRoute('/(portal)/_portal')({
     ssr: false,
-    notFoundComponent: () => (
-        <div>
-            <h1>404</h1>
-            <p>Page not found.</p>
-        </div>
-    ),
     beforeLoad: async () => {
         if (typeof window !== 'undefined' && !leerToken()) {
             throw redirect({ to: '/login' })
@@ -60,7 +55,9 @@ function PortalLayout() {
                     </div>
                 )}
             >
-                <Outlet />
+                <Suspense fallback={<LoadingState label="Cargando pantalla..." size="lg" />}>
+                    <Outlet />
+                </Suspense>
             </ErrorBoundary>
         </main>
     </div>
