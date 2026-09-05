@@ -22,8 +22,9 @@
   }
 }
 @theme {
-  --color-brand: var(--brand);         
-  --color-success: var(--success);     
+  --color-brand: var(--brand);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
   --color-bg-app: var(--bg-app);       
   --color-surface: var(--surface);     
   --color-border-ui: var(--border-ui); 
@@ -83,6 +84,7 @@
 :root, .light {
   --brand: #4f46e5;
   --success: #10b981;
+  --warning: #d97706;
   --bg-app: #f9fafb;
   --surface: #ffffff;
   --border-ui: #f1f5f9;
@@ -100,6 +102,7 @@
 .dark {
   --brand: #818cf8;
   --success: #34d399;
+  --warning: #fbbf24;
   --bg-app: #090d16;
   --surface: #111827;
   --border-ui: #1f2937;

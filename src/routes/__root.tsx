@@ -43,7 +43,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
           <ThemeProvider defaultTheme="system">
             {children || <Outlet />}
 
-            <Toaster position="bottom-right" richColors />
+            <Toaster />
           </ThemeProvider>
 
           {isDev && <ReactQueryDevtools initialIsOpen={false} />}
