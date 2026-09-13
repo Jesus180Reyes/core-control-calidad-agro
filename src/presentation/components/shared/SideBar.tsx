@@ -65,6 +65,12 @@ export function Sidebar() {
             permission: PERMISSIONS.MODULOCLIENTES,
             icon: <Users className="size-4.5" strokeWidth={2.1} />,
         },
+        {
+            label: 'Clientes Finalizados',
+            to: '/clientes-finalizados',
+            permission: PERMISSIONS.MODULOCLIENTES,
+            icon: <Users className="size-4.5" strokeWidth={2.1} />,
+        },
     ]
 
     return (
