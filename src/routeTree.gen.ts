@@ -19,7 +19,6 @@ import { Route as portalPortalInspeccionClientesRouteImport } from './routes/(po
 import { Route as portalPortalHistorialRouteImport } from './routes/(portal)/_portal.historial'
 import { Route as portalPortalCrearPesajeRouteImport } from './routes/(portal)/_portal.crear-pesaje'
 import { Route as portalPortalControlCalidadRouteImport } from './routes/(portal)/_portal.control-calidad'
-import { Route as portalPortalClientesFinalizadosRouteImport } from './routes/(portal)/_portal.clientes-finalizados'
 import { Route as portalPortalClientesRouteImport } from './routes/(portal)/_portal.clientes'
 import { Route as authAuthLoginRouteImport } from './routes/(auth)/_auth.login'
 
@@ -76,12 +75,6 @@ const portalPortalControlCalidadRoute =
     path: '/control-calidad',
     getParentRoute: () => portalPortalRoute,
   } as any)
-const portalPortalClientesFinalizadosRoute =
-  portalPortalClientesFinalizadosRouteImport.update({
-    id: '/clientes-finalizados',
-    path: '/clientes-finalizados',
-    getParentRoute: () => portalPortalRoute,
-  } as any)
 const portalPortalClientesRoute = portalPortalClientesRouteImport.update({
   id: '/clientes',
   path: '/clientes',
@@ -96,7 +89,6 @@ const authAuthLoginRoute = authAuthLoginRouteImport.update({
 export interface FileRoutesByFullPath {
   '/login': typeof authAuthLoginRoute
   '/clientes': typeof portalPortalClientesRoute
-  '/clientes-finalizados': typeof portalPortalClientesFinalizadosRoute
   '/control-calidad': typeof portalPortalControlCalidadRoute
   '/crear-pesaje': typeof portalPortalCrearPesajeRoute
   '/historial': typeof portalPortalHistorialRoute
@@ -109,7 +101,6 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/login': typeof authAuthLoginRoute
   '/clientes': typeof portalPortalClientesRoute
-  '/clientes-finalizados': typeof portalPortalClientesFinalizadosRoute
   '/control-calidad': typeof portalPortalControlCalidadRoute
   '/crear-pesaje': typeof portalPortalCrearPesajeRoute
   '/historial': typeof portalPortalHistorialRoute
@@ -125,7 +116,6 @@ export interface FileRoutesById {
   '/(portal)/_portal': typeof portalPortalRouteWithChildren
   '/(auth)/_auth/login': typeof authAuthLoginRoute
   '/(portal)/_portal/clientes': typeof portalPortalClientesRoute
-  '/(portal)/_portal/clientes-finalizados': typeof portalPortalClientesFinalizadosRoute
   '/(portal)/_portal/control-calidad': typeof portalPortalControlCalidadRoute
   '/(portal)/_portal/crear-pesaje': typeof portalPortalCrearPesajeRoute
   '/(portal)/_portal/historial': typeof portalPortalHistorialRoute
@@ -140,7 +130,6 @@ export interface FileRouteTypes {
   fullPaths:
     | '/login'
     | '/clientes'
-    | '/clientes-finalizados'
     | '/control-calidad'
     | '/crear-pesaje'
     | '/historial'
@@ -153,7 +142,6 @@ export interface FileRouteTypes {
   to:
     | '/login'
     | '/clientes'
-    | '/clientes-finalizados'
     | '/control-calidad'
     | '/crear-pesaje'
     | '/historial'
@@ -168,7 +156,6 @@ export interface FileRouteTypes {
     | '/(portal)/_portal'
     | '/(auth)/_auth/login'
     | '/(portal)/_portal/clientes'
-    | '/(portal)/_portal/clientes-finalizados'
     | '/(portal)/_portal/control-calidad'
     | '/(portal)/_portal/crear-pesaje'
     | '/(portal)/_portal/historial'
@@ -256,13 +243,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof portalPortalControlCalidadRouteImport
       parentRoute: typeof portalPortalRoute
     }
-    '/(portal)/_portal/clientes-finalizados': {
-      id: '/(portal)/_portal/clientes-finalizados'
-      path: '/clientes-finalizados'
-      fullPath: '/clientes-finalizados'
-      preLoaderRoute: typeof portalPortalClientesFinalizadosRouteImport
-      parentRoute: typeof portalPortalRoute
-    }
     '/(portal)/_portal/clientes': {
       id: '/(portal)/_portal/clientes'
       path: '/clientes'
@@ -294,7 +274,6 @@ const authAuthRouteWithChildren = authAuthRoute._addFileChildren(
 
 interface portalPortalRouteChildren {
   portalPortalClientesRoute: typeof portalPortalClientesRoute
-  portalPortalClientesFinalizadosRoute: typeof portalPortalClientesFinalizadosRoute
   portalPortalControlCalidadRoute: typeof portalPortalControlCalidadRoute
   portalPortalCrearPesajeRoute: typeof portalPortalCrearPesajeRoute
   portalPortalHistorialRoute: typeof portalPortalHistorialRoute
@@ -307,7 +286,6 @@ interface portalPortalRouteChildren {
 
 const portalPortalRouteChildren: portalPortalRouteChildren = {
   portalPortalClientesRoute: portalPortalClientesRoute,
-  portalPortalClientesFinalizadosRoute: portalPortalClientesFinalizadosRoute,
   portalPortalControlCalidadRoute: portalPortalControlCalidadRoute,
   portalPortalCrearPesajeRoute: portalPortalCrearPesajeRoute,
   portalPortalHistorialRoute: portalPortalHistorialRoute,
