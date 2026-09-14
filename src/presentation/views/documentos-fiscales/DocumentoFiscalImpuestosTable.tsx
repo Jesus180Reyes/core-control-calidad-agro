@@ -60,6 +60,7 @@ export function DocumentoFiscalImpuestosTable({
             maxHeight="32rem"
             emptyTitle="El documento no tiene impuestos"
             emptyDescription="Este documento fiscal se emitió sin tarifas de impuesto aplicadas."
+            className="animate-in fade-in-0 slide-in-from-bottom-2 duration-500 ease-out"
         />
     )
 }
