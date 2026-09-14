@@ -1,17 +1,27 @@
 import { Link, useLocation } from '@tanstack/react-router'
-import { ClipboardCheck, History, LogOut, Scale, SlidersHorizontal, Users } from 'lucide-react'
+import { ChevronRight, ClipboardCheck, LogOut, Scale, SlidersHorizontal, Users } from 'lucide-react'
+import { useState } from 'react'
 
 import { Can } from '#/presentation/components/shared/Can'
 import { useAuth } from '#/presentation/hooks/auth/useAuth'
 import { usePermissions } from '#/presentation/hooks/auth/usePermissions'
 import { PERMISSIONS, type Permission } from '#/presentation/types/auth/permissions'
 
-interface NavItem {
+interface NavChild {
     label: string
     to: string
+    rutasActivas?: string[]
+    permission?: Permission
+}
+
+interface NavItem {
+    label: string
+    /** Sin `to` el item sólo abre y cierra sus hijos. */
+    to?: string
     icon: React.ReactNode
     rutasActivas?: string[]
     permission?: Permission
+    children?: NavChild[]
 }
 
 const CLASES_ITEM = 'group relative flex items-center gap-3.5 px-3.5 py-2.5 rounded-2xl text-sm font-semibold cursor-pointer outline-none transition-all duration-200 ease-out active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-brand/40'
@@ -28,6 +38,21 @@ const CLASES_ITEM_PIE = 'group flex w-full items-center gap-3.5 px-3.5 py-2.5 ro
 
 const CLASES_ENTRADA = 'animate-in fade-in slide-in-from-left-3 fill-mode-both'
 
+const CLASES_HIJO = 'group/hijo relative flex items-center gap-2.5 pl-3 pr-3 py-2 rounded-xl text-[13px] cursor-pointer outline-none transition-all duration-200 ease-out active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-brand/40'
+
+const CLASES_HIJO_ACTIVO = 'bg-brand/10 text-brand font-bold'
+
+const CLASES_HIJO_INACTIVO = 'text-text-muted/90 font-semibold hover:bg-muted/60 hover:text-text-main hover:translate-x-0.5'
+
+/** Riel vertical que agrupa a los hijos; se desvanece al final. */
+const CLASES_RIEL = 'absolute left-0 top-1 bottom-1 w-px rounded-full bg-linear-to-b from-border-ui via-border-ui/70 to-transparent'
+
+const CLASES_MARCA_HIJO = 'absolute -left-3 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full transition-all duration-200 ease-out'
+
+const CLASES_MARCA_HIJO_ACTIVA = 'h-5 w-[3px] bg-brand shadow-[0_0_8px_-1px_var(--brand)]'
+
+const CLASES_MARCA_HIJO_INACTIVA = 'h-1.5 w-[3px] bg-text-muted/35 group-hover/hijo:h-3.5 group-hover/hijo:bg-text-muted/70'
+
 function inicialesDe(nombreCompleto: string): string {
     const palabras = nombreCompleto.trim().split(/\s+/)
     const primera = palabras[0]?.[0] ?? ''
@@ -39,6 +64,11 @@ export function Sidebar() {
     const { usuario, logout } = useAuth()
     const { has } = usePermissions()
     const { pathname } = useLocation()
+    const [abiertos, setAbiertos] = useState<Record<string, boolean>>({})
+
+    const esRutaActiva = (item: NavItem | NavChild) =>
+        pathname === item.to || (item.rutasActivas?.includes(pathname) ?? false)
+
     const menuItems: NavItem[] = [
         // {
         //     label: 'Dashboard',
@@ -46,19 +76,21 @@ export function Sidebar() {
         //     icon: <LayoutDashboard className="size-[18px]" strokeWidth={2.1} />,
         // },
         {
-
             label: 'Control de Calidad',
-            to: '/clientes',
-            rutasActivas: ['/control-calidad'],
             permission: PERMISSIONS.MODULOCONTROLCALIDAD,
             icon: <ClipboardCheck className="size-4.5" strokeWidth={2.1} />,
+            children: [
+                {
+                    label: 'Registrar Pesaje',
+                    to: '/clientes',
+                    rutasActivas: ['/control-calidad'],
+                },
+                {
+                    label: 'Historial Pesajes',
+                    to: '/historial',
+                },
+            ],
         },
-        {
-            label: 'Historial Pesajes',
-            to: '/historial',
-            icon: <History className="size-4.5" strokeWidth={2.1} />,
-        },
-
         {
             label: 'Clientes',
             to: '/inspeccion-clientes',
@@ -94,16 +126,20 @@ export function Sidebar() {
 
                         if (item.permission !== undefined && !has(item.permission)) return null
 
-                        const activo = pathname === item.to || (item.rutasActivas?.includes(pathname) ?? false)
+                        const hijos = (item.children ?? []).filter(
+                            (hijo) => hijo.permission === undefined || has(hijo.permission),
+                        )
 
-                        return (
-                            <Link
-                                key={item.to}
-                                to={item.to}
-                                aria-current={activo ? 'page' : undefined}
-                                style={{ animationDelay: `${indice * 70}ms`, animationDuration: '400ms' }}
-                                className={`${CLASES_ITEM} ${CLASES_ENTRADA} ${activo ? CLASES_ACTIVO : CLASES_INACTIVO}`}
-                            >
+                        // Un item sin `to` y sin hijos visibles no lleva a ningún lado.
+                        if (item.to === undefined && hijos.length === 0) return null
+
+                        const hijoActivo = hijos.some(esRutaActiva)
+                        const activo = esRutaActiva(item) || hijoActivo
+                        const abierto = abiertos[item.label] ?? hijoActivo
+                        const estilosEntrada = { animationDelay: `${indice * 70}ms`, animationDuration: '400ms' }
+
+                        const contenido = (
+                            <>
                                 {activo && <span className={CLASES_MARCA_ACTIVA} aria-hidden />}
                                 <span
                                     className={`${CLASES_CHIP} ${activo
@@ -114,7 +150,76 @@ export function Sidebar() {
                                     {item.icon}
                                 </span>
                                 <span className="truncate">{item.label}</span>
-                            </Link>
+                            </>
+                        )
+
+                        if (hijos.length === 0) {
+                            return (
+                                <Link
+                                    key={item.label}
+                                    to={item.to}
+                                    aria-current={activo ? 'page' : undefined}
+                                    style={estilosEntrada}
+                                    className={`${CLASES_ITEM} ${CLASES_ENTRADA} ${activo ? CLASES_ACTIVO : CLASES_INACTIVO}`}
+                                >
+                                    {contenido}
+                                </Link>
+                            )
+                        }
+
+                        const idPanel = `submenu-${item.label.replace(/\s+/g, '-').toLowerCase()}`
+
+                        return (
+                            <div key={item.label} style={estilosEntrada} className={CLASES_ENTRADA}>
+                                <button
+                                    type="button"
+                                    onClick={() => setAbiertos((previo) => ({ ...previo, [item.label]: !abierto }))}
+                                    aria-expanded={abierto}
+                                    aria-controls={idPanel}
+                                    className={`${CLASES_ITEM} w-full text-left ${activo ? CLASES_ACTIVO : CLASES_INACTIVO}`}
+                                >
+                                    {contenido}
+                                    <span className="ml-auto grid size-5 shrink-0 place-items-center rounded-lg transition-colors duration-200 group-hover:bg-muted/70">
+                                        <ChevronRight
+                                            className={`size-3.5 transition-transform duration-300 ease-out ${abierto ? 'rotate-90' : ''} ${activo ? 'text-brand' : 'text-text-muted/70'}`}
+                                            strokeWidth={2.6}
+                                            aria-hidden
+                                        />
+                                    </span>
+                                </button>
+
+                                <div
+                                    id={idPanel}
+                                    className={`grid transition-[grid-template-rows] duration-300 ease-out ${abierto ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'}`}
+                                >
+                                    <div className="overflow-hidden">
+                                        <div className={`relative ml-7.5 mt-1.5 mb-1 space-y-1 pl-3 transition-opacity duration-200 ${abierto ? 'opacity-100' : 'opacity-0'}`}>
+                                            <span className={CLASES_RIEL} aria-hidden />
+
+                                            {hijos.map((hijo, indiceHijo) => {
+                                                const hijoEsActivo = esRutaActiva(hijo)
+
+                                                return (
+                                                    <Link
+                                                        key={hijo.to}
+                                                        to={hijo.to}
+                                                        tabIndex={abierto ? undefined : -1}
+                                                        aria-current={hijoEsActivo ? 'page' : undefined}
+                                                        style={abierto ? { animationDelay: `${indiceHijo * 50}ms`, animationDuration: '260ms' } : undefined}
+                                                        className={`${CLASES_HIJO} ${abierto ? 'animate-in fade-in slide-in-from-left-2 fill-mode-both' : ''} ${hijoEsActivo ? CLASES_HIJO_ACTIVO : CLASES_HIJO_INACTIVO}`}
+                                                    >
+                                                        <span
+                                                            className={`${CLASES_MARCA_HIJO} ${hijoEsActivo ? CLASES_MARCA_HIJO_ACTIVA : CLASES_MARCA_HIJO_INACTIVA}`}
+                                                            aria-hidden
+                                                        />
+                                                        <span className="truncate">{hijo.label}</span>
+                                                    </Link>
+                                                )
+                                            })}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         )
                     })}
                 </nav>
