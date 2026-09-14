@@ -1,3 +1,4 @@
+import { DocumentoFiscalRowActions } from '#/presentation/components/documentos-fiscales/DocumentoFiscalRowActions'
 import {
     DataTable,
     type DataTableColumns,
@@ -19,6 +20,12 @@ function EmptyValue({ valor }: { valor: string | null }) {
 
 function crearColumnas(): DataTableColumns<Documento> {
     return [
+        {
+            id: 'acciones',
+            header: 'Acciones',
+            meta: { align: 'center', cellClassName: 'py-2' },
+            cell: ({ row }) => <DocumentoFiscalRowActions documento={row.original} />,
+        },
         {
             accessorKey: 'id',
             header: 'ID',

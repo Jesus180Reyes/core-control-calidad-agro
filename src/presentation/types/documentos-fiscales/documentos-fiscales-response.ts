@@ -15,10 +15,13 @@ export interface Documento {
     importe_exento: string;
     importe_exonerado: string;
     total: string;
-    referencia_exencion: null;
-    pais_destino: null;
-    documento_aduanero: null;
-    archivo_url: null;
+    // Los cuatro llegaron en null en la respuesta de muestra, pero el backend
+    // los emite cuando el documento los tiene: van como `string | null` para no
+    // tener que castear en cada celda que los pinta.
+    referencia_exencion: string | null;
+    pais_destino: string | null;
+    documento_aduanero: string | null;
+    archivo_url: string | null;
     cliente_id: number;
     cliente: string;
     cliente_rtn: string;
