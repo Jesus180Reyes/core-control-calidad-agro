@@ -1,28 +1,20 @@
-import { useState } from 'react'
 import {
-    DownloadCloud,
-    Edit,
+    Ban,
+    Download,
     Eye,
-    FileX2,
     MoreHorizontal,
-    Trash,
     type LucideIcon,
 } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import {
-    Command,
-    CommandEmpty,
-    CommandGroup,
-    CommandInput,
-    CommandItem,
-    CommandList,
-} from '@/components/ui/command'
-import {
-    Popover,
-    PopoverContent,
-    PopoverTrigger,
-} from '@/components/ui/popover'
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuSeparator,
+    DropdownMenuShortcut,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 import { Can } from '#/presentation/components/shared/Can'
 import type { Permission } from '#/presentation/types/auth/permissions'
 import type { Documento } from '#/presentation/types/documentos-fiscales/documentos-fiscales-response'
@@ -39,6 +31,15 @@ interface ActionsMenuItem {
     permission?: Permission
     /** Gris y sin click, para una acción que este documento no admite. */
     disabled?: boolean
+    /** Texto tenue a la derecha; sirve para explicar un `disabled`. */
+    hint?: string
+    /** `destructive` la pinta en rojo. */
+    variant?: 'default' | 'destructive'
+    /**
+     * Abre un bloque nuevo con una línea encima. Va en el item y no aparte para
+     * que el `<Can>` que lo esconde se lleve también su línea.
+     */
+    separatorBefore?: boolean
 }
 
 interface ActionsMenuProps {
@@ -53,12 +54,21 @@ interface DocumentoFiscalRowActionsProps {
 export function DocumentoFiscalRowActions({
     documento,
 }: DocumentoFiscalRowActionsProps) {
-    const actions: ActionsMenuItem[] = [
+    const sinArchivo = !documento.archivo_url
+
+    const items: ActionsMenuItem[] = [
+        {
+            action: 'VER_DETALLES_DOCUMENTO',
+            label: 'Ver detalles documento',
+            icon: Eye,
+            run: () => console.log('Ver detalles', documento.id),
+        },
         {
             action: 'DESCARGAR_DOCUMENTO',
-            label: 'Descargar documento',
-            icon: DownloadCloud,
-            disabled: !documento.archivo_url,
+            label: 'Descargar',
+            icon: Download,
+            disabled: sinArchivo,
+            hint: sinArchivo ? 'Sin archivo' : undefined,
             run: () => {
                 if (!documento.archivo_url) return
 
@@ -66,79 +76,66 @@ export function DocumentoFiscalRowActions({
             },
         },
         {
-            action: 'VER_DETALLES_DOCUMENTO',
-            label: 'Ver detalles del documento fiscal',
-            icon: Eye,
-            run: () => console.log('Editar documento', documento.id),
-        },
-        {
-            action: 'EDITAR_DOCUMENTO',
-            label: 'Editar documento',
-            icon: Edit,
-            run: () => console.log('Editar documento', documento.id),
-        },
-        {
             action: 'ANULAR_DOCUMENTO',
-            label: 'Anular documento fiscal',
-            icon: Trash,
+            label: 'Anular documento',
+            icon: Ban,
+            variant: 'destructive',
             run: () => console.log('Anular documento', documento.id),
         },
     ]
 
     return (
         <ActionsMenu
-            items={actions}
+            items={items}
             triggerLabel={`Acciones del documento ${documento.numero_completo}`}
         />
     )
 }
 
 function ActionsMenu({ items, triggerLabel }: ActionsMenuProps) {
-    const [abierto, setAbierto] = useState(false)
-
     return (
-        <Popover open={abierto} onOpenChange={setAbierto}>
-            <PopoverTrigger
+        <DropdownMenu>
+            <DropdownMenuTrigger
                 render={
-                    <Button variant="ghost" size="icon" aria-label={triggerLabel} />
+                    <Button
+                        variant="ghost"
+                        size="icon-sm"
+                        aria-label={triggerLabel}
+                        className="text-text-muted transition-colors hover:text-text-main data-popup-open:bg-muted data-popup-open:text-text-main"
+                    />
                 }
             >
                 <MoreHorizontal />
-            </PopoverTrigger>
+            </DropdownMenuTrigger>
 
-            <PopoverContent
-                align="start"
-                className="w-56 gap-0 p-0 duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] data-open:blur-in-2 data-closed:duration-100 data-closed:ease-in"
+            <DropdownMenuContent
+                align="end"
+                sideOffset={6}
+                className="w-auto min-w-48 rounded-xl border border-border-ui p-1.5 shadow-lg ring-0 duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] data-closed:duration-100 data-closed:ease-in"
             >
-                <Command>
-                    <CommandInput placeholder="Buscar acción..." />
+                {items.map((item) => (
+                    <Can key={item.action} permission={item.permission}>
+                        {item.separatorBefore && (
+                            <DropdownMenuSeparator className="-mx-1.5 bg-border-ui first:hidden" />
+                        )}
 
-                    <CommandList>
-                        <CommandEmpty className="text-text-muted">
-                            Sin acciones.
-                        </CommandEmpty>
-
-                        <CommandGroup>
-                            {items.map(
-                                ({ action, label, icon: Icon, run, permission, disabled }) => (
-                                    <Can key={action} permission={permission}>
-                                        <CommandItem
-                                            disabled={disabled}
-                                            onSelect={() => {
-                                                setAbierto(false)
-                                                run()
-                                            }}
-                                        >
-                                            <Icon />
-                                            {label}
-                                        </CommandItem>
-                                    </Can>
-                                ),
+                        <DropdownMenuItem
+                            variant={item.variant}
+                            disabled={item.disabled}
+                            className="gap-2.5 rounded-lg px-2 py-2 font-medium"
+                            onClick={item.run}
+                        >
+                            <item.icon className="text-text-muted transition-colors" />
+                            {item.label}
+                            {item.hint && (
+                                <DropdownMenuShortcut className="tracking-normal">
+                                    {item.hint}
+                                </DropdownMenuShortcut>
                             )}
-                        </CommandGroup>
-                    </CommandList>
-                </Command>
-            </PopoverContent>
-        </Popover>
+                        </DropdownMenuItem>
+                    </Can>
+                ))}
+            </DropdownMenuContent>
+        </DropdownMenu>
     )
 }
