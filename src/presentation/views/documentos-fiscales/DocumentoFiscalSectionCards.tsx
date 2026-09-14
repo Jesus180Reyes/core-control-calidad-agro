@@ -99,7 +99,7 @@ export function DocumentoFiscalSectionCards({
 
                                 <span
                                     className={cn(
-                                        'inline-flex items-center rounded-full border px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.1em] tabular-nums',
+                                        'inline-flex items-center rounded-full border px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-widest tabular-nums',
                                         isSelected
                                             ? 'border-brand/20 bg-brand/10 text-brand'
                                             : 'border-border-ui bg-bg-app text-text-muted',
