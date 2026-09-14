@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Edit, MoreHorizontal, Package, DownloadCloud, Trash } from 'lucide-react'
+import { Edit, MoreHorizontal, Package, PackageCheck, Trash } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
@@ -45,7 +45,7 @@ export function ClientRowActions({ cliente }: ClientRowActionsProps) {
             run: () => console.log('Ver lotes', cliente.id),
         },
         {
-            label: 'Ver lotes registrados',
+            label: 'Ver lotes pendientes de inspección',
             icon: Package,
             permission: PERMISSIONS.VERCLIENTELOTES,
             run: () =>
@@ -56,9 +56,15 @@ export function ClientRowActions({ cliente }: ClientRowActionsProps) {
                 }),
         },
         {
-            label: 'Ver Reporte de Lotes',
-            icon: DownloadCloud,
-            run: () => setselectedAction('VER_REPORTE_LOTES'),
+            label: 'Ver lotes finalizados por aprobador',
+            icon: PackageCheck,
+            permission: PERMISSIONS.VERCLIENTELOTES,
+            run: () =>
+                navigate({
+                    to: '/clientes-finalizados',
+                    search: { clienteId: cliente.id },
+                    state: { cliente },
+                }),
         },
         {
             label: 'Rechazar Cliente',
@@ -129,9 +135,8 @@ function RowActionsMenu({
 
                         <CommandGroup>
                             {actions.map(({ label, icon: Icon, run, permission }) => (
-                                <Can permission={permission}>
+                                <Can key={label} permission={permission}>
                                     <CommandItem
-                                        key={label}
                                         onSelect={() => {
                                             onOpenChange(false)
                                             run()

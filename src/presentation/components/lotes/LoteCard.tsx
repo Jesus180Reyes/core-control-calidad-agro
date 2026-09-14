@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import { Boxes } from 'lucide-react'
 import { cn } from '#/lib/utils'
 import type { Lote } from '#/presentation/types/lotes/lotes.types'
@@ -29,9 +30,15 @@ interface LoteCardProps {
     lote: Lote
     /** Si no se pasa, la card es sólo de lectura (no es un botón). */
     onSeleccionar?: (lote: Lote) => void
+    /**
+     * Bloque extra al pie de la card, debajo de los pesos de referencia.
+     * Sólo contenido de lectura: con `onSeleccionar` la card es un `<button>`
+     * y nada interactivo puede anidarse adentro.
+     */
+    footer?: ReactNode
 }
 
-export function LoteCard({ lote, onSeleccionar }: LoteCardProps) {
+export function LoteCard({ lote, onSeleccionar, footer }: LoteCardProps) {
     const contenido = (
         <>
             <div className="flex items-center gap-4">
@@ -63,6 +70,10 @@ export function LoteCard({ lote, onSeleccionar }: LoteCardProps) {
                 <PesoReferencia etiqueta="Ideal" valor={lote.peso_ideal} unidad={lote.unidad_medida} destacado />
                 <PesoReferencia etiqueta="Máximo" valor={lote.peso_maximo} unidad={lote.unidad_medida} />
             </div>
+
+            {footer && (
+                <div className="border-t border-border-ui/50 pt-4">{footer}</div>
+            )}
         </>
     )
 
