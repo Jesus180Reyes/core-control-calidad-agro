@@ -1,3 +1,4 @@
+import { EmptyValue } from '#/presentation/components/documentos-fiscales/DocumentoFiscalCells'
 import { DocumentoFiscalRowActions } from '#/presentation/components/documentos-fiscales/DocumentoFiscalRowActions'
 import {
     DataTable,
@@ -9,14 +10,6 @@ import { formatMoney } from '#/presentation/helpers/number/formatMoney'
 import { useGetDocumentosFiscales } from '#/presentation/hooks/documentos-fiscales/useGetDocumentosFiscales'
 import type { FiltrosDocumentosFiscales } from '#/presentation/schema/documentos-fiscales/filtrosDocumentosFiscalesSchema'
 import type { Documento } from '#/presentation/types/documentos-fiscales/documentos-fiscales-response'
-
-/** Buena parte de los campos del documento llegan en null; el guión largo los marca sin romper la fila. */
-function EmptyValue({ valor }: { valor: string | null }) {
-    if (!valor) return <span className="text-text-muted">—</span>
-
-    return <>{valor}</>
-}
-
 
 function crearColumnas(): DataTableColumns<Documento> {
     return [

@@ -5,6 +5,7 @@ import {
     MoreHorizontal,
     type LucideIcon,
 } from 'lucide-react'
+import { useNavigate } from '@tanstack/react-router'
 
 import { Button } from '@/components/ui/button'
 import {
@@ -54,6 +55,7 @@ interface DocumentoFiscalRowActionsProps {
 export function DocumentoFiscalRowActions({
     documento,
 }: DocumentoFiscalRowActionsProps) {
+    const navigate = useNavigate()
     const sinArchivo = !documento.archivo_url
 
     const items: ActionsMenuItem[] = [
@@ -61,7 +63,11 @@ export function DocumentoFiscalRowActions({
             action: 'VER_DETALLES_DOCUMENTO',
             label: 'Ver detalles documento',
             icon: Eye,
-            run: () => console.log('Ver detalles', documento.id),
+            run: () =>
+                navigate({
+                    to: '/ver-detalles-documento-fiscal',
+                    search: { documentoId: documento.id },
+                }),
         },
         {
             action: 'DESCARGAR_DOCUMENTO',
