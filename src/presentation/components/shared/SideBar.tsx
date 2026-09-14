@@ -1,5 +1,5 @@
 import { Link, useLocation } from '@tanstack/react-router'
-import { ChevronRight, ClipboardCheck, LogOut, Scale, SlidersHorizontal, Users } from 'lucide-react'
+import { ChevronRight, ClipboardCheck, LogOut, Scale, ShieldCheck, SlidersHorizontal, Users } from 'lucide-react'
 import { useState } from 'react'
 
 import { Can } from '#/presentation/components/shared/Can'
@@ -88,6 +88,17 @@ export function Sidebar() {
                 {
                     label: 'Historial Pesajes',
                     to: '/historial',
+                },
+            ],
+        },
+        {
+            label: 'Administración',
+            permission: PERMISSIONS.MODULOCONTROLCALIDAD,
+            icon: <ShieldCheck className="size-4.5" strokeWidth={2.1} />,
+            children: [
+                {
+                    label: 'Documentos Fiscales',
+                    to: '/administracion-documentos-fiscales',
                 },
             ],
         },
