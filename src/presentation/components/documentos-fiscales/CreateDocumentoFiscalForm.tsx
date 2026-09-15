@@ -97,8 +97,11 @@ const PAISES_DESTINO = [
     { value: 'GT', label: 'Guatemala' },
     { value: 'CN', label: 'China' },
     { value: 'TW', label: 'Taiwan' },
-
-
+]
+export const MONEDAS_CONFIG = [
+    { value: 'HNL', label: 'Lempira' },
+    { value: 'NIO', label: 'Cordoba' },
+    { value: 'USD', label: 'Dolar' },
 ]
 
 export function CreateDocumentoFiscalForm() {
@@ -180,12 +183,12 @@ export function CreateDocumentoFiscalForm() {
                 description="La moneda vacía toma la del país configurado; el total lo calcula el formulario."
             >
                 <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-                    <ControlledInput
+                    <ControlledSelector
                         control={control}
                         name="moneda"
                         label="Moneda (opcional)"
                         placeholder="HNL"
-                        uppercase
+                        options={MONEDAS_CONFIG}
                     />
                     <ControlledInput
                         control={control}

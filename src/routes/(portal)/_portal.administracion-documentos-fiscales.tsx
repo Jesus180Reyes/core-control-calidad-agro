@@ -13,6 +13,7 @@ import { ClientesHeader } from '#/presentation/components/clientes/ClientesHeade
 import {
     CREATE_DOCUMENTO_FISCAL_FORM_ID,
     CreateDocumentoFiscalForm,
+    MONEDAS_CONFIG,
 } from '#/presentation/components/documentos-fiscales/CreateDocumentoFiscalForm'
 import { CustomButton } from '#/presentation/components/shared/button/CustomButton'
 import { CustomDialog } from '#/presentation/components/shared/dialog/CustomDialog'
@@ -44,6 +45,9 @@ function RouteComponent() {
     >({
         resolver: zodResolver(createDocumentoFiscalSchema),
         reValidateMode: 'onChange',
+        defaultValues: {
+            moneda: MONEDAS_CONFIG[0].value,
+        }
     })
 
     const {
