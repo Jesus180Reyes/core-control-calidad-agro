@@ -1,4 +1,4 @@
-import { FinishedLoteCard } from '#/presentation/components/lotes/FinishedLoteCard'
+import { FinishedLoteHighlightCard } from '#/presentation/components/lotes/FinishedLoteHighlightCard'
 import { EmptyState } from '#/presentation/components/shared/EmptyState'
 import { useFinishedLotes } from '#/presentation/hooks/finished-lotes/useFinishedLotes'
 
@@ -21,7 +21,7 @@ export function FinishedLotesView({ clienteId }: FinishedLotesViewProps) {
     return (
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {lotes.map((lote) => (
-                <FinishedLoteCard key={lote.id} lote={lote} />
+                <FinishedLoteHighlightCard key={lote.id} lote={lote} />
             ))}
         </div>
     )
