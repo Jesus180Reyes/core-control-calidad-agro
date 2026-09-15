@@ -12,9 +12,6 @@ function createColumns(
 ): DataTableColumns<ImpuestoDocumentoFiscal> {
     return [
         {
-            // Los tres campos llegan como string: el `accessorFn` los pasa a
-            // número para que el orden sea el numérico y no el alfabético, que
-            // pondría "5.00" después de "15.00".
             id: 'tarifa',
             accessorFn: (impuesto) => Number(impuesto.tarifa),
             header: 'Tarifa',

@@ -27,13 +27,13 @@ function crearColumnas(): DataTableColumns<Documento> {
         },
         {
             accessorKey: 'numero_completo',
-            header: 'Documento',
+            header: 'N. Factura',
             enableSorting: true,
             meta: { cellClassName: 'font-bold whitespace-nowrap' },
         },
         {
             accessorKey: 'tipo_documento',
-            header: 'Tipo',
+            header: 'Tipo de documento',
             enableSorting: true,
         },
         {
@@ -45,7 +45,7 @@ function crearColumnas(): DataTableColumns<Documento> {
         },
         {
             accessorKey: 'cliente',
-            header: 'Cliente',
+            header: 'Documento de identificación del cliente',
             enableSorting: true,
         },
         {
@@ -97,7 +97,7 @@ function crearColumnas(): DataTableColumns<Documento> {
         },
         {
             accessorKey: 'autorizacion',
-            header: 'Autorización',
+            header: 'N. Autorización',
             meta: { cellClassName: 'whitespace-nowrap' },
             cell: ({ row }) => <EmptyValue valor={row.original.autorizacion} />,
         },
