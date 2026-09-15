@@ -17,6 +17,7 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Can } from '#/presentation/components/shared/Can'
+import { VoidDocumentoFiscalDialog } from '#/presentation/components/documentos-fiscales/VoidDocumentoFiscalDialog'
 import type { Permission } from '#/presentation/types/auth/permissions'
 import type { Documento } from '#/presentation/types/documentos-fiscales/documentos-fiscales-response'
 import { useState } from 'react'
@@ -88,15 +89,23 @@ export function DocumentoFiscalRowActions({
             label: 'Anular documento',
             icon: Ban,
             variant: 'destructive',
-            run: () => console.log('Anular documento', documento.id),
+            run: () => setactiveItem('ANULAR_DOCUMENTO'),
         },
     ]
 
     return (
-        <ActionsMenu
-            items={items}
-            triggerLabel={`Acciones del documento ${documento.numero_completo}`}
-        />
+        <>
+            <ActionsMenu
+                items={items}
+                triggerLabel={`Acciones del documento ${documento.numero_completo}`}
+            />
+
+            <VoidDocumentoFiscalDialog
+                documento={documento}
+                open={activeItem === 'ANULAR_DOCUMENTO'}
+                onOpenChange={(open) => !open && setactiveItem(null)}
+            />
+        </>
     )
 }
 
