@@ -70,7 +70,7 @@ export const createDocumentoFiscalSchema = z.object({
         z.string().trim().min(1, 'La referencia de exencion no puede ir vacia').max(50, 'La referencia de exencion no puede exceder los 50 caracteres').optional(),
 
     pais_destino:
-        z.string().trim().length(2, 'El pais de destino debe ser un codigo ISO 3166-1 alpha-2').toUpperCase().optional(),
+        z.string({ error: 'El pais de destino es obligatorio' }).trim().length(2, 'El pais de destino debe ser un codigo ISO 3166-1 alpha-2').toUpperCase(),
 
     impuestos: z
         .array(impuestoSchema)

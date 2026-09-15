@@ -1,6 +1,6 @@
 import { Suspense, useEffect, useRef, type ReactNode } from 'react'
 import { useFieldArray, useFormContext, useWatch } from 'react-hook-form'
-import { Plus, Trash2 } from 'lucide-react'
+import { AlertCircle, Plus, Trash2 } from 'lucide-react'
 
 import { CustomButton } from '#/presentation/components/shared/button/CustomButton'
 import { ControlledDatePicker } from '#/presentation/components/shared/inputs/ControlledDatePicker'
@@ -168,7 +168,7 @@ export function CreateDocumentoFiscalForm() {
                     <ControlledSelector
                         control={control}
                         name="pais_destino"
-                        label="País de destino (opcional)"
+                        label="País de destino"
                         placeholder="Elegí el país"
                         options={PAISES_DESTINO}
                     />
@@ -211,14 +211,20 @@ export function CreateDocumentoFiscalForm() {
                         placeholder="0.00"
                         valueAsNumber
                     />
+                    <TotalField />
+                    {/*
+                      Último de la sección y a fila completa: el número de
+                      resolución es largo, y arriba del todo dejaba a los
+                      importes chocados en media columna.
+                    */}
                     <ControlledInput
                         control={control}
                         name="referencia_exencion"
                         label="Referencia de exención (opcional)"
                         placeholder="Resolución de exoneración"
                         uppercase
+                        className="sm:col-span-2 xl:col-span-3"
                     />
-                    <TotalField />
                 </div>
             </FormSection>
 
@@ -261,11 +267,18 @@ function TotalField() {
 }
 
 function ImpuestosSection() {
-    const { control } = useFormContext<CreateDocumentoFiscalFormValues>()
+    const {
+        control,
+        formState: { errors },
+    } = useFormContext<CreateDocumentoFiscalFormValues>()
     const { fields, append, remove } = useFieldArray({
         control,
         name: 'impuestos',
     })
+
+    // La tarifa repetida la valida un `refine` del array entero, así que el
+    // error no cae en ningún campo: sin esto sólo se veía por consola.
+    const errorSeccion = errors.impuestos?.root?.message ?? errors.impuestos?.message
 
     return (
         <FormSection
@@ -283,6 +296,8 @@ function ImpuestosSection() {
                 </CustomButton>
             }
         >
+            <SectionError message={errorSeccion} />
+
             {fields.length === 0 && (
                 <p className="rounded-xl border border-dashed border-border-ui px-4 py-6 text-center text-sm text-text-muted">
                     Sin impuestos aplicados.
@@ -326,12 +341,19 @@ function ImpuestosSection() {
 }
 
 function LotesSection() {
-    const { control } = useFormContext<CreateDocumentoFiscalFormValues>()
+    const {
+        control,
+        formState: { errors },
+    } = useFormContext<CreateDocumentoFiscalFormValues>()
     const clienteId = useWatch({ control, name: 'cliente_id' })
     const { fields, append, remove, replace } = useFieldArray({
         control,
         name: 'lotes',
     })
+
+    // Tanto el lote repetido como el "al menos un lote" son reglas del array,
+    // no de una fila: se pintan acá o no se ven en ningún lado.
+    const errorSeccion = errors.lotes?.root?.message ?? errors.lotes?.message
 
     const clienteAnterior = useRef(clienteId)
     useEffect(() => {
@@ -358,6 +380,8 @@ function LotesSection() {
                 </CustomButton>
             }
         >
+            <SectionError message={errorSeccion} />
+
             {!clienteId ? (
                 <p className="rounded-xl border border-dashed border-border-ui px-4 py-6 text-center text-sm text-text-muted">
                     Elegí primero el cliente para ver sus lotes.
@@ -453,6 +477,26 @@ function FormSection({
 
             {children}
         </section>
+    )
+}
+
+/**
+ * El error de una sección entera: las reglas que miran todas las filas juntas
+ * —tarifa repetida, lote repetido, "al menos un lote"— no tienen un campo donde
+ * caer. Va como banner y no como el `FieldError` de un input porque lo que está
+ * mal es la lista, no el casillero que el operario tiene el cursor encima.
+ */
+function SectionError({ message }: { message?: string }) {
+    if (!message) return null
+
+    return (
+        <p
+            role="alert"
+            className="flex items-center gap-2 rounded-xl border border-rose-500/40 bg-rose-500/10 px-3.5 py-2.5 text-xs font-semibold text-rose-500"
+        >
+            <AlertCircle className="size-4 shrink-0" />
+            {message}
+        </p>
     )
 }
 
