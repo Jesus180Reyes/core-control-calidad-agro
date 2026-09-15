@@ -19,6 +19,7 @@ import {
 import { Can } from '#/presentation/components/shared/Can'
 import type { Permission } from '#/presentation/types/auth/permissions'
 import type { Documento } from '#/presentation/types/documentos-fiscales/documentos-fiscales-response'
+import { useState } from 'react'
 
 type ItemActionSelected = 'DESCARGAR_DOCUMENTO' | 'EDITAR_DOCUMENTO' | 'ANULAR_DOCUMENTO' | 'VER_DETALLES_DOCUMENTO' | null
 
@@ -55,7 +56,8 @@ interface DocumentoFiscalRowActionsProps {
 export function DocumentoFiscalRowActions({
     documento,
 }: DocumentoFiscalRowActionsProps) {
-    const navigate = useNavigate()
+    const navigate = useNavigate();
+    const [activeItem, setactiveItem] = useState<ItemActionSelected>(null);
     const sinArchivo = !documento.archivo_url
 
     const items: ActionsMenuItem[] = [
