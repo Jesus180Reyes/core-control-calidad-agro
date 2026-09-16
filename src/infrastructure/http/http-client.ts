@@ -1,6 +1,11 @@
-import { BASE_URL, TIMEOUT_POR_DEFECTO_MS } from '#/infrastructure/http/core/config-http'
+import {
+  BASE_URL,
+  REPORT_SERVICE_URL,
+  TIMEOUT_POR_DEFECTO_MS,
+} from '#/infrastructure/http/core/config-http'
 import {
   createHttpClient,
+  type HttpClient,
   type HttpRequestOptions,
   type MutationRequestOptions,
   type QueryRequestOptions,
@@ -38,45 +43,70 @@ export const api = createHttpClient({
 registrarInterceptoresAuth(api)
 
 /**
- * Punto único de entrada de toda petición de la app.
+ * Cliente crudo del **servicio de reportes** (`VITE_REPORT_SERVICE_URL`), que
+ * corre aparte del API pero contra la misma sesión: lleva el mismo `Bearer`.
+ * El refresh sigue saliendo por el API —la sesión es de allá—, así que un 401
+ * de reportes se renueva contra `BASE_URL` y se reintenta acá.
+ */
+export const apiReportes = createHttpClient({
+  baseUrl: REPORT_SERVICE_URL,
+  timeoutMs: TIMEOUT_POR_DEFECTO_MS,
+})
+
+registrarInterceptoresAuth(apiReportes)
+
+/**
+ * Envuelve a un cliente con la política del 401.
  *
  * Ante un 401 de una petición autenticada por la sesión: renueva el access
  * token y reintenta **una sola vez**. Si el refresh falla —o no hay refresh
  * token, que es el estado de hoy— cierra sesión y manda a `/login`.
  *
- * El reintento vive acá y no en `create-http-client.ts` a propósito: ese módulo
- * declara que sus interceptores observan pero nunca cortocircuitan, y así sigue
- * siendo instanciable contra otro API sin arrastrar el refresh.
+ * Vive acá y no en `create-http-client.ts` a propósito: ese módulo declara que
+ * sus interceptores observan pero nunca cortocircuitan, y así sigue siendo
+ * instanciable contra otro API sin arrastrar el refresh.
  */
-export async function httpRequest<T>(endpoint: string, options: HttpRequestOptions): Promise<T> {
-  try {
-    return await api.request<T>(endpoint, options)
-  } catch (error) {
-    if (!esNoAutorizado(error)) throw error
-
-    // Sin esta condición el propio login rebotaría con su 401 legítimo y el
-    // operario nunca vería el mensaje de credenciales inválidas.
-    if (!peticionLlevaToken(options.headers)) throw error
-
-    if (!hayRefreshToken()) {
-      cerrarSesionYSalir()
-      throw error
-    }
-
+function conPoliticaDe401(cliente: HttpClient) {
+  return async function request<T>(endpoint: string, options: HttpRequestOptions): Promise<T> {
     try {
-      await refrescarSesion()
-    } catch {
-      // Quien llamó recibe el 401 original: le importa que su petición falló,
-      // no la mecánica interna de la renovación.
-      cerrarSesionYSalir()
-      throw error
-    }
+      return await cliente.request<T>(endpoint, options)
+    } catch (error) {
+      if (!esNoAutorizado(error)) throw error
 
-    // El reintento vuelve a pasar por `onPeticion`, que relee el token y por lo
-    // tanto inyecta el nuevo. Un 401 acá sale como error: no hay segundo refresh.
-    return await api.request<T>(endpoint, options)
+      // Sin esta condición el propio login rebotaría con su 401 legítimo y el
+      // operario nunca vería el mensaje de credenciales inválidas.
+      if (!peticionLlevaToken(options.headers)) throw error
+
+      if (!hayRefreshToken()) {
+        cerrarSesionYSalir()
+        throw error
+      }
+
+      try {
+        await refrescarSesion()
+      } catch {
+        // Quien llamó recibe el 401 original: le importa que su petición falló,
+        // no la mecánica interna de la renovación.
+        cerrarSesionYSalir()
+        throw error
+      }
+
+      // El reintento vuelve a pasar por `onPeticion`, que relee el token y por lo
+      // tanto inyecta el nuevo. Un 401 acá sale como error: no hay segundo refresh.
+      return await cliente.request<T>(endpoint, options)
+    }
   }
 }
+
+/** Punto único de entrada de toda petición de la app contra el API. */
+export const httpRequest = conPoliticaDe401(api)
+
+/**
+ * Lo mismo, contra el servicio de reportes. Es lo que usa
+ * `useExecutePdfMutation`: un endpoint relativo que se le pase sale por
+ * `VITE_REPORT_SERVICE_URL`, no por `VITE_API_URL`.
+ */
+export const reportRequest = conPoliticaDe401(apiReportes)
 
 // Construidos sobre `httpRequest`, no sobre `api`: apuntando a `api.get` las
 // queries se quedarían sin refresh.

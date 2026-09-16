@@ -1,8 +1,11 @@
+import { useState } from 'react'
 import { Boxes, CheckCircle2, FileDown, Flag } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 
 import { Button } from '#/components/ui/button'
 import { cn } from '#/lib/utils'
+import { DownloadActaDialog } from '#/presentation/components/lotes/DownloadActaDialog'
+import type { ActaReportFormat } from '#/presentation/components/lotes/DownloadActaDialog'
 import { formatDate } from '#/presentation/helpers/date/formatDate'
 import type { FinishedLote } from '#/presentation/types/lotes/lotes.types'
 
@@ -42,8 +45,8 @@ const ACTA_BUTTON_STYLES = cn(
 
 interface FinishedLoteHighlightCardProps {
     lote: FinishedLote
-    /** Descarga del acta. Todavía no hay endpoint que la resuelva. */
-    onDownloadActa?: (lote: FinishedLote) => void
+    /** Descarga del acta en el formato elegido. Todavía no hay endpoint que la resuelva. */
+    onDownloadActa?: (lote: FinishedLote, formato: ActaReportFormat) => void
     downloadingActa?: boolean
 }
 
@@ -52,6 +55,13 @@ export function FinishedLoteHighlightCard({
     onDownloadActa,
     downloadingActa = false,
 }: FinishedLoteHighlightCardProps) {
+    const [dialogAbierto, setDialogAbierto] = useState(false)
+
+    const descargarActa = (formato: ActaReportFormat) => {
+        setDialogAbierto(false)
+        onDownloadActa?.(lote, formato)
+    }
+
     const trazas = [
         {
             id: 'aprobado',
@@ -130,11 +140,19 @@ export function FinishedLoteHighlightCard({
                 size="lg"
                 className={ACTA_BUTTON_STYLES}
                 disabled={downloadingActa}
-                onClick={() => onDownloadActa?.(lote)}
+                onClick={() => setDialogAbierto(true)}
             >
                 <FileDown className="size-4" strokeWidth={2.4} aria-hidden />
                 {downloadingActa ? 'Generando acta…' : 'Descargar acta de entrega'}
             </Button>
+
+            <DownloadActaDialog
+                lote={lote}
+                open={dialogAbierto}
+                onOpenChange={setDialogAbierto}
+                onSelectFormat={descargarActa}
+                isPending={downloadingActa}
+            />
         </article>
     )
 }

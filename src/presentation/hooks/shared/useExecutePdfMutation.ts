@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useMutation, type UseMutationOptions } from '@tanstack/react-query'
 import {
-  httpRequest,
+  reportRequest,
   type HttpMethod,
   type HttpRequestOptions,
   type QueryParams,
@@ -11,6 +11,10 @@ import { withErrorToast } from '#/presentation/hooks/shared/errorToast'
 /**
  * Pide un documento binario —un PDF— y deja lista una object URL para abrirlo
  * o embeberlo.
+ *
+ * Sale por `reportRequest`: los reportes los sirve un servicio aparte
+ * (`VITE_REPORT_SERVICE_URL`), no el API. El `endpoint` que recibe es relativo
+ * a **esa** base; uno absoluto la ignora, como en cualquier petición.
  *
  * El `method` es configurable: con `GET` cubre el caso que el template
  * resolvía con un archivo aparte (`queryPdfAbstraction`), mandando las
@@ -74,7 +78,7 @@ export function useExecutePdfMutation<TVariables = void>(
           ? { method, params: variables as QueryParams, headers, parsear: 'blob' }
           : { method, body: variables, headers, parsear: 'blob' }
 
-      return httpRequest<Blob>(destino, peticion)
+      return reportRequest<Blob>(destino, peticion)
     },
     ...mutationOptions,
     onError: withErrorToast(mutationOptions.onError),

@@ -10,5 +10,11 @@
 /** Base de todas las peticiones. Vite la inyecta en build time. */
 export const BASE_URL: string = import.meta.env.VITE_API_URL ?? ''
 
+/**
+ * Base del servicio de reportes, que corre aparte del API. Vacía cae en
+ * relativo —el propio origen—, igual que `BASE_URL`.
+ */
+export const REPORT_SERVICE_URL: string = import.meta.env.VITE_REPORT_SERVICE_URL ?? ''
+
 /** Tope de espera por petición, sobreescribible por llamada. */
 export const TIMEOUT_POR_DEFECTO_MS = 15_000

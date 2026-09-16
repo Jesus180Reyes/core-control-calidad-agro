@@ -1,5 +1,6 @@
 import { FinishedLoteHighlightCard } from '#/presentation/components/lotes/FinishedLoteHighlightCard'
 import { EmptyState } from '#/presentation/components/shared/EmptyState'
+import { useDownloadActa } from '#/presentation/hooks/finished-lotes/useDownloadActa'
 import { useFinishedLotes } from '#/presentation/hooks/finished-lotes/useFinishedLotes'
 
 interface FinishedLotesViewProps {
@@ -8,6 +9,7 @@ interface FinishedLotesViewProps {
 
 export function FinishedLotesView({ clienteId }: FinishedLotesViewProps) {
     const { lotes } = useFinishedLotes({ clienteId })
+    const { descargarActa, loteDescargando } = useDownloadActa()
 
     if (lotes.length === 0) {
         return (
@@ -21,7 +23,12 @@ export function FinishedLotesView({ clienteId }: FinishedLotesViewProps) {
     return (
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {lotes.map((lote) => (
-                <FinishedLoteHighlightCard key={lote.id} lote={lote} />
+                <FinishedLoteHighlightCard
+                    key={lote.id}
+                    lote={lote}
+                    onDownloadActa={descargarActa}
+                    downloadingActa={loteDescargando === lote.id}
+                />
             ))}
         </div>
     )
