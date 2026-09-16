@@ -4,10 +4,10 @@ import type { LucideIcon } from 'lucide-react'
 
 import { Button } from '#/components/ui/button'
 import { cn } from '#/lib/utils'
-import { DownloadActaDialog } from '#/presentation/components/lotes/DownloadActaDialog'
-import type { ActaReportFormat } from '#/presentation/components/lotes/DownloadActaDialog'
+import { DownloadFormatDialog } from '#/presentation/components/shared/dialog/DownloadFormatDialog'
 import { formatDate } from '#/presentation/helpers/date/formatDate'
 import type { FinishedLote } from '#/presentation/types/lotes/lotes.types'
+import type { ReportFormat } from '#/presentation/types/reportes/reportes.types'
 
 const SIN_VARIEDAD = 'Sin variedad o talla'
 const SIN_REGISTRO = 'Sin registro'
@@ -46,7 +46,7 @@ const ACTA_BUTTON_STYLES = cn(
 interface FinishedLoteHighlightCardProps {
     lote: FinishedLote
     /** Descarga del acta en el formato elegido. Todavía no hay endpoint que la resuelva. */
-    onDownloadActa?: (lote: FinishedLote, formato: ActaReportFormat) => void
+    onDownloadActa?: (lote: FinishedLote, formato: ReportFormat) => void
     downloadingActa?: boolean
 }
 
@@ -57,7 +57,7 @@ export function FinishedLoteHighlightCard({
 }: FinishedLoteHighlightCardProps) {
     const [dialogAbierto, setDialogAbierto] = useState(false)
 
-    const descargarActa = (formato: ActaReportFormat) => {
+    const descargarActa = (formato: ReportFormat) => {
         setDialogAbierto(false)
         onDownloadActa?.(lote, formato)
     }
@@ -146,10 +146,11 @@ export function FinishedLoteHighlightCard({
                 {downloadingActa ? 'Generando acta…' : 'Descargar acta de entrega'}
             </Button>
 
-            <DownloadActaDialog
-                lote={lote}
+            <DownloadFormatDialog
                 open={dialogAbierto}
                 onOpenChange={setDialogAbierto}
+                title="Descargar acta de entrega"
+                description={`Elegí en qué formato querés el acta del lote "${lote.nombre_lote}".`}
                 onSelectFormat={descargarActa}
                 isPending={downloadingActa}
             />

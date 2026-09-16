@@ -1,9 +1,8 @@
 import { Suspense } from 'react'
 import { createFileRoute, redirect, useLocation } from '@tanstack/react-router'
-import { Download } from 'lucide-react'
 
 import { ClientesHeader } from '#/presentation/components/clientes/ClientesHeader'
-import { CustomButton } from '#/presentation/components/shared/button/CustomButton'
+import { FinishedLotesReportButton } from '#/presentation/components/lotes/FinishedLotesReportButton'
 import { LoadingState } from '#/presentation/components/shared/LoadingState'
 import { FinishedLotesView } from '#/presentation/views/finished-lotes/FinishedLotesView'
 
@@ -29,12 +28,11 @@ function RouteComponent() {
                 backTo="/inspeccion-clientes"
                 titulo="Lotes finalizados"
                 actions={
-                    <CustomButton
-                        fullWidth={false}
-                        icon={<Download className="size-4" />}
-                    >
-                        Descargar Reporte de lotes finalizados.
-                    </CustomButton>
+                    <FinishedLotesReportButton
+                        clienteId={clienteId}
+                        nombreCliente={cliente?.nombre}
+
+                    />
                 }
                 descripcion={
                     cliente

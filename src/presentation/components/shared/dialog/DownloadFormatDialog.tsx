@@ -3,30 +3,28 @@ import type { LucideIcon } from 'lucide-react'
 
 import { cn } from '#/lib/utils'
 import { CustomDialog } from '#/presentation/components/shared/dialog/CustomDialog'
-import type { FinishedLote } from '#/presentation/types/lotes/lotes.types'
+import type { ReportFormat } from '#/presentation/types/reportes/reportes.types'
 
-export type ActaReportFormat = 'pdf' | 'excel'
-
-interface ActaReportOption {
-    formato: ActaReportFormat
+interface ReportFormatOption {
+    formato: ReportFormat
     etiqueta: string
     detalle: string
     icono: LucideIcon
     iconClassName: string
 }
 
-const OPCIONES: ActaReportOption[] = [
+const OPCIONES: ReportFormatOption[] = [
     {
         formato: 'pdf',
         etiqueta: 'Descargar Reporte en PDF',
-        detalle: 'Acta lista para imprimir o firmar.',
+        detalle: 'Documento listo para imprimir o firmar.',
         icono: FileText,
         iconClassName: 'bg-red-50 text-red-600 dark:bg-red-950/40 dark:text-red-400',
     },
     {
         formato: 'excel',
         etiqueta: 'Descargar Reporte en Excel',
-        detalle: 'Planilla con el detalle de los pesajes.',
+        detalle: 'Planilla con el detalle, lista para editar.',
         icono: FileSpreadsheet,
         iconClassName:
             'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400',
@@ -39,31 +37,30 @@ const OPTION_STYLES = cn(
     'cursor-pointer disabled:cursor-not-allowed disabled:opacity-60 disabled:active:scale-100',
 )
 
-interface DownloadActaDialogProps {
-    lote: FinishedLote
+interface DownloadFormatDialogProps {
     open: boolean
     onOpenChange: (open: boolean) => void
-    onSelectFormat: (formato: ActaReportFormat) => void
+    title: string
+    description: string
+    onSelectFormat: (formato: ReportFormat) => void
     isPending?: boolean
 }
 
-/**
- * Elige el formato del acta antes de descargarla. El diálogo sólo informa la
- * elección: quién pide el archivo al backend es la pantalla.
- */
-export function DownloadActaDialog({
-    lote,
+
+export function DownloadFormatDialog({
     open,
     onOpenChange,
+    title,
+    description,
     onSelectFormat,
     isPending = false,
-}: DownloadActaDialogProps) {
+}: DownloadFormatDialogProps) {
     return (
         <CustomDialog
             open={open}
             onOpenChange={onOpenChange}
-            title="Descargar acta de entrega"
-            description={`Elegí en qué formato querés el acta del lote "${lote.nombre_lote}".`}
+            title={title}
+            description={description}
             size="md"
         >
             <div className="flex flex-col gap-3 py-1">
