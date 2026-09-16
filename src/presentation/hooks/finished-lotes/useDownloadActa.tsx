@@ -36,7 +36,7 @@ export function useDownloadActa() {
     const [loteDescargando, setLoteDescargando] = useState<number | null>(null)
 
     const { generar } = useExecutePdfMutation<ActaVariables>(
-        ({ loteId }) => `/reportes/lotes/${loteId}/acta-entrega/pdf`,
+        ({ loteId, formato }) => `/reportes/lotes/${loteId}/acta-entrega/${formato}`,
         {
             method: 'GET',
             onSettled: () => setLoteDescargando(null),
