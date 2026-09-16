@@ -27,7 +27,7 @@ function crearColumnas(): DataTableColumns<Documento> {
         },
         {
             accessorKey: 'numero_completo',
-            header: 'N. Factura',
+            header: 'N. de Documento',
             enableSorting: true,
             meta: { cellClassName: 'font-bold whitespace-nowrap' },
         },
