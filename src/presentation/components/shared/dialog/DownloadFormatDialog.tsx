@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import { FileSpreadsheet, FileText } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 
@@ -44,6 +45,11 @@ interface DownloadFormatDialogProps {
     description: string
     onSelectFormat: (formato: ReportFormat) => void
     isPending?: boolean
+    /**
+     * Filtros del reporte, si los tiene. Se pintan arriba de los formatos: el
+     * formato es lo último que se elige porque es lo que dispara la descarga.
+     */
+    filters?: ReactNode
 }
 
 
@@ -54,6 +60,7 @@ export function DownloadFormatDialog({
     description,
     onSelectFormat,
     isPending = false,
+    filters,
 }: DownloadFormatDialogProps) {
     return (
         <CustomDialog
@@ -61,8 +68,13 @@ export function DownloadFormatDialog({
             onOpenChange={onOpenChange}
             title={title}
             description={description}
-            size="md"
+            size={filters ? 'lg' : 'md'}
         >
+
+            {filters && (
+                <div className="mb-4 border-b border-border-ui/70 pb-4">{filters}</div>
+            )}
+
             <div className="flex flex-col gap-3 py-1">
                 {OPCIONES.map((opcion) => (
                     <button

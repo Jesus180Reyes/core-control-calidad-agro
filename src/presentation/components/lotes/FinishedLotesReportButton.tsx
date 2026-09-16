@@ -1,30 +1,41 @@
 import { useState } from 'react'
+import { useForm } from 'react-hook-form'
 import { Download } from 'lucide-react'
 
+import { FinishedLotesReportFilters } from '#/presentation/components/lotes/FinishedLotesReportFilters'
 import { CustomButton } from '#/presentation/components/shared/button/CustomButton'
 import { DownloadFormatDialog } from '#/presentation/components/shared/dialog/DownloadFormatDialog'
 import { useDownloadFinishedLotesReport } from '#/presentation/hooks/finished-lotes/useDownloadFinishedLotesReport'
-import type { FiltrosReporteLotesFinalizados } from '#/presentation/hooks/finished-lotes/useDownloadFinishedLotesReport'
+import type { FiltrosReporteLotesFinalizados } from '#/presentation/schema/reportes/filtrosReporteLotesFinalizadosSchema'
 import type { ReportFormat } from '#/presentation/types/reportes/reportes.types'
 
 interface FinishedLotesReportButtonProps {
     clienteId: number
     nombreCliente?: string
-    filtros?: FiltrosReporteLotesFinalizados
 }
 
 
 export function FinishedLotesReportButton({
     clienteId,
     nombreCliente,
-    filtros,
 }: FinishedLotesReportButtonProps) {
     const [dialogAbierto, setDialogAbierto] = useState(false)
     const { descargarReporte, generando } = useDownloadFinishedLotesReport()
 
+    const { control, getValues, reset } = useForm<FiltrosReporteLotesFinalizados>({
+        reValidateMode: 'onChange',
+        values: {
+            cliente_id: clienteId,
+        }
+    })
+
     const descargar = (formato: ReportFormat) => {
-        setDialogAbierto(false)
-        void descargarReporte({ clienteId, formato, nombreCliente, filtros })
+        setDialogAbierto(false);
+        void descargarReporte({
+            formato,
+            filtros: getValues(),
+        });
+        reset();
     }
 
     return (
@@ -44,8 +55,15 @@ export function FinishedLotesReportButton({
                 title="Descargar reporte de lotes finalizados"
                 description={
                     nombreCliente
-                        ? `Elegí en qué formato querés el reporte de ${nombreCliente}.`
-                        : 'Elegí en qué formato querés el reporte.'
+                        ? `Filtrá por fecha y elegí en qué formato querés el reporte de ${nombreCliente}.`
+                        : 'Filtrá por fecha y elegí en qué formato querés el reporte.'
+                }
+                filters={
+                    <FinishedLotesReportFilters
+                        control={control}
+                        onClear={() => reset()}
+                        disabled={generando}
+                    />
                 }
                 onSelectFormat={descargar}
                 isPending={generando}

@@ -1,22 +1,26 @@
 import { useCallback } from 'react'
 import { toast } from 'sonner'
 
-import type { QueryParams } from '#/infrastructure/http/http-client'
 import { downloadUrl } from '#/presentation/helpers/file/downloadUrl'
+import { toDateParam } from '#/presentation/helpers/date/toDateParam'
 import { EXTENSION_POR_FORMATO } from '#/presentation/helpers/file/reportExtension'
 import { useExecutePdfMutation } from '#/presentation/hooks/shared/useExecutePdfMutation'
+import type { FiltrosReporteLotesFinalizados } from '#/presentation/schema/reportes/filtrosReporteLotesFinalizadosSchema'
 import type { ReportFormat } from '#/presentation/types/reportes/reportes.types'
 
-
-export type FiltrosReporteLotesFinalizados = QueryParams
-
-type ReporteVariables = QueryParams & {
-    clienteId: number
+/**
+ * Variables de la petición, ya con los nombres que espera el endpoint
+ * (`cliente_id`, `desde`, `hasta` en `YYYY-MM-DD`). El `formato` también viaja
+ * como query param además de ir en la URL; el backend ignora lo que no conoce.
+ */
+type ReporteVariables = {
     formato: ReportFormat
+    cliente_id?: number
+    desde?: string
+    hasta?: string
 }
 
 interface DescargarReporteArgs {
-    clienteId: number
     formato: ReportFormat
     nombreCliente?: string
     filtros?: FiltrosReporteLotesFinalizados
@@ -30,12 +34,17 @@ export function useDownloadFinishedLotesReport() {
     )
 
     const descargarReporte = useCallback(
-        async ({ clienteId, formato, nombreCliente, filtros }: DescargarReporteArgs) => {
+        async ({ formato, nombreCliente, filtros }: DescargarReporteArgs) => {
             const avisoDeCarga = toast.loading('Descargando reporte de lotes finalizados…')
 
             try {
-                const url = await generar({ ...filtros, clienteId, formato })
-                const nombre = nombreCliente ?? `cliente-${clienteId}`
+                const url = await generar({
+                    formato,
+                    cliente_id: filtros?.cliente_id,
+                    desde: toDateParam(filtros?.desde),
+                    hasta: toDateParam(filtros?.hasta),
+                })
+                const nombre = nombreCliente ?? `cliente-${filtros?.cliente_id}`
 
                 downloadUrl(
                     url,
