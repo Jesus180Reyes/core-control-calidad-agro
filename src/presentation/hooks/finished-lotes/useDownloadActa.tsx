@@ -45,6 +45,7 @@ export function useDownloadActa() {
 
     const descargarActa = useCallback(
         async (lote: FinishedLote, formato: ActaReportFormat) => {
+            toast.loading(`Descargando acta de lote ${lote.nombre_lote}…`)
             setLoteDescargando(lote.id)
 
             // El error ya lo avisa el toast automático de `useExecutePdfMutation`;
@@ -53,9 +54,11 @@ export function useDownloadActa() {
                 const url = await generar({ loteId: lote.id, formato })
 
                 downloadUrl(url, `acta-${lote.nombre_lote}.${EXTENSIONES[formato]}`)
-                toast.success('Acta descargada')
+                toast.success(`Acta de lote ${lote.nombre_lote} descargada`)
             } catch {
                 /* vacío a propósito */
+            } finally {
+                toast.dismiss()
             }
         },
         [generar],
