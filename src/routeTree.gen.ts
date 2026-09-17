@@ -22,6 +22,7 @@ import { Route as portalPortalCrearPesajeRouteImport } from './routes/(portal)/_
 import { Route as portalPortalControlCalidadRouteImport } from './routes/(portal)/_portal.control-calidad'
 import { Route as portalPortalClientesFinalizadosRouteImport } from './routes/(portal)/_portal.clientes-finalizados'
 import { Route as portalPortalClientesRouteImport } from './routes/(portal)/_portal.clientes'
+import { Route as portalPortalAjustesRouteImport } from './routes/(portal)/_portal.ajustes'
 import { Route as portalPortalAdministracionDocumentosFiscalesRouteImport } from './routes/(portal)/_portal.administracion-documentos-fiscales'
 import { Route as authAuthLoginRouteImport } from './routes/(auth)/_auth.login'
 
@@ -95,6 +96,11 @@ const portalPortalClientesRoute = portalPortalClientesRouteImport.update({
   path: '/clientes',
   getParentRoute: () => portalPortalRoute,
 } as any)
+const portalPortalAjustesRoute = portalPortalAjustesRouteImport.update({
+  id: '/ajustes',
+  path: '/ajustes',
+  getParentRoute: () => portalPortalRoute,
+} as any)
 const portalPortalAdministracionDocumentosFiscalesRoute =
   portalPortalAdministracionDocumentosFiscalesRouteImport.update({
     id: '/administracion-documentos-fiscales',
@@ -110,6 +116,7 @@ const authAuthLoginRoute = authAuthLoginRouteImport.update({
 export interface FileRoutesByFullPath {
   '/login': typeof authAuthLoginRoute
   '/administracion-documentos-fiscales': typeof portalPortalAdministracionDocumentosFiscalesRoute
+  '/ajustes': typeof portalPortalAjustesRoute
   '/clientes': typeof portalPortalClientesRoute
   '/clientes-finalizados': typeof portalPortalClientesFinalizadosRoute
   '/control-calidad': typeof portalPortalControlCalidadRoute
@@ -125,6 +132,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/login': typeof authAuthLoginRoute
   '/administracion-documentos-fiscales': typeof portalPortalAdministracionDocumentosFiscalesRoute
+  '/ajustes': typeof portalPortalAjustesRoute
   '/clientes': typeof portalPortalClientesRoute
   '/clientes-finalizados': typeof portalPortalClientesFinalizadosRoute
   '/control-calidad': typeof portalPortalControlCalidadRoute
@@ -143,6 +151,7 @@ export interface FileRoutesById {
   '/(portal)/_portal': typeof portalPortalRouteWithChildren
   '/(auth)/_auth/login': typeof authAuthLoginRoute
   '/(portal)/_portal/administracion-documentos-fiscales': typeof portalPortalAdministracionDocumentosFiscalesRoute
+  '/(portal)/_portal/ajustes': typeof portalPortalAjustesRoute
   '/(portal)/_portal/clientes': typeof portalPortalClientesRoute
   '/(portal)/_portal/clientes-finalizados': typeof portalPortalClientesFinalizadosRoute
   '/(portal)/_portal/control-calidad': typeof portalPortalControlCalidadRoute
@@ -160,6 +169,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/login'
     | '/administracion-documentos-fiscales'
+    | '/ajustes'
     | '/clientes'
     | '/clientes-finalizados'
     | '/control-calidad'
@@ -175,6 +185,7 @@ export interface FileRouteTypes {
   to:
     | '/login'
     | '/administracion-documentos-fiscales'
+    | '/ajustes'
     | '/clientes'
     | '/clientes-finalizados'
     | '/control-calidad'
@@ -192,6 +203,7 @@ export interface FileRouteTypes {
     | '/(portal)/_portal'
     | '/(auth)/_auth/login'
     | '/(portal)/_portal/administracion-documentos-fiscales'
+    | '/(portal)/_portal/ajustes'
     | '/(portal)/_portal/clientes'
     | '/(portal)/_portal/clientes-finalizados'
     | '/(portal)/_portal/control-calidad'
@@ -303,6 +315,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof portalPortalClientesRouteImport
       parentRoute: typeof portalPortalRoute
     }
+    '/(portal)/_portal/ajustes': {
+      id: '/(portal)/_portal/ajustes'
+      path: '/ajustes'
+      fullPath: '/ajustes'
+      preLoaderRoute: typeof portalPortalAjustesRouteImport
+      parentRoute: typeof portalPortalRoute
+    }
     '/(portal)/_portal/administracion-documentos-fiscales': {
       id: '/(portal)/_portal/administracion-documentos-fiscales'
       path: '/administracion-documentos-fiscales'
@@ -334,6 +353,7 @@ const authAuthRouteWithChildren = authAuthRoute._addFileChildren(
 
 interface portalPortalRouteChildren {
   portalPortalAdministracionDocumentosFiscalesRoute: typeof portalPortalAdministracionDocumentosFiscalesRoute
+  portalPortalAjustesRoute: typeof portalPortalAjustesRoute
   portalPortalClientesRoute: typeof portalPortalClientesRoute
   portalPortalClientesFinalizadosRoute: typeof portalPortalClientesFinalizadosRoute
   portalPortalControlCalidadRoute: typeof portalPortalControlCalidadRoute
@@ -350,6 +370,7 @@ interface portalPortalRouteChildren {
 const portalPortalRouteChildren: portalPortalRouteChildren = {
   portalPortalAdministracionDocumentosFiscalesRoute:
     portalPortalAdministracionDocumentosFiscalesRoute,
+  portalPortalAjustesRoute: portalPortalAjustesRoute,
   portalPortalClientesRoute: portalPortalClientesRoute,
   portalPortalClientesFinalizadosRoute: portalPortalClientesFinalizadosRoute,
   portalPortalControlCalidadRoute: portalPortalControlCalidadRoute,

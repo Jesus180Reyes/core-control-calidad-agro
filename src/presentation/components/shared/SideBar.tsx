@@ -2,7 +2,7 @@ import { Link, useLocation } from '@tanstack/react-router'
 import { ChevronRight, ClipboardCheck, LogOut, Scale, ShieldCheck, SlidersHorizontal, Users } from 'lucide-react'
 import { useState } from 'react'
 
-import { Can } from '#/presentation/components/shared/Can'
+import { getInitials } from '#/presentation/components/shared/getInitials'
 import { useAuth } from '#/presentation/hooks/auth/useAuth'
 import { usePermissions } from '#/presentation/hooks/auth/usePermissions'
 import { PERMISSIONS, type Permission } from '#/presentation/types/auth/permissions'
@@ -52,13 +52,6 @@ const CLASES_MARCA_HIJO = 'absolute -left-3 top-1/2 -translate-x-1/2 -translate-
 const CLASES_MARCA_HIJO_ACTIVA = 'h-5 w-[3px] bg-brand shadow-[0_0_8px_-1px_var(--brand)]'
 
 const CLASES_MARCA_HIJO_INACTIVA = 'h-1.5 w-[3px] bg-text-muted/35 group-hover/hijo:h-3.5 group-hover/hijo:bg-text-muted/70'
-
-function inicialesDe(nombreCompleto: string): string {
-    const palabras = nombreCompleto.trim().split(/\s+/)
-    const primera = palabras[0]?.[0] ?? ''
-    const ultima = palabras.length > 1 ? palabras[palabras.length - 1][0] : ''
-    return `${primera}${ultima}`.toUpperCase()
-}
 
 export function Sidebar() {
     const { usuario, logout } = useAuth()
@@ -240,7 +233,7 @@ export function Sidebar() {
                 {usuario && (
                     <div className="group flex items-center gap-3 rounded-2xl bg-muted/50 border border-border-ui/60 p-2.5 transition-colors duration-200 hover:bg-muted/80">
                         <div className="size-9 shrink-0 rounded-xl bg-brand/12 text-brand flex items-center justify-center text-[11px] font-black tracking-wide transition-transform duration-200 ease-out group-hover:scale-105">
-                            {inicialesDe(usuario.complete_name)}
+                            {getInitials(usuario.complete_name)}
                         </div>
                         <div className="leading-tight overflow-hidden">
                             <p className="text-text-main text-sm font-bold truncate">
@@ -254,20 +247,21 @@ export function Sidebar() {
                 )}
 
                 <div className="pt-3 border-t border-border-ui/60 space-y-1">
-                    <Can permission={PERMISSIONS.MODULOCONTROLCALIDAD}>
-                        <Link
-                            to="/"
-                            inactiveProps={{
-                                className: 'text-text-muted hover:bg-muted/70 hover:text-text-main',
-                            }}
-                            className={`${CLASES_ITEM_PIE} focus-visible:ring-brand/40`}
-                        >
-                            <span className={`${CLASES_CHIP} bg-muted/60 group-hover:rotate-45`}>
-                                <SlidersHorizontal className="size-4.5" strokeWidth={2.1} />
-                            </span>
-                            <span>Ajustes</span>
-                        </Link>
-                    </Can>
+                    {/* Sin `<Can>`: ajustes es el perfil y el tema de quien entró,
+                        no un módulo del backend. */}
+                    <Link
+                        to="/ajustes"
+                        activeProps={{ className: CLASES_ACTIVO }}
+                        inactiveProps={{
+                            className: 'text-text-muted hover:bg-muted/70 hover:text-text-main',
+                        }}
+                        className={`${CLASES_ITEM_PIE} focus-visible:ring-brand/40`}
+                    >
+                        <span className={`${CLASES_CHIP} bg-muted/60 group-hover:rotate-45`}>
+                            <SlidersHorizontal className="size-4.5" strokeWidth={2.1} />
+                        </span>
+                        <span>Ajustes</span>
+                    </Link>
 
                     <button
                         onClick={logout}
