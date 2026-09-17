@@ -16,6 +16,7 @@ import {
     PopoverTrigger,
 } from '@/components/ui/popover'
 import { RejectPesajeDialog } from '#/presentation/components/inspeccion-pesajes/RejectPesajeDialog'
+import { useDownloadEtiqueta } from '#/presentation/hooks/pesajes/useDownloadEtiqueta'
 import type { PesajeData } from '#/presentation/types/pesajes/pesajesResponse'
 import { Can } from '../shared/Can'
 import { PERMISSIONS, type Permission } from '#/presentation/types/auth/permissions'
@@ -23,7 +24,7 @@ import { PERMISSIONS, type Permission } from '#/presentation/types/auth/permissi
 interface PesajeRowActionsProps {
     pesaje: PesajeData
 }
-type ItemActionSelected = 'RECHAZAR_PESAJE' | 'DESCARGAR_COMPROBANTE' | null;
+type ItemActionSelected = 'RECHAZAR_PESAJE' | 'DESCARGAR_ETIQUETA' | null;
 
 interface ActionsMenuItem {
     /** Identificador de la acción; se usa como key de la lista. */
@@ -33,6 +34,8 @@ interface ActionsMenuItem {
     /** Se ejecuta después de cerrar el menú. */
     run: () => void
     permission?: Permission
+    /** Evita disparar de nuevo una acción que ya está en curso. */
+    disabled?: boolean
 }
 
 interface ActionsMenuProps {
@@ -43,14 +46,15 @@ interface ActionsMenuProps {
 
 export function PesajeRowActions({ pesaje }: PesajeRowActionsProps) {
     const [selected, setSelected] = useState<ItemActionSelected>(null)
+    const { descargarEtiqueta, generando } = useDownloadEtiqueta()
 
     const actions: ActionsMenuItem[] = [
         {
-            action: 'DESCARGAR_COMPROBANTE',
-            label: 'Descargar comprobante',
+            action: 'DESCARGAR_ETIQUETA',
+            label: generando ? 'Descargando etiqueta…' : 'Descargar etiqueta',
             icon: DownloadCloud,
-            run: () => console.log('Descargar comprobante', pesaje.id),
-
+            run: () => void descargarEtiqueta(pesaje),
+            disabled: generando,
         },
         {
             action: 'RECHAZAR_PESAJE',
@@ -107,10 +111,10 @@ function ActionsMenu({ items, triggerLabel }: ActionsMenuProps) {
                         </CommandEmpty>
 
                         <CommandGroup>
-                            {items.map(({ action, label, icon: Icon, run, permission }) => (
-                                <Can permission={permission}>
+                            {items.map(({ action, label, icon: Icon, run, permission, disabled }) => (
+                                <Can key={action} permission={permission}>
                                     <CommandItem
-                                        key={action}
+                                        disabled={disabled}
                                         onSelect={() => {
                                             setAbierto(false)
                                             run()
