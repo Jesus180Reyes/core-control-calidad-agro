@@ -90,11 +90,11 @@ function RouteComponent() {
                     <LoteCard lote={lote} />
                 </div>
             )}
-            <Suspense fallback={<LoadingState label="Cargando filtros..." />}>
+            <Suspense fallback={<LoadingState />}>
                 <PesajesFiltersBar filtros={filtros} onApply={setFiltros} />
             </Suspense>
 
-            <Suspense fallback={<LoadingState label="Cargando pesajes..." />}>
+            <Suspense fallback={<LoadingState />}>
                 <PesajesInspectionView loteId={loteId} filtros={filtros} />
             </Suspense>
         </div>

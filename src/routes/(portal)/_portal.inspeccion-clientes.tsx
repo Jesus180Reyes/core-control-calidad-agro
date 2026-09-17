@@ -71,11 +71,11 @@ function RouteComponent() {
                 }
             />
 
-            <Suspense fallback={<LoadingState label="Cargando filtros..." />}>
+            <Suspense fallback={<LoadingState />}>
                 <ClientesFiltersBar filtros={filtros} onApply={setFiltros} />
             </Suspense>
 
-            <Suspense fallback={<LoadingState label="Cargando clientes..." />}>
+            <Suspense fallback={<LoadingState />}>
                 <ClientInspectionView filtros={filtros} />
             </Suspense>
 

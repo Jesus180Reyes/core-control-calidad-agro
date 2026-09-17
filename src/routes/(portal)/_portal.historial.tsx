@@ -23,7 +23,7 @@ function HistorialPage() {
 
       <HistorialFiltersBar filtros={filtros} onApply={setFiltros} />
 
-      <Suspense fallback={<LoadingState label="Cargando historial de pesajes..." />}>
+      <Suspense fallback={<LoadingState />}>
         <HistorialPesajesTable filtros={filtros} />
       </Suspense>
     </div>

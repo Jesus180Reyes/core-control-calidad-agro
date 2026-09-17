@@ -55,7 +55,7 @@ function PortalLayout() {
                     </div>
                 )}
             >
-                <Suspense fallback={<LoadingState label="Cargando pantalla..." size="lg" />}>
+                <Suspense fallback={<LoadingState size="lg" />}>
                     <Outlet />
                 </Suspense>
             </ErrorBoundary>

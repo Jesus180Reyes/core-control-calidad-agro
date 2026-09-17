@@ -43,7 +43,7 @@ function RouteComponent() {
                 descripcion="Los impuestos aplicados y los lotes facturados en el documento."
             />
 
-            <Suspense fallback={<LoadingState label="Cargando documento..." />}>
+            <Suspense fallback={<LoadingState />}>
                 <div className="space-y-6">
                     <DocumentoFiscalSectionCards
                         documentoId={documentoId}

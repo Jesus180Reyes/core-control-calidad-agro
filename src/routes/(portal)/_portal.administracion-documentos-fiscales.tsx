@@ -94,7 +94,7 @@ function RouteComponent() {
                 }
             />
 
-            <Suspense fallback={<LoadingState label="Cargando filtros..." />}>
+            <Suspense fallback={<LoadingState />}>
                 <DocumentosFiscalesFiltersBar
                     filtros={filtros}
                     onApply={setFiltros}
@@ -102,7 +102,7 @@ function RouteComponent() {
             </Suspense>
 
             <Suspense
-                fallback={<LoadingState label="Cargando documentos fiscales..." />}
+                fallback={<LoadingState />}
             >
                 <DocumentosFiscalesView filtros={filtros} />
             </Suspense>
@@ -141,7 +141,7 @@ function RouteComponent() {
                         onSubmit={form.handleSubmit(onSuccess, onError)}
                     >
                         <Suspense
-                            fallback={<LoadingState label="Cargando formulario..." />}
+                            fallback={<LoadingState />}
                         >
                             <CreateDocumentoFiscalForm />
                         </Suspense>

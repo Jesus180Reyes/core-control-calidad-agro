@@ -42,7 +42,7 @@ function RouteComponent() {
                 descripcion={`Elegí el lote de ${cliente.nombre} que vas a pesar. Después de eso se abre la báscula.`}
             />
 
-            <Suspense fallback={<LoadingState label="Cargando lotes..." />}>
+            <Suspense fallback={<LoadingState />}>
                 <LotesView cliente={cliente} />
             </Suspense>
         </div>

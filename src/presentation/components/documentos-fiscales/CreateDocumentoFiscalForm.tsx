@@ -390,7 +390,7 @@ function LotesSection() {
                     Elegí primero el cliente para ver sus lotes.
                 </p>
             ) : (
-                <Suspense fallback={<LoadingState label="Cargando lotes..." />}>
+                <Suspense fallback={<LoadingState />}>
                     {fields.map((field, index) => (
                         <FormRow
                             key={field.id}

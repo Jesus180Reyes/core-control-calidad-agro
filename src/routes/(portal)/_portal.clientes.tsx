@@ -18,7 +18,7 @@ function ClientesPage() {
                 descripcion="Elegí para quién vas a pesar. Después de eso se abre la báscula."
             />
 
-            <Suspense fallback={<LoadingState label='Cargando clientes...' />}>
+            <Suspense fallback={<LoadingState />}>
                 <ClientesView />
             </Suspense>
         </div>

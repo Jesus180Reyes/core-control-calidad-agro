@@ -91,7 +91,7 @@ function RouteComponent() {
                 }
             />
 
-            <Suspense fallback={<LoadingState label="Cargando lotes..." />}>
+            <Suspense fallback={<LoadingState />}>
                 <LotesInspectionView clienteId={clienteId} />
             </Suspense>
 
