@@ -30,6 +30,7 @@ Este spec entrega la pantalla completa y **no** el backend. El hook devuelve una
 - Botón "Nueva conversación" en el header de la pantalla.
 - Tokens nuevos en `src/styles.css` para el gradiente de Agri, más el keyframe de los tres puntos.
 - Item nuevo en `src/presentation/components/shared/SideBar.tsx`, sin permiso.
+- Dependencia nueva `remark-gfm` y su enganche en `MarkdownContent.tsx`, que es lo que hace que las tablas se pinten (ver Decisiones).
 - Sección de Agri en `CLAUDE.md`.
 
 **Fuera de alcance (para specs futuros):**
@@ -46,7 +47,7 @@ Este spec entrega la pantalla completa y **no** el backend. El hook devuelve una
 - **Permisos.** El item del Sidebar y la ruta no se envuelven en `<Can>` ni en un guard propio.
 - **Tests de vitest.** Ninguno en este spec (ver Decisiones).
 - Tocar `useAiSummary`, `AiSummaryDialog` o cualquier otra pantalla.
-- Modificar `MarkdownContent`: se usa tal cual está.
+- Cualquier otro cambio en `MarkdownContent` que no sea el `remark-gfm` del alcance: la animación, los `prose-*` existentes y la ausencia de `rehype-raw` quedan como están.
 - Modificar `(portal)/_portal.tsx`: el layout queda como está.
 
 ---
@@ -172,7 +173,8 @@ Cada paso deja el proyecto compilando y la app funcionando.
 - [ ] En modo oscuro son legibles el header, las dos burbujas, los chips, el indicador y el compositor; el gradiente de Agri se ve en ambos temas.
 - [ ] Con "reducir movimiento" activado en el sistema, ni los puntos ni el texto palabra por palabra se animan, y todo el contenido se ve igual.
 - [ ] `useAgriChat.tsx` no contiene ninguna URL ni llama a `httpRequest`, `useExecuteQuery` o `useExecuteMutation`.
-- [ ] `MarkdownContent.tsx`, `AiSummaryDialog.tsx`, `useAiSummary.tsx` y `(portal)/_portal.tsx` quedan sin cambios.
+- [ ] `remark-gfm` figura en `dependencies` de `package.json` y una tabla markdown se pinta como `<table>`, tanto en `/agri` como en el resumen IA de `AiSummaryDialog`.
+- [ ] `AiSummaryDialog.tsx`, `useAiSummary.tsx` y `(portal)/_portal.tsx` quedan sin cambios, y de `MarkdownContent.tsx` sólo cambia el enganche de `remark-gfm` y los `prose-*` de tabla.
 - [ ] `CLAUDE.md` documenta la pantalla y que el hook es un mock.
 
 ---
@@ -200,7 +202,9 @@ Cada paso deja el proyecto compilando y la app funcionando.
 - **Sí:** el item del Sidebar va sin permiso. Decisión del usuario. `PERMISSIONS` sólo lleva strings verificados contra el backend, y un `MODULO-AGRI` que el backend no emite escondería el item para todos —que es justo lo contrario de lo que este spec quiere mostrar.
 - **No:** tests de vitest. Decisión del usuario. Lo único con lógica es un `setTimeout` que se va a borrar cuando llegue el endpoint; los tests valen la pena sobre el hook ya conectado.
 - **Sí:** identificadores en inglés (`AgriMessage`, `sendMessage`, `isThinking`, `startNewChat`), texto de UI y comentarios en español. Archivos nuevos, regla de `CLAUDE.md`.
-- **Sí:** `MarkdownContent` se reusa tal cual, sin `rehype-raw`. Ya resuelve la tipografía sobre los tokens del proyecto y la animación palabra por palabra, y el día que la respuesta venga de una IA de verdad, el HTML que traiga adentro se sigue mostrando como texto en vez de ejecutarse.
+- **Sí:** `remark-gfm` en `MarkdownContent`. Decisión del usuario, tomada durante la implementación: el spec se aprobó pidiendo que el mock ejercitara una tabla y dando por sentado que `MarkdownContent` no se tocaba, y las dos cosas no podían ser ciertas a la vez. `react-markdown` de fábrica es CommonMark, donde las tablas no existen: un `| Lote | Peso |` sale como un párrafo con los pipes a la vista. El arreglo es un import y una prop, y arregla de paso el resumen IA de lotes, que hoy ya rompería si el backend mandara una tabla.
+- **No:** sacar la tabla del mock. Era la alternativa que no tocaba nada fuera de alcance, y el usuario la descartó: la tabla es justo donde una respuesta de IA se ve capaz, que es lo que esta pantalla tiene que demostrar.
+- **Sí:** `MarkdownContent` se reusa por lo demás tal cual, sin `rehype-raw`. Ya resuelve la tipografía sobre los tokens del proyecto y la animación palabra por palabra, y el día que la respuesta venga de una IA de verdad, el HTML que traiga adentro se sigue mostrando como texto en vez de ejecutarse.
 
 ---
 
@@ -230,6 +234,6 @@ Cada paso deja el proyecto compilando y la app funcionando.
 - Feedback de la respuesta (pulgar arriba / abajo).
 - Permisos sobre `/agri`, en el Sidebar o en la ruta.
 - Tests de vitest.
-- Cambios en `MarkdownContent`, `useAiSummary`, `AiSummaryDialog` o `(portal)/_portal.tsx`.
+- Cambios en `useAiSummary`, `AiSummaryDialog` o `(portal)/_portal.tsx`, y cualquier cambio en `MarkdownContent` más allá de `remark-gfm`.
 
 Cada uno de ellos, si se hace, va en su propio spec.

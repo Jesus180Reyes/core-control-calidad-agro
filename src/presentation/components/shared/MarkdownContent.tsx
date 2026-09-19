@@ -1,7 +1,16 @@
 import type { Element, ElementContent, Root } from 'hast'
 import Markdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
 
 import { cn } from '#/lib/utils'
+
+/**
+ * `react-markdown` de fábrica es CommonMark pelado, y ahí las tablas no
+ * existen: un `| Lote | Peso |` se pinta como un párrafo con los pipes a la
+ * vista. GFM es lo que las convierte en `<table>`, y de paso trae el tachado y
+ * las listas de tareas.
+ */
+const PLUGINS_REMARK = [remarkGfm]
 
 /**
  * Tipografía del markdown: `prose` del plugin de Tailwind, reencauzada a los
@@ -15,6 +24,8 @@ const PROSE_STYLES = cn(
     'prose-a:text-brand prose-code:text-text-main',
     'prose-hr:border-border-ui prose-blockquote:border-border-ui',
     'prose-blockquote:text-text-muted',
+    'prose-th:text-text-main prose-td:text-text-main',
+    'prose-thead:border-border-ui prose-tr:border-border-ui',
 )
 
 /** Lo que tarda una palabra en salir después de la anterior. */
@@ -112,7 +123,10 @@ interface MarkdownContentProps {
 export function MarkdownContent({ content, animated, className }: MarkdownContentProps) {
     return (
         <div className={cn(PROSE_STYLES, className)}>
-            <Markdown rehypePlugins={animated ? PLUGINS_ANIMADOS : undefined}>
+            <Markdown
+                remarkPlugins={PLUGINS_REMARK}
+                rehypePlugins={animated ? PLUGINS_ANIMADOS : undefined}
+            >
                 {content}
             </Markdown>
         </div>
