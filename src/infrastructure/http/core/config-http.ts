@@ -17,4 +17,4 @@ export const BASE_URL: string = import.meta.env.VITE_API_URL ?? ''
 export const REPORT_SERVICE_URL: string = import.meta.env.VITE_REPORT_SERVICE_URL ?? ''
 
 /** Tope de espera por petición, sobreescribible por llamada. */
-export const TIMEOUT_POR_DEFECTO_MS = 15_000
+export const TIMEOUT_POR_DEFECTO_MS = 30_000

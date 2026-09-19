@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Boxes, CheckCircle2, FileDown, Flag } from 'lucide-react'
+import { Boxes, CheckCircle2, FileDown, Flag, Sparkles } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 
 import { Button } from '#/components/ui/button'
@@ -38,8 +38,17 @@ const ICON_STYLES = cn(
 // Verde plano y ancho completo: alcanza para que se lea como la acción de la
 // card, sin degradado ni glow que compitan con el resto.
 const ACTA_BUTTON_STYLES = cn(
-    'mt-5 h-10 w-full rounded-xl text-xs font-semibold',
+    'h-10 w-full rounded-xl text-xs font-semibold',
     'bg-emerald-600 text-white hover:bg-emerald-700',
+    'cursor-pointer',
+)
+
+// El resumen es la acción secundaria: mismo tamaño que el acta, pero en violeta
+// y sin relleno, para que el verde siga siendo lo primero que se ve.
+const RESUMEN_BUTTON_STYLES = cn(
+    'h-10 w-full rounded-xl text-xs font-semibold',
+    'border border-indigo-500/30 bg-indigo-50 text-indigo-700 hover:bg-indigo-100',
+    'dark:bg-indigo-950/40 dark:text-indigo-300 dark:hover:bg-indigo-950/70',
     'cursor-pointer',
 )
 
@@ -48,12 +57,17 @@ interface FinishedLoteHighlightCardProps {
     /** Descarga del acta en el formato elegido. Todavía no hay endpoint que la resuelva. */
     onDownloadActa?: (lote: FinishedLote, formato: ReportFormat) => void
     downloadingActa?: boolean
+    /** Pide el resumen IA del lote; el texto se pinta en el diálogo de la pantalla. */
+    onAiSummary?: (lote: FinishedLote) => void
+    aiSummaryPending?: boolean
 }
 
 export function FinishedLoteHighlightCard({
     lote,
     onDownloadActa,
     downloadingActa = false,
+    onAiSummary,
+    aiSummaryPending = false,
 }: FinishedLoteHighlightCardProps) {
     const [dialogAbierto, setDialogAbierto] = useState(false)
 
@@ -136,15 +150,28 @@ export function FinishedLoteHighlightCard({
                 </ol>
             </div>
 
-            <Button
-                size="lg"
-                className={ACTA_BUTTON_STYLES}
-                disabled={downloadingActa}
-                onClick={() => setDialogAbierto(true)}
-            >
-                <FileDown className="size-4" strokeWidth={2.4} aria-hidden />
-                {downloadingActa ? 'Generando acta…' : 'Descargar acta de entrega'}
-            </Button>
+            <div className="mt-5 flex flex-col gap-2">
+                <Button
+                    size="lg"
+                    className={ACTA_BUTTON_STYLES}
+                    disabled={downloadingActa}
+                    onClick={() => setDialogAbierto(true)}
+                >
+                    <FileDown className="size-4" strokeWidth={2.4} aria-hidden />
+                    {downloadingActa ? 'Generando acta…' : 'Descargar acta de entrega'}
+                </Button>
+
+                <Button
+                    size="lg"
+                    variant="ghost"
+                    className={RESUMEN_BUTTON_STYLES}
+                    disabled={aiSummaryPending}
+                    onClick={() => onAiSummary?.(lote)}
+                >
+                    <Sparkles className="size-4" strokeWidth={2.4} aria-hidden />
+                    {aiSummaryPending ? 'Generando resumen…' : 'Ver resumen del lote'}
+                </Button>
+            </div>
 
             <DownloadFormatDialog
                 open={dialogAbierto}

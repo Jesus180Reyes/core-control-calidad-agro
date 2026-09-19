@@ -1,5 +1,9 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 @import "tailwindcss";
+/* Las clases `prose` del plugin son lo que le da forma al markdown que devuelve
+   el backend (resumen IA): sin él, `MarkdownContent` pinta títulos y listas sin
+   estilo, porque Tailwind resetea todo. */
+@plugin "@tailwindcss/typography";
 /* Las primitivas de shadcn (popover, dialog, sheet, select) ya vienen con las
    clases `animate-in`/`animate-out`; sin este import no existen y todo abre de
    golpe. `duration-*` y `ease-*` alimentan la animación, no sólo la transición. */

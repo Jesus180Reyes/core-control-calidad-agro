@@ -36,6 +36,16 @@ export interface FinishedLotesResponse {
     lotes: FinishedLote[]
 }
 
+/**
+ * Resumen del lote redactado por IA. `resumen` viene en markdown y se pinta
+ * con `MarkdownContent`; es texto para leer, no datos para calcular.
+ */
+export interface ResumenLoteResponse {
+    ok: boolean
+    msg: string
+    resumen: string
+}
+
 
 declare module '@tanstack/react-router' {
     interface HistoryState {
