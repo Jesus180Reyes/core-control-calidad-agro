@@ -103,7 +103,7 @@ function ResumenBody({ resumen, isPending, isError, onRetry }: ResumenBodyProps)
         )
     }
 
-    return <MarkdownContent content={resumen} className="py-2" />
+    return <MarkdownContent content={resumen} animated className="py-2" />
 }
 
 interface EstadoDeAvisoProps {

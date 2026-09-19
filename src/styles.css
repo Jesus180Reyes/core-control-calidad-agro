@@ -25,6 +25,41 @@
     }
   }
 }
+@layer components {
+  /* Cada palabra del markdown animado (`MarkdownContent animated`) sale con su
+     propio `animation-delay`, que el plugin de `MarkdownContent` escribe en el
+     `style` del span. El `inline-block` no es decorativo: sobre un elemento
+     inline el navegador ignora el `translate`. */
+  .md-word {
+    display: inline-block;
+    animation: fade-word 520ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  /* El bloque global de más arriba sólo acorta la duración; el retardo seguiría
+     escalonando la aparición durante segundos, que es justo lo que molesta a
+     quien pidió menos movimiento. */
+  @media (prefers-reduced-motion: reduce) {
+    .md-word {
+      animation: none !important;
+    }
+  }
+}
+
+/* El `both` de `.md-word` es lo que mantiene la palabra invisible durante su
+   retardo; sin él, el texto entero se vería desde el primer frame. */
+@keyframes fade-word {
+  from {
+    opacity: 0;
+    transform: translateY(0.3em);
+    filter: blur(5px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+    filter: blur(0);
+  }
+}
+
 @theme {
   --color-brand: var(--brand);
   --color-success: var(--success);
