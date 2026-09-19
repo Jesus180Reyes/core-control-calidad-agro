@@ -11,9 +11,9 @@ export interface AgriMessage {
     id: string
     role: AgriRole
     /**
-     * Markdown crudo. El del usuario también: se pinta con el mismo
-     * `MarkdownContent` que el de Agri, así el texto no cambia de tipografía
-     * según quién lo escribió.
+     * El de Agri es markdown y se pinta con `MarkdownContent`. El del usuario
+     * se muestra tal cual se tipeó, sin interpretar: nadie espera que su propio
+     * `**hola**` le salga en negrita.
      */
     content: string
 }

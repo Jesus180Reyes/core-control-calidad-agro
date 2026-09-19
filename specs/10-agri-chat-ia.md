@@ -1,6 +1,6 @@
 # SPEC 10 — Agri, el chat IA
 
-> **Estado:** Approved
+> **Estado:** Implemented
 > **Depende de:** —
 > **Fecha:** 2026-09-19
 > **Objetivo:** Crear la ruta `/agri`, una pantalla de chat con IA al estilo de Gemini o ChatGPT o Claude, con el hilo, el compositor, la pantalla de bienvenida con prompts sugeridos y una identidad visual propia, alimentada por un mock mientras no exista el endpoint.
@@ -63,7 +63,7 @@ export interface AgriMessage {
     /** `crypto.randomUUID()`. Es la key de la lista y el ancla del scroll. */
     id: string
     role: AgriRole
-    /** Markdown crudo. El del usuario también, para que se pinte con la misma tipografía. */
+    /** El de Agri es markdown; el del usuario se muestra tal cual se tipeó. */
     content: string
 }
 ```
@@ -192,6 +192,7 @@ Cada paso deja el proyecto compilando y la app funcionando.
 - **Sí:** tokens del proyecto más un acento propio de Agri. Decisión del usuario. Los dos tokens nuevos se usan sólo en esta pantalla y en su item del Sidebar; el resto sale de `bg-surface`, `text-text-main` y compañía, así que la pantalla se ve distinta sin dejar de ser la misma app.
 - **No:** identidad visual completa con aurora animada y glassmorphism. Es el doble de superficie que mantener en claro y en oscuro, y en tablets de planta un fondo animado permanente se paga en batería.
 - **No:** cero colores nuevos. Era la opción más coherente y se descartó explícitamente: el punto del spec es que Agri se vea moderno, y con los tokens actuales la pantalla se vería igual que el historial.
+- **Sí:** el mensaje del usuario se pinta como texto plano, no como markdown. Decisión del usuario, tomada durante la implementación: el spec decía que los dos mensajes pasaban por `MarkdownContent` "para que se pinte con la misma tipografía", y eso obligaba a reencauzar el color elemento por elemento (`prose-p`, `prose-strong`, `prose-li`…) porque el markdown manda todo a `text-text-main`, que sobre el globo de marca queda azul oscuro sobre índigo. Un `<p className="text-brand-foreground whitespace-pre-wrap">` da blanco en tema claro y oscuro en el oscuro, sin pelear por especificidad. De paso alinea con Gemini y ChatGPT, que muestran el mensaje propio tal cual se tipeó.
 - **Sí:** la burbuja de Agri no tiene globo. Es lo que hacen Gemini y ChatGPT, y con markdown de varios párrafos un globo encerrado se lee peor que el texto suelto.
 - **Sí:** copiar y regenerar, sobre la última respuesta nada más. Decisión del usuario. Una barra en cada burbuja llena el hilo de íconos, y regenerar una respuesta del medio dejaría el hilo inconsistente.
 - **No:** detener la generación. Con un `setTimeout` de 1.4s el botón de stop nunca llega a usarse; entra junto con el endpoint real, donde sí significa algo.

@@ -109,6 +109,22 @@ Los tipos de la Web Serial API están declarados a mano en `src/global.d.ts` (no
 
 `useControlCalidad` envuelve a `useSerialScale` y añade las reglas de negocio (rango min/ideal/max, bloqueo crítico con PIN de supervisor).
 
+### Agri (chat IA)
+
+`/agri` es la pantalla de chat con IA: `routes/(portal)/_portal.agri.tsx` monta `views/agri/AgriChatView.tsx`, que cablea el hook con los cinco componentes de `components/agri/` (avatar, burbuja, indicador de tipeo, compositor y bienvenida). El item del Sidebar vive arriba de la etiqueta "Operación", fuera del `menuItems.map` y **sin permiso**: `PERMISSIONS` sólo lleva strings que el backend emite, y hoy no emite ninguno para el chat.
+
+**El hook es un mock.** `presentation/hooks/agri/useAgriChat.tsx` no llama a ningún endpoint: el hilo vive en un `useState` y la respuesta sale siempre de `agriMockResponse.ts`, detrás de un `setTimeout`. El día que exista el endpoint del chat, **ese archivo es el único que cambia** — la vista y sus componentes no saben de dónde viene el texto. Es el mismo trato que `useControlCalidad` y `useParametros`.
+
+Tres cosas que el chat **no** hace, y que no conviene agregar de prepo porque cada una es un spec (SPEC 10 las deja anotadas):
+
+- **No hay streaming.** La respuesta llega entera. El `createHttpClient` elige entre `parsear: 'json' | 'blob'` y leer un `ReadableStream` es un transporte nuevo en la capa HTTP. La sensación de escritura progresiva la da `MarkdownContent animated`, que ya existía.
+- **No hay persistencia.** Recargar vacía el hilo. Ni `localStorage` ni backend de conversaciones, así que tampoco hay lista de chats.
+- **No hay contexto de dominio.** El front manda texto y nada más: ningún id de lote ni de cliente viaja con el mensaje.
+
+`--agri-from` y `--agri-to` (en `styles.css`, expuestos como `agri-from`/`agri-to`) son el acento de **esta** pantalla: el avatar, el botón de enviar, el halo del compositor y el item del Sidebar. No son tokens de la app — el resto de `/agri` se pinta con `bg-surface`, `text-text-main` y compañía como cualquier otra pantalla. La clase `.agri-dot` anima los tres puntos del indicador, con el `animation-delay` por punto escrito en el `style` desde el componente, igual que hace `MarkdownContent` con `.md-word`.
+
+`MarkdownContent` monta `remark-gfm`, que es lo que hace que las tablas se pinten como `<table>`. Sin él, `react-markdown` es CommonMark pelado y un `| Lote | Peso |` sale como un párrafo con los pipes a la vista — tanto en el chat como en el resumen IA de lotes.
+
 ## Estilos
 
 Tailwind v4 sin `tailwind.config.js`: los tokens viven en `src/styles.css` bajo `@theme`, con variables CSS redefinidas en `:root/.light` y `.dark`. Usar los tokens semánticos (`bg-surface`, `text-text-main`, `text-text-muted`, `border-border-ui`, `bg-bg-app`, `shadow-clay-card`, `shadow-clay-btn`) en vez de colores crudos cuando exista el token. El modo oscuro es por clase en `<html>` (`ThemeProvider`, persistido en `localStorage` bajo `bascula-ui-theme`) y se declara con `@variant dark (.dark &)`.
