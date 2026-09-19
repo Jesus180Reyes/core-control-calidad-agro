@@ -17,3 +17,17 @@ export interface AgriMessage {
      */
     content: string
 }
+
+/** Respuesta de `GET /chat/sugerencias`. */
+export interface AgriSugerenciasResponse {
+    ok: boolean
+    msg: string
+    /**
+     * Las frases de arranque de la pantalla vacía. El backend devuelve siempre
+     * tres, en **texto plano**: se pintan tal cual, sin `MarkdownContent`.
+     *
+     * Si el usuario tiene cartera nombran clientes suyos; si no —un aprobador,
+     * un admin— vienen tres genéricas. La pantalla no distingue los dos casos.
+     */
+    sugerencias: string[]
+}

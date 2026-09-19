@@ -113,7 +113,11 @@ Los tipos de la Web Serial API están declarados a mano en `src/global.d.ts` (no
 
 `/agri` es la pantalla de chat con IA: `routes/(portal)/_portal.agri.tsx` monta `views/agri/AgriChatView.tsx`, que cablea el hook con los cinco componentes de `components/agri/` (avatar, burbuja, indicador de tipeo, compositor y bienvenida). El item del Sidebar vive arriba de la etiqueta "Operación", fuera del `menuItems.map` y **sin permiso**: `PERMISSIONS` sólo lleva strings que el backend emite, y hoy no emite ninguno para el chat.
 
-**El hook es un mock.** `presentation/hooks/agri/useAgriChat.tsx` no llama a ningún endpoint: el hilo vive en un `useState` y la respuesta sale siempre de `agriMockResponse.ts`, detrás de un `setTimeout`. El día que exista el endpoint del chat, **ese archivo es el único que cambia** — la vista y sus componentes no saben de dónde viene el texto. Es el mismo trato que `useControlCalidad` y `useParametros`.
+**El hilo todavía es un mock.** `presentation/hooks/agri/useAgriChat.tsx` no llama a ningún endpoint: el hilo vive en un `useState` y la respuesta sale siempre de `agriMockResponse.ts`, detrás de un `setTimeout`. El día que exista el endpoint del turno de conversación (`POST /chat`), **ese archivo es el único que cambia** — la vista y sus componentes no saben de dónde viene el texto. Es el mismo trato que `useControlCalidad` y `useParametros`.
+
+**Las sugerencias sí salen del backend.** `useAgriSugerencias` pide `GET /chat/sugerencias`, que devuelve siempre tres frases en **texto plano** (nunca markdown: se pintan tal cual, sin `MarkdownContent`) armadas con la cartera del usuario que sale del token. El endpoint no llama a Gemini y no cuenta contra el límite diario, así que abrir el chat es gratis y la query se pide al montar la pantalla vacía. Va con `staleTime: Infinity`: la cartera no cambia en medio de una sesión, y sin eso "Nueva conversación" vuelve a suspender la bienvenida a los cinco segundos.
+
+El `<Suspense>` y el `ErrorBoundary` de esa query viven **dentro de `AgriWelcome`**, no en la ruta: suspender la pantalla entera cambiaría el chat por un spinner cuando el saludo y el compositor ya podrían estar puestos. Si la query falla, el fallback es una línea chica más "Reintentar" y el compositor sigue funcionando — las sugerencias son comodidad, no la pantalla.
 
 Tres cosas que el chat **no** hace, y que no conviene agregar de prepo porque cada una es un spec (SPEC 10 las deja anotadas):
 
