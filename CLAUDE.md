@@ -113,7 +113,19 @@ Los tipos de la Web Serial API están declarados a mano en `src/global.d.ts` (no
 
 `/agri` es la pantalla de chat con IA: `routes/(portal)/_portal.agri.tsx` monta `views/agri/AgriChatView.tsx`, que cablea el hook con los cinco componentes de `components/agri/` (avatar, burbuja, indicador de tipeo, compositor y bienvenida). El item del Sidebar vive arriba de la etiqueta "Operación", fuera del `menuItems.map` y **sin permiso**: `PERMISSIONS` sólo lleva strings que el backend emite, y hoy no emite ninguno para el chat.
 
-**El hilo todavía es un mock.** `presentation/hooks/agri/useAgriChat.tsx` no llama a ningún endpoint: el hilo vive en un `useState` y la respuesta sale siempre de `agriMockResponse.ts`, detrás de un `setTimeout`. El día que exista el endpoint del turno de conversación (`POST /chat`), **ese archivo es el único que cambia** — la vista y sus componentes no saben de dónde viene el texto. Es el mismo trato que `useControlCalidad` y `useParametros`.
+**El hilo sale de `POST /chat`.** `presentation/hooks/agri/useAgriChat.tsx` manda cada turno por `useExecuteMutation`; `isThinking` es el `isPending` de esa mutación y el hilo sigue viviendo en un `useState`. El backend **no guarda la conversación**: el contexto lo pone el front en cada envío, con `{ mensaje, conversacion, historial }`.
+
+Tres reglas del cuerpo, que es donde da 400:
+
+- `mensaje` — trimmeado, no vacío, **máximo 500 caracteres**. El hook corta el largo antes de mandar con un `toast.error`: el 400 ya habría gastado un turno del límite diario del usuario.
+- `conversacion` — **UUID o nada**. Se genera una vez por hilo y se reenvía igual en todos sus turnos; "Nueva conversación" genera otro. Un id incremental, un `Date.now()`, un `''` o un `null` son 400, así que cuando no hay UUID que mandar (`crypto.randomUUID` pide contexto seguro; el respaldo sale de `getRandomValues`) la clave **se omite**. Sólo agrupa los turnos en el log del backend.
+- `historial` — array de `{ rol: 'usuario' | 'asistente', contenido }`, nunca `'user'`/`'assistant'`/`'system'`. `aHistorial` traduce los roles, recorta el `contenido` a 4000 caracteres y manda los últimos diez turnos, que es lo único que el backend le reenvía al modelo. Sólo turnos visibles: ni resultados de herramientas ni mensajes de sistema.
+
+El endpoint contesta **200 casi siempre**: si el modelo falla o el usuario agotó su límite diario, la explicación viene escrita en `respuesta` y se pinta como un mensaje más de Agri. Un error de verdad (400, 401, red) sale por el toast automático de la mutación, y no se reintenta solo — cada turno cuenta contra el límite diario.
+
+El `onSuccess` que empuja la respuesta al hilo es el de la llamada (`mutate(cuerpo, { onSuccess })`), no el de las opciones del hook: `reset()` lo desengancha, y es lo que hace que "Nueva conversación" en medio de un turno no vea aparecer esa respuesta dentro del hilo nuevo.
+
+El chat es de **sólo lectura** —el backend elige entre funciones de consulta— y **no filtra por cartera**: cualquier usuario autenticado puede preguntar por lotes de cualquier cliente. No montar botones de acción (aprobar, finalizar) sobre una respuesta.
 
 **Las sugerencias sí salen del backend.** `useAgriSugerencias` pide `GET /chat/sugerencias`, que devuelve siempre tres frases en **texto plano** (nunca markdown: se pintan tal cual, sin `MarkdownContent`) armadas con la cartera del usuario que sale del token. El endpoint no llama a Gemini y no cuenta contra el límite diario, así que abrir el chat es gratis y la query se pide al montar la pantalla vacía. Va con `staleTime: Infinity`: la cartera no cambia en medio de una sesión, y sin eso "Nueva conversación" vuelve a suspender la bienvenida a los cinco segundos.
 
