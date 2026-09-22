@@ -109,6 +109,17 @@ Los tipos de la Web Serial API están declarados a mano en `src/global.d.ts` (no
 
 `useControlCalidad` envuelve a `useSerialScale` y añade las reglas de negocio (rango min/ideal/max, bloqueo crítico con PIN de supervisor).
 
+### El ticket cierra el pesaje
+
+Todo `POST /pesajes` exitoso abre el `PrintTicketDialog` (`components/control-calidad/`), y la impresión del ticket **no es opcional**: un bulto sin etiqueta después no se identifica en planta. El modal es bloqueante de verdad —`showCloseButton={false}`, `onOpenChange` vacío y el `open` controlado por `impresion.pesaje`— así que no se cierra con la X, ni con Esc, ni con un click afuera. Su única acción es "Imprimir ticket", que llama a `useDownloadEtiqueta` con el `id` que devolvió el guardado; una descarga exitosa lo cierra sola.
+
+Dos reglas que van juntas:
+
+- **La salida de emergencia aparece recién con dos fallos** (`FALLOS_PARA_OMITIR` en `useControlCalidad`). Si el servicio de reportes se cae, un modal sin salida frena la planta con el producto sobre la plataforma; exigir un reintento antes evita que un timeout suelto enseñe el atajo. El contador se reinicia con cada pesaje: que la etiqueta anterior fallara dos veces no habilita el atajo en el bulto siguiente.
+- **`mostrarBloqueo` exige `pesajeRegistrado === null`.** Con el modal abierto la báscula sigue leyendo, y un producto que no se retiró reestabiliza en 5 s: sin esa guarda el `BloqueoCriticoDialog` aparecería encima del ticket, sobre un pesaje que ya está guardado.
+
+Por eso `guardarPesaje` devuelve el `PesajeCreado` y no un `boolean`, y `descargarEtiqueta` pide un `{ id: number }` —no un `PesajeData`— y devuelve `boolean`: el modal necesita saber si contar un fallo, y el toast rojo del error ya lo pone `useExecutePdfMutation`. La reimpresión sigue saliendo del historial (`PesajeRowActions`); `/control-calidad` no reimprime.
+
 ### Agri (chat IA)
 
 `/agri` es la pantalla de chat con IA: `routes/(portal)/_portal.agri.tsx` monta `views/agri/AgriChatView.tsx`, que cablea el hook con los cinco componentes de `components/agri/` (avatar, burbuja, indicador de tipeo, compositor y bienvenida). El item del Sidebar vive arriba de la etiqueta "Operación", fuera del `menuItems.map` y **sin permiso**: `PERMISSIONS` sólo lleva strings que el backend emite, y hoy no emite ninguno para el chat.
