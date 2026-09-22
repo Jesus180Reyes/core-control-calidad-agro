@@ -2,10 +2,15 @@ import type { InfoDesconexion } from "#/presentation/types/control-calidad/bascu
 import type { OperacionData, ParametrosData } from "#/presentation/types/control-calidad/control-calidad.types"
 import type { Cliente } from "#/presentation/types/clientes/clientes.types"
 import type { Lote } from "#/presentation/types/lotes/lotes.types"
+import type { PesajeCreado } from "#/presentation/types/pesajes/pesajes.types"
 import { useEffect, useMemo, useRef, useState } from "react"
+import { useDownloadEtiqueta } from "#/presentation/hooks/pesajes/useDownloadEtiqueta"
 import { usePesajes } from "#/presentation/hooks/pesajes/usePesajes"
 import { useSerialScale } from "./useSerialScale"
 import { useSelectorBascula } from "./useSelectorBascula"
+
+/** Descargas fallidas que habilitan la salida de emergencia del ticket. */
+const FALLOS_PARA_OMITIR = 2
 
 export function useControlCalidad(cliente: Cliente | null, lote: Lote | null) {
     /**
@@ -91,6 +96,15 @@ export function useControlCalidad(cliente: Cliente | null, lote: Lote | null) {
     const [autorizado, setAutorizado] = useState<boolean>(false)
 
     /**
+     * El pesaje que espera su ticket. Mientras no sea `null`, el modal de
+     * impresión está abierto y es la única acción disponible en la pantalla.
+     */
+    const [pesajeRegistrado, setPesajeRegistrado] = useState<PesajeCreado | null>(null)
+
+    /** Descargas fallidas del ticket actual; se reinicia con cada pesaje nuevo. */
+    const [fallosDeImpresion, setFallosDeImpresion] = useState<number>(0)
+
+    /**
      * La autorización vive atada a una muestra concreta. Si la muestra se
      * invalida —el operario agregó o quitó producto y la báscula reestabiliza—
      * el PIN anterior ya no cubre el peso nuevo y hay que volver a pedirlo.
@@ -103,12 +117,20 @@ export function useControlCalidad(cliente: Cliente | null, lote: Lote | null) {
         // Solo se bloquea con lecturas confiables: la báscula debe estar
         // transmitiendo y el peso ya estabilizado (evita disparos durante la carga).
         // Sin muestra confirmada no hay nada que autorizar ni que guardar.
+        // Con el ticket pendiente tampoco: el producto que no se retiró puede
+        // reestabilizar y el bloqueo aparecería encima del modal de impresión.
         setMostrarBloqueo(
-            !autorizado && esAltoRango && scale.hayFlujoDatos && !scale.isStabilizing && scale.pesoEstable !== null,
+            !autorizado &&
+            pesajeRegistrado === null &&
+            esAltoRango &&
+            scale.hayFlujoDatos &&
+            !scale.isStabilizing &&
+            scale.pesoEstable !== null,
         )
-    }, [autorizado, esAltoRango, scale.hayFlujoDatos, scale.isStabilizing, scale.pesoEstable])
+    }, [autorizado, pesajeRegistrado, esAltoRango, scale.hayFlujoDatos, scale.isStabilizing, scale.pesoEstable])
 
     const pesajes = usePesajes(lote)
+    const { descargarEtiqueta, generando } = useDownloadEtiqueta()
 
     /** El dialog de tara es la única puerta al `POST /pesajes`. */
     const [taraAbierta, setTaraAbierta] = useState<boolean>(false)
@@ -127,12 +149,37 @@ export function useControlCalidad(cliente: Cliente | null, lote: Lote | null) {
     const confirmarTara = async (tara: number): Promise<void> => {
         if (scale.pesoEstable === null) return
 
-        const guardado = await pesajes.guardarPesaje(scale.pesoEstable, tara)
-        if (!guardado) return
+        const creado = await pesajes.guardarPesaje(scale.pesoEstable, tara)
+        if (!creado) return
+
+        // El pesaje guardado abre el ticket: la impresión es el paso que lo cierra.
+        setPesajeRegistrado(creado)
+        setFallosDeImpresion(0)
 
         scale.reiniciarPesaje()
         setTaraAbierta(false)
         setAutorizado(false)
+    }
+
+    /** Descarga la etiqueta del pesaje recién creado; sólo al lograrlo cierra el modal. */
+    const imprimirTicket = (): void => {
+        if (pesajeRegistrado === null || generando) return
+
+        void descargarEtiqueta({ id: pesajeRegistrado.id }).then((impreso) => {
+            if (impreso) {
+                setPesajeRegistrado(null)
+                return
+            }
+
+            setFallosDeImpresion((fallos) => fallos + 1)
+        })
+    }
+
+    /** Salida de emergencia: sale del ticket sin imprimirlo, tras fallar dos veces. */
+    const omitirImpresion = (): void => {
+        if (fallosDeImpresion < FALLOS_PARA_OMITIR) return
+
+        setPesajeRegistrado(null)
     }
 
     const cancelarTara = () => {
@@ -185,6 +232,16 @@ export function useControlCalidad(cliente: Cliente | null, lote: Lote | null) {
             mostrar: mostrarBloqueo,
             handleRechazar: handleRechazarPesaje,
             handleAutorizar: handleAutorizarConPin,
-        }
+        },
+        impresion: {
+            /** `null` con el modal cerrado; el pesaje recién creado con el modal abierto. */
+            pesaje: pesajeRegistrado,
+            imprimiendo: generando,
+            /** Ya falló al menos una vez: el botón pasa a "Reintentar impresión". */
+            fallo: fallosDeImpresion > 0,
+            puedeOmitir: fallosDeImpresion >= FALLOS_PARA_OMITIR,
+            imprimir: imprimirTicket,
+            omitir: omitirImpresion,
+        },
     }
 }
