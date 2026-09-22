@@ -1,6 +1,6 @@
 # SPEC 11 — Ticket obligatorio después de cada pesaje
 
-> **Estado:** Approved
+> **Estado:** Implmented
 > **Depende de:** SPEC 05
 > **Fecha:** 2026-09-22
 > **Objetivo:** Después de cada `POST /pesajes` exitoso, abrir un modal bloqueante "Pesaje registrado exitosamente" cuyo único camino de salida es imprimir el ticket con `useDownloadEtiqueta`.
@@ -175,29 +175,29 @@ Cada paso deja el proyecto compilando.
 
 ## Criterios de aceptación
 
-- [ ] `npx tsc --noEmit` pasa sin errores.
-- [ ] `npx vitest run` pasa completo, sin tests nuevos ni tests rotos.
-- [ ] Al confirmar la tara con un guardado exitoso aparece el modal con el título "Pesaje registrado exitosamente".
-- [ ] El toast verde con el `msg` del servidor sigue saliendo, además del modal.
-- [ ] El modal no tiene X, no se cierra con Esc y no se cierra con un click fuera.
-- [ ] El modal muestra el título y el botón "Imprimir ticket", y ningún dato del pesaje.
-- [ ] "Imprimir ticket" pide `GET /reportes/pesajes/{id}/etiqueta/pdf` con el `id` que devolvió el `POST /pesajes` (verificable en la pestaña Network).
-- [ ] Al tocar "Imprimir ticket" aparece el **diálogo de impresión del navegador**, con el selector de impresora y la vista previa de la etiqueta.
-- [ ] Al cerrarse ese diálogo —haya impreso o cancelado— el modal se cierra solo.
-- [ ] El PDF **no** queda en la carpeta de Descargas: `/control-calidad` imprime, no descarga.
-- [ ] Mientras el PDF está en vuelo y mientras el diálogo está abierto, el botón muestra el spinner y un segundo click no dispara una segunda petición.
-- [ ] Con el servicio de reportes apagado, sale el toast rojo, el modal **no** se cierra y el botón pasa a decir "Reintentar impresión".
-- [ ] El menú de acciones del historial sigue **descargando** el PDF, sin abrir ningún diálogo de impresión.
-- [ ] Después del primer fallo **no** hay ningún botón para salir del modal.
-- [ ] Después del segundo fallo aparece "Continuar sin imprimir", y al tocarlo el modal se cierra.
-- [ ] Un pesaje nuevo después de un fallo arranca el contador otra vez: el primer fallo del pesaje siguiente no muestra "Continuar sin imprimir".
-- [ ] Tras cerrar el modal —por impresión o por omisión— la pantalla está lista para el siguiente bulto: el peso se reinició y el dialog de tara está cerrado.
-- [ ] Con un guardado fallido no aparece ningún modal: sigue el comportamiento de SPEC 05 (dialog de tara abierto y toast rojo).
-- [ ] Con el modal abierto y el producto todavía sobre la plataforma, el `BloqueoCriticoDialog` **no** aparece por encima del ticket.
-- [ ] El botón "Imprimir Etiqueta" ya no está en `MonitoreoBasculaCard`, y en la ruta no queda ningún `console.log`.
-- [ ] El menú de acciones del historial sigue descargando la etiqueta igual que antes.
-- [ ] El modal se ve correctamente en modo claro y oscuro.
-- [ ] `CLAUDE.md` documenta el ticket obligatorio.
+- [X] `npx tsc --noEmit` pasa sin errores.
+- [X] `npx vitest run` pasa completo, sin tests nuevos ni tests rotos.
+- [X] Al confirmar la tara con un guardado exitoso aparece el modal con el título "Pesaje registrado exitosamente".
+- [X] El toast verde con el `msg` del servidor sigue saliendo, además del modal.
+- [X] El modal no tiene X, no se cierra con Esc y no se cierra con un click fuera.
+- [X] El modal muestra el título y el botón "Imprimir ticket", y ningún dato del pesaje.
+- [X] "Imprimir ticket" pide `GET /reportes/pesajes/{id}/etiqueta/pdf` con el `id` que devolvió el `POST /pesajes` (verificable en la pestaña Network).
+- [X] Al tocar "Imprimir ticket" aparece el **diálogo de impresión del navegador**, con el selector de impresora y la vista previa de la etiqueta.
+- [X] Al cerrarse ese diálogo —haya impreso o cancelado— el modal se cierra solo.
+- [X] El PDF **no** queda en la carpeta de Descargas: `/control-calidad` imprime, no descarga.
+- [X] Mientras el PDF está en vuelo y mientras el diálogo está abierto, el botón muestra el spinner y un segundo click no dispara una segunda petición.
+- [X] Con el servicio de reportes apagado, sale el toast rojo, el modal **no** se cierra y el botón pasa a decir "Reintentar impresión".
+- [X] El menú de acciones del historial sigue **descargando** el PDF, sin abrir ningún diálogo de impresión.
+- [X] Después del primer fallo **no** hay ningún botón para salir del modal.
+- [X] Después del segundo fallo aparece "Continuar sin imprimir", y al tocarlo el modal se cierra.
+- [X] Un pesaje nuevo después de un fallo arranca el contador otra vez: el primer fallo del pesaje siguiente no muestra "Continuar sin imprimir".
+- [X] Tras cerrar el modal —por impresión o por omisión— la pantalla está lista para el siguiente bulto: el peso se reinició y el dialog de tara está cerrado.
+- [X] Con un guardado fallido no aparece ningún modal: sigue el comportamiento de SPEC 05 (dialog de tara abierto y toast rojo).
+- [X] Con el modal abierto y el producto todavía sobre la plataforma, el `BloqueoCriticoDialog` **no** aparece por encima del ticket.
+- [X] El botón "Imprimir Etiqueta" ya no está en `MonitoreoBasculaCard`, y en la ruta no queda ningún `console.log`.
+- [X] El menú de acciones del historial sigue descargando la etiqueta igual que antes.
+- [X] El modal se ve correctamente en modo claro y oscuro.
+- [X] `CLAUDE.md` documenta el ticket obligatorio.
 
 ---
 
