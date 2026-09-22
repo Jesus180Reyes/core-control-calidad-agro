@@ -117,9 +117,11 @@ function ControlCalidadPage() {
             <PrintTicketDialog
                 pesaje={impresion.pesaje}
                 imprimiendo={impresion.imprimiendo}
+                iniciada={impresion.iniciada}
                 fallo={impresion.fallo}
                 puedeOmitir={impresion.puedeOmitir}
                 onImprimir={impresion.imprimir}
+                onConfirmar={impresion.confirmar}
                 onOmitir={impresion.omitir}
             />
 

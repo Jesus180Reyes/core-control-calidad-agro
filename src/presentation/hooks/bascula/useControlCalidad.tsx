@@ -4,8 +4,8 @@ import type { Cliente } from "#/presentation/types/clientes/clientes.types"
 import type { Lote } from "#/presentation/types/lotes/lotes.types"
 import type { PesajeCreado } from "#/presentation/types/pesajes/pesajes.types"
 import { useEffect, useMemo, useRef, useState } from "react"
-import { useDownloadEtiqueta } from "#/presentation/hooks/pesajes/useDownloadEtiqueta"
 import { usePesajes } from "#/presentation/hooks/pesajes/usePesajes"
+import { usePrintEtiqueta } from "#/presentation/hooks/pesajes/usePrintEtiqueta"
 import { useSerialScale } from "./useSerialScale"
 import { useSelectorBascula } from "./useSelectorBascula"
 
@@ -101,8 +101,14 @@ export function useControlCalidad(cliente: Cliente | null, lote: Lote | null) {
      */
     const [pesajeRegistrado, setPesajeRegistrado] = useState<PesajeCreado | null>(null)
 
-    /** Descargas fallidas del ticket actual; se reinicia con cada pesaje nuevo. */
+    /** Impresiones fallidas del ticket actual; se reinicia con cada pesaje nuevo. */
     const [fallosDeImpresion, setFallosDeImpresion] = useState<number>(0)
+
+    /**
+     * El diálogo de impresión ya se abrió para este pesaje. A partir de acá el
+     * cierre lo confirma el operario: el navegador no avisa si el papel salió.
+     */
+    const [impresionIniciada, setImpresionIniciada] = useState<boolean>(false)
 
     /**
      * La autorización vive atada a una muestra concreta. Si la muestra se
@@ -130,7 +136,7 @@ export function useControlCalidad(cliente: Cliente | null, lote: Lote | null) {
     }, [autorizado, pesajeRegistrado, esAltoRango, scale.hayFlujoDatos, scale.isStabilizing, scale.pesoEstable])
 
     const pesajes = usePesajes(lote)
-    const { descargarEtiqueta, generando } = useDownloadEtiqueta()
+    const { imprimirEtiqueta, imprimiendo } = usePrintEtiqueta()
 
     /** El dialog de tara es la única puerta al `POST /pesajes`. */
     const [taraAbierta, setTaraAbierta] = useState<boolean>(false)
@@ -155,24 +161,36 @@ export function useControlCalidad(cliente: Cliente | null, lote: Lote | null) {
         // El pesaje guardado abre el ticket: la impresión es el paso que lo cierra.
         setPesajeRegistrado(creado)
         setFallosDeImpresion(0)
+        setImpresionIniciada(false)
 
         scale.reiniciarPesaje()
         setTaraAbierta(false)
         setAutorizado(false)
     }
 
-    /** Descarga la etiqueta del pesaje recién creado; sólo al lograrlo cierra el modal. */
+    /**
+     * Manda la etiqueta del pesaje recién creado al diálogo de impresión del
+     * navegador. Abrirlo es lo único que se puede verificar desde el front, así
+     * que el modal no se cierra acá: habilita la confirmación del operario.
+     */
     const imprimirTicket = (): void => {
-        if (pesajeRegistrado === null || generando) return
+        if (pesajeRegistrado === null || imprimiendo) return
 
-        void descargarEtiqueta({ id: pesajeRegistrado.id }).then((impreso) => {
-            if (impreso) {
-                setPesajeRegistrado(null)
+        void imprimirEtiqueta({ id: pesajeRegistrado.id }).then((abrioElDialogo) => {
+            if (abrioElDialogo) {
+                setImpresionIniciada(true)
                 return
             }
 
             setFallosDeImpresion((fallos) => fallos + 1)
         })
+    }
+
+    /** "Ya lo imprimí": el operario cierra el ticket con el papel en la mano. */
+    const confirmarImpresion = (): void => {
+        if (!impresionIniciada) return
+
+        setPesajeRegistrado(null)
     }
 
     /** Salida de emergencia: sale del ticket sin imprimirlo, tras fallar dos veces. */
@@ -236,11 +254,15 @@ export function useControlCalidad(cliente: Cliente | null, lote: Lote | null) {
         impresion: {
             /** `null` con el modal cerrado; el pesaje recién creado con el modal abierto. */
             pesaje: pesajeRegistrado,
-            imprimiendo: generando,
+            /** Se está generando el PDF. */
+            imprimiendo,
+            /** El diálogo del navegador ya se abrió: falta la confirmación del operario. */
+            iniciada: impresionIniciada,
             /** Ya falló al menos una vez: el botón pasa a "Reintentar impresión". */
             fallo: fallosDeImpresion > 0,
             puedeOmitir: fallosDeImpresion >= FALLOS_PARA_OMITIR,
             imprimir: imprimirTicket,
+            confirmar: confirmarImpresion,
             omitir: omitirImpresion,
         },
     }

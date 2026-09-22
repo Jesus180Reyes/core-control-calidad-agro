@@ -1,4 +1,4 @@
-import { Printer } from 'lucide-react'
+import { Check, Printer } from 'lucide-react'
 
 import { CustomButton } from '#/presentation/components/shared/button/CustomButton'
 import { CustomDialog } from '#/presentation/components/shared/dialog/CustomDialog'
@@ -7,37 +7,49 @@ import type { PesajeCreado } from '#/presentation/types/pesajes/pesajes.types'
 interface PrintTicketDialogProps {
     /** El pesaje que espera su ticket; `null` mantiene el modal cerrado. */
     pesaje: PesajeCreado | null
-    /** Hay una descarga de la etiqueta en vuelo. */
+    /** Se está generando la etiqueta. */
     imprimiendo: boolean
-    /** Ya falló al menos un intento de descarga. */
+    /** El diálogo del navegador ya se abrió: falta que el operario confirme. */
+    iniciada: boolean
+    /** Ya falló al menos un intento de impresión. */
     fallo: boolean
-    /** Se puede salir sin imprimir: la descarga ya falló dos veces. */
+    /** Se puede salir sin imprimir: la impresión ya falló dos veces. */
     puedeOmitir: boolean
     onImprimir: () => void
+    onConfirmar: () => void
     onOmitir: () => void
 }
 
 /**
  * El paso que cierra el pesaje: el bulto no sale de la plataforma sin su
  * etiqueta. Por eso el modal es bloqueante —sin X, sin Esc y sin click afuera—
- * y su única acción es imprimir.
+ * y su única acción es imprimir, que abre el diálogo del navegador para que el
+ * operario elija la impresora.
  *
- * La salida de emergencia aparece recién tras dos descargas fallidas: si el
+ * Quien cierra el modal es el operario, con "Ya lo imprimí". No es una
+ * concesión: el navegador no avisa si el papel salió, si canceló o si guardó el
+ * archivo, y atarse a una señal que no existe deja el modal colgado.
+ *
+ * La salida de emergencia aparece recién tras dos intentos fallidos: si el
  * servicio de reportes se cae, un modal sin salida frena la planta entera.
  */
 export function PrintTicketDialog({
     pesaje,
     imprimiendo,
+    iniciada,
     fallo,
     puedeOmitir,
     onImprimir,
+    onConfirmar,
     onOmitir,
 }: PrintTicketDialogProps) {
-    const etiquetaDelBoton = imprimiendo
-        ? 'Imprimiendo…'
-        : fallo
-            ? 'Reintentar impresión'
-            : 'Imprimir ticket'
+    const etiquetaDeImpresion = imprimiendo
+        ? 'Abriendo impresión…'
+        : iniciada
+            ? 'Volver a imprimir'
+            : fallo
+                ? 'Reintentar impresión'
+                : 'Imprimir ticket'
 
     return (
         <CustomDialog
@@ -49,7 +61,7 @@ export function PrintTicketDialog({
             showCloseButton={false}
             footer={
                 <>
-                    {puedeOmitir && (
+                    {puedeOmitir && !iniciada && (
                         <CustomButton
                             variant="secondary"
                             fullWidth={false}
@@ -61,21 +73,37 @@ export function PrintTicketDialog({
                         </CustomButton>
                     )}
                     <CustomButton
-                        variant="primary"
+                        variant={iniciada ? 'secondary' : 'primary'}
                         fullWidth={false}
                         type="button"
                         isLoading={imprimiendo}
                         icon={<Printer className="h-5 w-5" />}
                         onClick={onImprimir}
                     >
-                        {etiquetaDelBoton}
+                        {etiquetaDeImpresion}
                     </CustomButton>
+                    {iniciada && (
+                        <CustomButton
+                            variant="primary"
+                            fullWidth={false}
+                            type="button"
+                            disabled={imprimiendo}
+                            icon={<Check className="h-5 w-5" />}
+                            onClick={onConfirmar}
+                        >
+                            Ya lo imprimí
+                        </CustomButton>
+                    )}
                 </>
             }
         >
-            {fallo ? (
+            {iniciada ? (
+                <p className="text-sm text-text-muted">
+                    Confirmá que el ticket salió de la impresora para seguir con el próximo bulto.
+                </p>
+            ) : fallo ? (
                 <p className="text-sm font-semibold text-warning">
-                    No se pudo descargar la etiqueta. Reintentá la impresión.
+                    No se pudo abrir la impresión de la etiqueta. Reintentá.
                 </p>
             ) : null}
         </CustomDialog>

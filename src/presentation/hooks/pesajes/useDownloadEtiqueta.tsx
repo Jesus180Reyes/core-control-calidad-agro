@@ -2,21 +2,13 @@ import { useCallback } from 'react'
 import { toast } from 'sonner'
 
 import { downloadUrl } from '#/presentation/helpers/file/downloadUrl'
+import { endpointEtiquetaPdf, type EtiquetaDePesaje, type EtiquetaVariables } from '#/presentation/hooks/pesajes/etiquetaPesaje'
 import { useExecutePdfMutation } from '#/presentation/hooks/shared/useExecutePdfMutation'
 
-interface EtiquetaVariables {
-    pesajeId: number
-}
-
-/** Lo único que la etiqueta necesita del pesaje. */
-interface EtiquetaDePesaje {
-    id: number
-}
-
-
+/** Baja la etiqueta como archivo. Es el gesto del historial; `/control-calidad` imprime. */
 export function useDownloadEtiqueta() {
     const { generar, generando } = useExecutePdfMutation<EtiquetaVariables>(
-        ({ pesajeId }) => `/reportes/pesajes/${pesajeId}/etiqueta/pdf`,
+        endpointEtiquetaPdf,
         { method: 'GET' },
     )
 
