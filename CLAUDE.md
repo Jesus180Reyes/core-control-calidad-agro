@@ -109,6 +109,38 @@ Los tipos de la Web Serial API están declarados a mano en `src/global.d.ts` (no
 
 `useControlCalidad` envuelve a `useSerialScale` y añade las reglas de negocio (rango min/ideal/max, bloqueo crítico con PIN de supervisor).
 
+### Agri (chat IA)
+
+`/agri` es la pantalla de chat con IA: `routes/(portal)/_portal.agri.tsx` monta `views/agri/AgriChatView.tsx`, que cablea el hook con los cinco componentes de `components/agri/` (avatar, burbuja, indicador de tipeo, compositor y bienvenida). El item del Sidebar vive arriba de la etiqueta "Operación", fuera del `menuItems.map` y **sin permiso**: `PERMISSIONS` sólo lleva strings que el backend emite, y hoy no emite ninguno para el chat.
+
+**El hilo sale de `POST /chat`.** `presentation/hooks/agri/useAgriChat.tsx` manda cada turno por `useExecuteMutation`; `isThinking` es el `isPending` de esa mutación y el hilo sigue viviendo en un `useState`. El backend **no guarda la conversación**: el contexto lo pone el front en cada envío, con `{ mensaje, conversacion, historial }`.
+
+Tres reglas del cuerpo, que es donde da 400:
+
+- `mensaje` — trimmeado, no vacío, **máximo 500 caracteres**. El hook corta el largo antes de mandar con un `toast.error`: el 400 ya habría gastado un turno del límite diario del usuario.
+- `conversacion` — **UUID o nada**. Se genera una vez por hilo y se reenvía igual en todos sus turnos; "Nueva conversación" genera otro. Un id incremental, un `Date.now()`, un `''` o un `null` son 400, así que cuando no hay UUID que mandar (`crypto.randomUUID` pide contexto seguro; el respaldo sale de `getRandomValues`) la clave **se omite**. Sólo agrupa los turnos en el log del backend.
+- `historial` — array de `{ rol: 'usuario' | 'asistente', contenido }`, nunca `'user'`/`'assistant'`/`'system'`. `aHistorial` traduce los roles, recorta el `contenido` a 4000 caracteres y manda los últimos diez turnos, que es lo único que el backend le reenvía al modelo. Sólo turnos visibles: ni resultados de herramientas ni mensajes de sistema.
+
+El endpoint contesta **200 casi siempre**: si el modelo falla o el usuario agotó su límite diario, la explicación viene escrita en `respuesta` y se pinta como un mensaje más de Agri. Un error de verdad (400, 401, red) sale por el toast automático de la mutación, y no se reintenta solo — cada turno cuenta contra el límite diario.
+
+El `onSuccess` que empuja la respuesta al hilo es el de la llamada (`mutate(cuerpo, { onSuccess })`), no el de las opciones del hook: `reset()` lo desengancha, y es lo que hace que "Nueva conversación" en medio de un turno no vea aparecer esa respuesta dentro del hilo nuevo.
+
+El chat es de **sólo lectura** —el backend elige entre funciones de consulta— y **no filtra por cartera**: cualquier usuario autenticado puede preguntar por lotes de cualquier cliente. No montar botones de acción (aprobar, finalizar) sobre una respuesta.
+
+**Las sugerencias sí salen del backend.** `useAgriSugerencias` pide `GET /chat/sugerencias`, que devuelve siempre tres frases en **texto plano** (nunca markdown: se pintan tal cual, sin `MarkdownContent`) armadas con la cartera del usuario que sale del token. El endpoint no llama a Gemini y no cuenta contra el límite diario, así que abrir el chat es gratis y la query se pide al montar la pantalla vacía. Va con `staleTime: Infinity`: la cartera no cambia en medio de una sesión, y sin eso "Nueva conversación" vuelve a suspender la bienvenida a los cinco segundos.
+
+El `<Suspense>` y el `ErrorBoundary` de esa query viven **dentro de `AgriWelcome`**, no en la ruta: suspender la pantalla entera cambiaría el chat por un spinner cuando el saludo y el compositor ya podrían estar puestos. Si la query falla, el fallback es una línea chica más "Reintentar" y el compositor sigue funcionando — las sugerencias son comodidad, no la pantalla.
+
+Tres cosas que el chat **no** hace, y que no conviene agregar de prepo porque cada una es un spec (SPEC 10 las deja anotadas):
+
+- **No hay streaming.** La respuesta llega entera. El `createHttpClient` elige entre `parsear: 'json' | 'blob'` y leer un `ReadableStream` es un transporte nuevo en la capa HTTP. La sensación de escritura progresiva la da `MarkdownContent animated`, que ya existía.
+- **No hay persistencia.** Recargar vacía el hilo. Ni `localStorage` ni backend de conversaciones, así que tampoco hay lista de chats.
+- **No hay contexto de dominio.** El front manda texto y nada más: ningún id de lote ni de cliente viaja con el mensaje.
+
+`--agri-from` y `--agri-to` (en `styles.css`, expuestos como `agri-from`/`agri-to`) son el acento de **esta** pantalla: el avatar, el botón de enviar, el halo del compositor y el item del Sidebar. No son tokens de la app — el resto de `/agri` se pinta con `bg-surface`, `text-text-main` y compañía como cualquier otra pantalla. La clase `.agri-dot` anima los tres puntos del indicador, con el `animation-delay` por punto escrito en el `style` desde el componente, igual que hace `MarkdownContent` con `.md-word`.
+
+`MarkdownContent` monta `remark-gfm`, que es lo que hace que las tablas se pinten como `<table>`. Sin él, `react-markdown` es CommonMark pelado y un `| Lote | Peso |` sale como un párrafo con los pipes a la vista — tanto en el chat como en el resumen IA de lotes.
+
 ## Estilos
 
 Tailwind v4 sin `tailwind.config.js`: los tokens viven en `src/styles.css` bajo `@theme`, con variables CSS redefinidas en `:root/.light` y `.dark`. Usar los tokens semánticos (`bg-surface`, `text-text-main`, `text-text-muted`, `border-border-ui`, `bg-bg-app`, `shadow-clay-card`, `shadow-clay-btn`) en vez de colores crudos cuando exista el token. El modo oscuro es por clase en `<html>` (`ThemeProvider`, persistido en `localStorage` bajo `bascula-ui-theme`) y se declara con `@variant dark (.dark &)`.

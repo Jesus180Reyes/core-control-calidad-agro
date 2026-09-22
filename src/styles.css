@@ -35,11 +35,24 @@
     animation: fade-word 520ms cubic-bezier(0.22, 1, 0.36, 1) both;
   }
 
+  /* Cada punto del indicador de "Agri está escribiendo". El `animation-delay`
+     lo escribe el componente en el `style` de cada span, igual que `.md-word`:
+     es lo que hace que los tres reboten en cascada y no los tres a la vez. El
+     `block` es por lo mismo que en `.md-word` — sobre un span inline el
+     navegador ignora el `translate`. */
+  .agri-dot {
+    display: block;
+    animation: agri-dot 1.2s ease-in-out infinite;
+  }
+
   /* El bloque global de más arriba sólo acorta la duración; el retardo seguiría
      escalonando la aparición durante segundos, que es justo lo que molesta a
-     quien pidió menos movimiento. */
+     quien pidió menos movimiento. En `.agri-dot` el problema es otro y peor:
+     `infinite` con duración 0.01ms es un parpadeo permanente. Apagada la
+     animación, el punto queda quieto y opaco, que es su estado base. */
   @media (prefers-reduced-motion: reduce) {
-    .md-word {
+    .md-word,
+    .agri-dot {
       animation: none !important;
     }
   }
@@ -60,6 +73,20 @@
   }
 }
 
+/* El punto empieza y termina en el mismo estado apagado: el ciclo cierra donde
+   abrió y el `infinite` no da el salto que se ve cuando la última keyframe no
+   coincide con la primera. */
+@keyframes agri-dot {
+  0%, 60%, 100% {
+    opacity: 0.35;
+    transform: translateY(0);
+  }
+  30% {
+    opacity: 1;
+    transform: translateY(-0.3em);
+  }
+}
+
 @theme {
   --color-brand: var(--brand);
   --color-success: var(--success);
@@ -69,6 +96,12 @@
   --color-border-ui: var(--border-ui); 
   --color-text-main: var(--text-main);
   --color-text-muted: var(--text-muted);
+
+  /* El acento de Agri, el chat IA. Se usa **sólo** en `/agri` y en su item del
+     Sidebar: es lo que diferencia esa pantalla del resto sin sacarla de la app.
+     Arranca del índigo de `--brand` y va al púrpura. */
+  --color-agri-from: var(--agri-from);
+  --color-agri-to: var(--agri-to);
 
   /* Paleta base de shadcn. Las primitivas de `components/ui/` están escritas
      contra estos nombres (`bg-popover`, `bg-muted`, `border-input`…) y sin
@@ -130,6 +163,9 @@
   --text-main: #0f172a;
   --text-muted: #64748b;
 
+  --agri-from: #6366f1;
+  --agri-to: #a855f7;
+
   /* Sólo para la paleta de shadcn: el fondo de los estados hover/selected de
      las primitivas, el color de error y el texto sobre `brand`. */
   --brand-foreground: #ffffff;
@@ -147,6 +183,11 @@
   --border-ui: #1f2937;
   --text-main: #f8fafc;
   --text-muted: #94a3b8;
+
+  /* Dos pasos más claros que en el tema claro: sobre `#090d16` el par
+     índigo/púrpura original se apaga y el ícono blanco del avatar se pierde. */
+  --agri-from: #818cf8;
+  --agri-to: #c084fc;
 
   --brand-foreground: #0f172a;
   --muted: #1f2937;
