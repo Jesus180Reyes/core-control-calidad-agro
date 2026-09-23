@@ -11,7 +11,6 @@ interface MonitoreoBasculaCardProps {
     /** Hay un `POST /pesajes` en vuelo. */
     guardando: boolean
     onGuardar?: () => void
-    onImprimirEtiqueta?: () => void
 }
 
 export function MonitoreoBasculaCard({
@@ -22,7 +21,6 @@ export function MonitoreoBasculaCard({
     unidad,
     guardando,
     onGuardar,
-    onImprimirEtiqueta,
 }: MonitoreoBasculaCardProps) {
 
     const esPesoCero = pesoActual === 0
@@ -45,10 +43,6 @@ export function MonitoreoBasculaCard({
                 disabledGuardar={esPesoCero || requiereReajuste || isStabilizing || guardando}
                 guardando={guardando}
                 onGuardar={onGuardar}
-                onImprimirEtiqueta={onImprimirEtiqueta}
-                isStabilizing={isStabilizing}
-                pesoActual={pesoActual}
-                requiereReajuste={requiereReajuste}
             />
 
         </div>
@@ -92,14 +86,9 @@ interface PanelAccionesProps {
     disabledGuardar: boolean
     guardando: boolean
     onGuardar?: () => void
-    onImprimirEtiqueta?: () => void
-    isStabilizing: boolean
-    pesoActual: number
-    requiereReajuste: boolean
-
 }
 
-function PanelAcciones({ disabledGuardar, guardando, onGuardar, onImprimirEtiqueta, isStabilizing, pesoActual, requiereReajuste }: PanelAccionesProps) {
+function PanelAcciones({ disabledGuardar, guardando, onGuardar }: PanelAccionesProps) {
     return (
         <div className="w-full space-y-4 pt-6 lg:pt-8 border-t border-slate-50 dark:border-zinc-800/40">
 
@@ -116,24 +105,6 @@ function PanelAcciones({ disabledGuardar, guardando, onGuardar, onImprimirEtique
             >
                 Guardar en Base de Datos
             </CustomButton>
-            {(!isStabilizing && pesoActual > 0 && !requiereReajuste) && (
-
-
-                < CustomButton
-                    variant="secondary"
-                    onClick={onImprimirEtiqueta}
-                    disabled={guardando}
-                    icon={
-                        <svg className="w-4 h-4 lg:w-5 lg:h-5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M6.72 13.82l-.24-2.48a1.125 1.125 0 011.12-1.24h8.8a1.125 1.125 0 011.12 1.24l-.24 2.48m-10.56 0h10.56m-10.56 0a1.125 1.125 0 00-1.12 1.24v2.88c0 .53.43.96.96.96h10.88c.53 0 .96-.43.96-.96v-2.88a1.125 1.125 0 00-1.12-1.24M15 18H9M15 6h-6V4h6v2z" />
-                        </svg>
-                    }
-                >
-                    Imprimir Etiqueta
-                </CustomButton>
-
-            )
-            }
 
         </div >
     )

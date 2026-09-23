@@ -2,6 +2,7 @@ import { AlertaDesconexionBascula, BannerEstadoBascula } from '#/presentation/co
 import { BannerEstabilizacion } from '#/presentation/components/control-calidad/BannerEstabilizacion'
 import { BloqueoCriticoDialog } from '#/presentation/components/control-calidad/BloqueoCriticoDialog'
 import { HeaderControlCalidad } from '#/presentation/components/control-calidad/HeaderControlCalidad'
+import { PrintTicketDialog } from '#/presentation/components/control-calidad/PrintTicketDialog'
 import { SelectorBasculaDialog } from '#/presentation/components/control-calidad/SelectorBasculaDialog'
 import { TaraPesajeDialog } from '#/presentation/components/control-calidad/TaraPesajeDialog'
 import { useControlCalidad } from '#/presentation/hooks/bascula/useControlCalidad'
@@ -53,6 +54,7 @@ function ControlCalidadPage() {
         bloqueo,
         tara,
         guardando,
+        impresion,
 
     } = useControlCalidad(cliente, lote)
 
@@ -98,7 +100,6 @@ function ControlCalidadPage() {
                         unidad={parametros.unidad}
                         guardando={guardando}
                         onGuardar={tara.solicitar}
-                        onImprimirEtiqueta={() => console.log('Vamos a imprimir')}
                     />
                 </div>
             </div>
@@ -111,6 +112,17 @@ function ControlCalidadPage() {
                 unidad={parametros.unidad}
                 guardando={guardando}
                 onConfirm={(valor) => void tara.confirmar(valor)}
+            />
+
+            <PrintTicketDialog
+                pesaje={impresion.pesaje}
+                imprimiendo={impresion.imprimiendo}
+                iniciada={impresion.iniciada}
+                fallo={impresion.fallo}
+                puedeOmitir={impresion.puedeOmitir}
+                onImprimir={impresion.imprimir}
+                onConfirmar={impresion.confirmar}
+                onOmitir={impresion.omitir}
             />
 
             <BloqueoCriticoDialog
