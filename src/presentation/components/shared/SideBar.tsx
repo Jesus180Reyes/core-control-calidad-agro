@@ -7,6 +7,7 @@ import { getInitials } from '#/presentation/components/shared/getInitials'
 import { useAuth } from '#/presentation/hooks/auth/useAuth'
 import { usePermissions } from '#/presentation/hooks/auth/usePermissions'
 import { PERMISSIONS, type Permission } from '#/presentation/types/auth/permissions'
+import { Can } from './Can'
 
 interface NavChild {
     label: string
@@ -87,7 +88,7 @@ export function Sidebar() {
         },
         {
             label: 'Administración',
-            permission: PERMISSIONS.MODULOCONTROLCALIDAD,
+            permission: PERMISSIONS.MODULOADMINISTRACION,
             icon: <ShieldCheck className="size-4.5" strokeWidth={2.1} />,
             children: [
                 {
@@ -123,24 +124,23 @@ export function Sidebar() {
                 </div>
 
                 <nav className="space-y-1.5">
-                    {/* Agri va arriba de todo y fuera del `menuItems.map`: no
-                        tiene permiso que consultar ni hijos que desplegar, y su
-                        chip es el avatar de la marca en vez de un ícono. */}
-                    <Link
-                        to="/agri"
-                        aria-current={pathname === '/agri' ? 'page' : undefined}
-                        style={{ animationDuration: '400ms' }}
-                        className={`${CLASES_ITEM} ${CLASES_ENTRADA} ${pathname === '/agri' ? CLASES_ACTIVO : CLASES_INACTIVO}`}
-                    >
-                        {pathname === '/agri' && <span className={CLASES_MARCA_ACTIVA} aria-hidden />}
-                        <AgriAvatar />
-                        <span className="leading-tight overflow-hidden">
-                            <span className="block truncate">Agri</span>
-                            <span className="block text-[10px] font-bold uppercase tracking-[0.14em] text-text-muted/70">
-                                Asistente IA
+                    <Can permission={PERMISSIONS.USARCHATIA}>
+                        <Link
+                            to="/agri"
+                            aria-current={pathname === '/agri' ? 'page' : undefined}
+                            style={{ animationDuration: '400ms' }}
+                            className={`${CLASES_ITEM} ${CLASES_ENTRADA} ${pathname === '/agri' ? CLASES_ACTIVO : CLASES_INACTIVO}`}
+                        >
+                            {pathname === '/agri' && <span className={CLASES_MARCA_ACTIVA} aria-hidden />}
+                            <AgriAvatar />
+                            <span className="leading-tight overflow-hidden">
+                                <span className="block truncate">Agri</span>
+                                <span className="block text-[10px] font-bold uppercase tracking-[0.14em] text-text-muted/70">
+                                    Asistente IA
+                                </span>
                             </span>
-                        </span>
-                    </Link>
+                        </Link>
+                    </Can>
 
                     <p className="px-3.5 pt-4 pb-1 text-[10px] font-bold uppercase tracking-[0.16em] text-text-muted/50">
                         Operación
