@@ -38,7 +38,7 @@ const ICON_STYLES = cn(
 // Verde plano y ancho completo: alcanza para que se lea como la acción de la
 // card, sin degradado ni glow que compitan con el resto.
 const ACTA_BUTTON_STYLES = cn(
-    'h-10 w-full rounded-xl text-xs font-semibold',
+    'h-11 md:h-10 w-full rounded-xl text-xs font-semibold',
     'bg-emerald-600 text-white hover:bg-emerald-700',
     'cursor-pointer',
 )
@@ -46,7 +46,7 @@ const ACTA_BUTTON_STYLES = cn(
 // El resumen es la acción secundaria: mismo tamaño que el acta, pero en violeta
 // y sin relleno, para que el verde siga siendo lo primero que se ve.
 const RESUMEN_BUTTON_STYLES = cn(
-    'h-10 w-full rounded-xl text-xs font-semibold',
+    'h-11 md:h-10 w-full rounded-xl text-xs font-semibold',
     'border border-indigo-500/30 bg-indigo-50 text-indigo-700 hover:bg-indigo-100',
     'dark:bg-indigo-950/40 dark:text-indigo-300 dark:hover:bg-indigo-950/70',
     'cursor-pointer',

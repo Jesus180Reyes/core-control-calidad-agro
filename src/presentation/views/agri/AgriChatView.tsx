@@ -59,22 +59,25 @@ export function AgriChatView() {
             <header className="flex shrink-0 items-center gap-3">
                 <AgriAvatar />
 
-                <div className="leading-tight">
+                <div className="min-w-0 leading-tight">
                     <h1 className="text-lg font-extrabold tracking-tight text-text-main">Agri</h1>
-                    <p className="text-xs font-semibold text-text-muted">
+                    <p className="truncate text-xs font-semibold text-text-muted">
                         Asistente IA de control de calidad
                     </p>
                 </div>
 
+                {/* En el teléfono queda sólo el ícono: con el texto, el
+                    subtítulo no entra en la misma fila. */}
                 <CustomButton
                     variant="secondary"
                     fullWidth={false}
                     disabled={hiloVacio}
                     onClick={startNewChat}
                     icon={<SquarePen className="size-4" strokeWidth={2.2} />}
-                    className="ml-auto"
+                    aria-label="Nueva conversación"
+                    className="ml-auto shrink-0 max-sm:gap-0"
                 >
-                    Nueva conversación
+                    <span className="hidden sm:inline">Nueva conversación</span>
                 </CustomButton>
             </header>
 
@@ -104,7 +107,7 @@ export function AgriChatView() {
                 <div ref={finDelHiloRef} />
             </div>
 
-            <div className={`${ANCHO_COLUMNA} shrink-0`}>
+            <div className={`${ANCHO_COLUMNA} shrink-0 pb-[env(safe-area-inset-bottom)] md:pb-0`}>
                 <AgriComposer isThinking={isThinking} onSend={sendMessage} />
             </div>
         </div>

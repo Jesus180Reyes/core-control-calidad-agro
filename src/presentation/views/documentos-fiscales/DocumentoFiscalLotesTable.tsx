@@ -1,6 +1,7 @@
 import { EmptyValue } from '#/presentation/components/documentos-fiscales/DocumentoFiscalCells'
 import {
     DataTable,
+    HIDE_BELOW_LG,
     type DataTableColumns,
 } from '#/presentation/components/shared/table/DataTable'
 import { formatDate } from '#/presentation/helpers/date/formatDate'
@@ -67,24 +68,26 @@ function createColumns(): DataTableColumns<LoteDocumentoFiscal> {
             accessorKey: 'aprobado_por',
             header: 'Aprobado por',
             enableSorting: true,
+            meta: { headerClassName: HIDE_BELOW_LG, cellClassName: HIDE_BELOW_LG },
         },
         {
             accessorKey: 'aprobado_en',
             header: 'Aprobación',
             enableSorting: true,
-            meta: { cellClassName: 'whitespace-nowrap' },
+            meta: { headerClassName: HIDE_BELOW_LG, cellClassName: `whitespace-nowrap ${HIDE_BELOW_LG}` },
             cell: ({ row }) => formatDate(row.original.aprobado_en),
         },
         {
             accessorKey: 'finalizado_por',
             header: 'Finalizado por',
             enableSorting: true,
+            meta: { headerClassName: HIDE_BELOW_LG, cellClassName: HIDE_BELOW_LG },
         },
         {
             accessorKey: 'finalizado_en',
             header: 'Finalización',
             enableSorting: true,
-            meta: { cellClassName: 'whitespace-nowrap' },
+            meta: { headerClassName: HIDE_BELOW_LG, cellClassName: `whitespace-nowrap ${HIDE_BELOW_LG}` },
             cell: ({ row }) => formatDate(row.original.finalizado_en),
         },
     ]

@@ -114,6 +114,8 @@ function RowActionsMenu({
                     <Button
                         variant="ghost"
                         size="icon"
+                        // 44 px en el teléfono: es el mínimo cómodo para un dedo.
+                        className="size-11 md:size-8"
                         aria-label={triggerLabel}
                     />
                 }

@@ -56,6 +56,24 @@ export const dataTableFeatures = tableFeatures({
     columnMeta: metaHelper<DataTableColumnMeta>(),
 })
 
+/**
+ * Columna secundaria: por debajo de `lg:` la tabla no entra en la pantalla y
+ * se esconde. Va en `headerClassName` y en `cellClassName` a la vez.
+ */
+export const HIDE_BELOW_LG = 'hidden lg:table-cell'
+
+/**
+ * La columna de acciones queda fija a la izquierda al scrollear en horizontal
+ * por debajo de `lg:`, para no perder de vista sobre qué fila se actúa. El
+ * fondo opaco tapa las celdas que pasan por debajo; desde `lg:` vuelve a ser
+ * una celda común.
+ */
+const STICKY_ACTIONS = 'sticky left-0 z-[1] shadow-[inset_-1px_0_0_0_var(--color-border-ui)] lg:static lg:bg-transparent lg:shadow-none'
+
+export const STICKY_ACTIONS_HEADER = `${STICKY_ACTIONS} bg-bg-app`
+
+export const STICKY_ACTIONS_CELL = `${STICKY_ACTIONS} bg-surface`
+
 /** Las columnas de un DataTable, sin repetir el genérico de features. */
 export type DataTableColumns<TData extends RowData> = ColumnDef<
     typeof dataTableFeatures,

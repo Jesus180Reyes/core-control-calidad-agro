@@ -18,7 +18,7 @@ export function ProfileCard({ usuario }: ProfileCardProps) {
                 <Avatar nombreCompleto={usuario.complete_name} />
 
                 <div className="min-w-0 space-y-1.5">
-                    <h2 className="truncate text-2xl font-black leading-tight tracking-tight sm:text-[28px]">
+                    <h2 className="truncate text-xl font-black leading-tight tracking-tight sm:text-2xl md:text-[28px]">
                         {usuario.complete_name}
                     </h2>
                     <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-white/75">

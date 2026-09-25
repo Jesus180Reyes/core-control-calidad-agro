@@ -2,6 +2,9 @@ import { EmptyValue } from '#/presentation/components/documentos-fiscales/Docume
 import { DocumentoFiscalRowActions } from '#/presentation/components/documentos-fiscales/DocumentoFiscalRowActions'
 import {
     DataTable,
+    HIDE_BELOW_LG,
+    STICKY_ACTIONS_CELL,
+    STICKY_ACTIONS_HEADER,
     type DataTableColumns,
 } from '#/presentation/components/shared/table/DataTable'
 import { formatDate } from '#/presentation/helpers/date/formatDate'
@@ -16,7 +19,11 @@ function crearColumnas(): DataTableColumns<Documento> {
         {
             id: 'acciones',
             header: 'Acciones',
-            meta: { align: 'center', cellClassName: 'py-2' },
+            meta: {
+                align: 'center',
+                headerClassName: STICKY_ACTIONS_HEADER,
+                cellClassName: `py-2 ${STICKY_ACTIONS_CELL}`,
+            },
             cell: ({ row }) => <DocumentoFiscalRowActions documento={row.original} />,
         },
         {
@@ -52,15 +59,18 @@ function crearColumnas(): DataTableColumns<Documento> {
             accessorKey: 'cliente_rtn',
             header: 'RTN del cliente',
             enableSorting: true,
+            meta: { headerClassName: HIDE_BELOW_LG, cellClassName: HIDE_BELOW_LG },
         },
         {
             accessorKey: 'pais',
             header: 'País',
             enableSorting: true,
+            meta: { headerClassName: HIDE_BELOW_LG, cellClassName: HIDE_BELOW_LG },
         },
         {
             accessorKey: 'pais_destino',
             header: 'País destino',
+            meta: { headerClassName: HIDE_BELOW_LG, cellClassName: HIDE_BELOW_LG },
             cell: ({ row }) => <EmptyValue valor={row.original.pais_destino} />,
         },
         {
@@ -72,19 +82,19 @@ function crearColumnas(): DataTableColumns<Documento> {
         {
             accessorKey: 'tipo_cambio',
             header: 'Tipo de cambio',
-            meta: { align: 'right' },
+            meta: { align: 'right', headerClassName: HIDE_BELOW_LG, cellClassName: HIDE_BELOW_LG },
             cell: ({ row }) => formatDecimal(row.original.tipo_cambio),
         },
         {
             accessorKey: 'importe_exento',
             header: 'Exento',
-            meta: { align: 'right' },
+            meta: { align: 'right', headerClassName: HIDE_BELOW_LG, cellClassName: HIDE_BELOW_LG },
             cell: ({ row }) => formatMoney(row.original.importe_exento),
         },
         {
             accessorKey: 'importe_exonerado',
             header: 'Exonerado',
-            meta: { align: 'right' },
+            meta: { align: 'right', headerClassName: HIDE_BELOW_LG, cellClassName: HIDE_BELOW_LG },
             cell: ({ row }) => formatMoney(row.original.importe_exonerado),
         },
         {
@@ -104,6 +114,7 @@ function crearColumnas(): DataTableColumns<Documento> {
         {
             accessorKey: 'referencia_exencion',
             header: 'Ref. exención',
+            meta: { headerClassName: HIDE_BELOW_LG, cellClassName: HIDE_BELOW_LG },
             cell: ({ row }) => (
                 <EmptyValue valor={row.original.referencia_exencion} />
             ),

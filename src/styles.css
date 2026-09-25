@@ -226,6 +226,14 @@
   --destructive: #f87171;
 }
 
+:root {
+  /* Alto del header de `MobileNav`: el botón de menú de 44 px, 0.75rem abajo,
+     el borde de 1 px y arriba lo que pida el notch, con 0.75rem de mínimo.
+     Lo fija el propio header y lo descuenta cualquier pantalla de alto fijo
+     en el teléfono (hoy, `/agri`). */
+  --mobile-nav-h: calc(2.75rem + 0.75rem + 1px + max(0.75rem, env(safe-area-inset-top)));
+}
+
 @custom-variant dark (.dark &);
 @custom-variant light (.light &);
 

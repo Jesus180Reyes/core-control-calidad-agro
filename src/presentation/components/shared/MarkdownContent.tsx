@@ -1,5 +1,5 @@
 import type { Element, ElementContent, Root } from 'hast'
-import Markdown from 'react-markdown'
+import Markdown, { type Components } from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 
 import { cn } from '#/lib/utils'
@@ -104,6 +104,18 @@ function partirEnPalabras(valor: string, palabras: Element[]): ElementContent[] 
 
 const PLUGINS_ANIMADOS = [rehypeFadeWords]
 
+/**
+ * Una tabla ancha scrollea en su propia caja: sin el envoltorio, empuja el
+ * ancho de la burbuja y en el teléfono se desplaza la página entera.
+ */
+const COMPONENTES: Components = {
+    table: ({ node: _node, ...props }) => (
+        <div className="overflow-x-auto">
+            <table {...props} />
+        </div>
+    ),
+}
+
 interface MarkdownContentProps {
     /** Markdown crudo, tal como lo devuelve el backend. */
     content: string
@@ -126,6 +138,7 @@ export function MarkdownContent({ content, animated, className }: MarkdownConten
             <Markdown
                 remarkPlugins={PLUGINS_REMARK}
                 rehypePlugins={animated ? PLUGINS_ANIMADOS : undefined}
+                components={COMPONENTES}
             >
                 {content}
             </Markdown>

@@ -65,7 +65,7 @@ export function LoteCard({ lote, onSeleccionar, footer }: LoteCardProps) {
                 </span>
             </div>
 
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-3 gap-2 sm:gap-3">
                 <PesoReferencia etiqueta="Mínimo" valor={lote.peso_minimo} unidad={lote.unidad_medida} />
                 <PesoReferencia etiqueta="Ideal" valor={lote.peso_ideal} unidad={lote.unidad_medida} destacado />
                 <PesoReferencia etiqueta="Máximo" valor={lote.peso_maximo} unidad={lote.unidad_medida} />
@@ -103,7 +103,7 @@ function PesoReferencia({ etiqueta, valor, unidad, destacado = false }: PesoRefe
     return (
         <div
             className={cn(
-                'rounded-2xl p-3 text-center border',
+                'rounded-2xl p-2 sm:p-3 text-center border',
                 destacado
                     ? 'bg-indigo-50/40 dark:bg-indigo-950/20 border-indigo-500/15'
                     : 'bg-slate-50/60 dark:bg-zinc-800/40 border-border-ui/50',

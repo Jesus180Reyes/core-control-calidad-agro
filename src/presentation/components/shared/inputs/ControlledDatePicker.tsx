@@ -146,7 +146,7 @@ function DatePickerField<TFieldValues extends FieldValues>({
                     aria-invalid={Boolean(error)}
                     aria-describedby={error ? idError : undefined}
                     className={[
-                        'relative flex h-11 w-full items-center gap-2 rounded-xl px-3.5 text-left text-sm font-medium',
+                        'relative flex h-11 w-full items-center gap-2 rounded-xl px-3.5 text-left text-base md:text-sm font-medium',
                         'bg-bg-app border border-border-ui text-text-main',
                         'transition-[color,background-color,border-color,box-shadow] duration-200',
                         'hover:border-brand/30',

@@ -43,7 +43,7 @@ function RouteComponent() {
                 descripcion={`Todos los pesajes del lote ${lote?.nombre_lote}.`}
                 actions={
                     lote && (
-                        <div className="flex gap-3">
+                        <div className="flex flex-wrap gap-3">
                             <Can permission={PERMISSIONS.APROBARLOTE}>
                                 <CustomButton
                                     fullWidth={false}

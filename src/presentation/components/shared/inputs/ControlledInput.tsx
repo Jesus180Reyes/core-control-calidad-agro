@@ -83,7 +83,7 @@ export function ControlledInput<TFieldValues extends FieldValues>({
                                 aria-invalid={Boolean(error)}
                                 aria-describedby={error ? idError : undefined}
                                 className={[
-                                    'h-11 w-full rounded-xl px-3.5 text-sm font-medium',
+                                    'h-11 w-full rounded-xl px-3.5 text-base md:text-sm font-medium',
                                     'bg-bg-app dark:bg-bg-app border border-border-ui text-text-main',
                                     'placeholder:font-normal placeholder:text-text-muted/60',
                                     'transition-[color,background-color,border-color,box-shadow] duration-200',

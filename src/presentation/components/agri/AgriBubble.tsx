@@ -20,7 +20,7 @@ export function AgriBubble({ message, children }: AgriBubbleProps) {
     if (message.role === 'user') {
         return (
             <div className="flex justify-end">
-                <div className="max-w-[75%] rounded-3xl rounded-br-lg bg-brand px-4 py-3 shadow-clay-btn">
+                <div className="max-w-[85%] sm:max-w-[75%] rounded-3xl rounded-br-lg bg-brand px-4 py-3 shadow-clay-btn">
                     {/* Texto plano, sin `MarkdownContent`: el color del markdown
                         sale de los `prose-*`, que sobre el globo de marca hay
                         que reencauzar elemento por elemento y termina ganando

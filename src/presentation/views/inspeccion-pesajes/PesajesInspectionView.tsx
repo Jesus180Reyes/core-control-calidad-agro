@@ -2,6 +2,9 @@ import { PesajeRowActions } from '#/presentation/components/inspeccion-pesajes/P
 import { QualityStatusBadge } from '#/presentation/components/pesajes/PesajeCells'
 import {
     DataTable,
+    HIDE_BELOW_LG,
+    STICKY_ACTIONS_CELL,
+    STICKY_ACTIONS_HEADER,
     type DataTableColumns,
 } from '#/presentation/components/shared/table/DataTable'
 import { formatDate } from '#/presentation/helpers/date/formatDate'
@@ -15,7 +18,11 @@ function crearColumnas(): DataTableColumns<PesajeData> {
         {
             id: 'acciones',
             header: 'Acciones',
-            meta: { align: 'center', cellClassName: 'py-2' },
+            meta: {
+                align: 'center',
+                headerClassName: STICKY_ACTIONS_HEADER,
+                cellClassName: `py-2 ${STICKY_ACTIONS_CELL}`,
+            },
             cell: ({ row }) => <PesajeRowActions pesaje={row.original} />,
         },
         {
@@ -61,6 +68,8 @@ function crearColumnas(): DataTableColumns<PesajeData> {
         {
             accessorKey: 'fuera_de_rango',
             header: 'Peso fuera de rango',
+            // Repite lo que ya dice el badge de "Estado": es la primera en irse.
+            meta: { headerClassName: HIDE_BELOW_LG, cellClassName: HIDE_BELOW_LG },
             cell: ({ row }) => (row.original.fuera_de_rango ? 'Si' : 'No'),
         },
         {

@@ -512,7 +512,9 @@ interface FormRowProps {
 
 function FormRow({ onRemove, removeLabel, children }: FormRowProps) {
     return (
-        <div className="flex items-start gap-3 rounded-xl border border-border-ui bg-bg-app p-3">
+        // En el teléfono los campos se apilan y el botón baja a su propia línea,
+        // al pie de la fila, con un blanco de 44 px.
+        <div className="flex flex-col gap-3 rounded-xl border border-border-ui bg-bg-app p-3 sm:flex-row sm:items-start">
             <div className="grid flex-1 gap-3 sm:grid-cols-3">{children}</div>
 
             <button
@@ -520,7 +522,7 @@ function FormRow({ onRemove, removeLabel, children }: FormRowProps) {
                 onClick={onRemove}
                 disabled={!onRemove}
                 aria-label={removeLabel}
-                className="mt-6 shrink-0 rounded-lg p-2 text-text-muted transition-colors hover:bg-rose-500/10 hover:text-rose-500 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-text-muted"
+                className="self-end shrink-0 rounded-lg p-3.5 text-text-muted sm:mt-6 sm:self-auto sm:p-2 transition-colors hover:bg-rose-500/10 hover:text-rose-500 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-text-muted"
             >
                 <Trash2 className="size-4" />
             </button>

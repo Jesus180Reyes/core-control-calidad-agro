@@ -12,7 +12,7 @@ export function MobileNav() {
     const [open, setOpen] = useState(false)
 
     return (
-        <header className="sticky top-0 z-40 flex items-center gap-3 border-b border-border-ui/60 bg-surface/90 px-4 pb-3 pt-[max(0.75rem,env(safe-area-inset-top))] backdrop-blur md:hidden">
+        <header className="sticky top-0 z-40 flex h-(--mobile-nav-h) shrink-0 items-center gap-3 border-b border-border-ui/60 bg-surface/90 px-4 pb-3 pt-[max(0.75rem,env(safe-area-inset-top))] backdrop-blur md:hidden">
             <Sheet open={open} onOpenChange={setOpen}>
                 <SheetTrigger
                     aria-label="Abrir menú"

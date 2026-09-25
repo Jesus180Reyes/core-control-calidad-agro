@@ -79,7 +79,7 @@ export function ControlledMultiSelector<TFieldValues extends FieldValues>({
                                 aria-invalid={Boolean(error)}
                                 aria-describedby={error ? idError : undefined}
                                 className={[
-                                    'flex min-h-11 w-full items-center justify-between gap-2 rounded-xl px-3.5 py-2 text-left text-sm font-medium',
+                                    'flex min-h-11 w-full items-center justify-between gap-2 rounded-xl px-3.5 py-2 text-left text-base md:text-sm font-medium',
                                     'bg-bg-app border border-border-ui text-text-main',
                                     'transition-[color,background-color,border-color,box-shadow] duration-200',
                                     'hover:border-brand/30 focus-visible:border-brand/60 focus-visible:ring-4 focus-visible:ring-brand/15 outline-none',

@@ -70,8 +70,9 @@ export function CustomDialog({
                     )}
                 </DialogHeader>
 
-                {/* El padding compensado evita que el scroll recorte el ring de foco de los inputs. */}
-                <div className="-mx-1 max-h-[70vh] overflow-y-auto px-1">
+                {/* El padding compensado evita que el scroll recorte el ring de foco de los inputs.
+                    En el teléfono el alto sale de `dvh`, que descuenta la barra del navegador. */}
+                <div className="-mx-1 max-h-[65dvh] overflow-y-auto px-1 sm:max-h-[70vh]">
                     {children}
                 </div>
 

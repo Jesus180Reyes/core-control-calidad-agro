@@ -118,7 +118,8 @@ function ActionsMenu({ items, triggerLabel }: ActionsMenuProps) {
                         variant="ghost"
                         size="icon-sm"
                         aria-label={triggerLabel}
-                        className="text-text-muted transition-colors hover:text-text-main data-popup-open:bg-muted data-popup-open:text-text-main"
+                        // 44 px en el teléfono: es el mínimo cómodo para un dedo.
+                        className="size-11 md:size-7 text-text-muted transition-colors hover:text-text-main data-popup-open:bg-muted data-popup-open:text-text-main"
                     />
                 }
             >

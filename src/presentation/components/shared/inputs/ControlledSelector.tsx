@@ -108,7 +108,7 @@ export function ControlledSelector<TFieldValues extends FieldValues>({
                                     // El alto de la primitiva viene con variante (`data-[size=default]:h-8`):
                                     // hay que pisarlo con la misma variante, no con un `h-11` suelto.
                                     // Queda en `auto` porque el valor elegido ocupa dos líneas.
-                                    'relative w-full data-[size=default]:h-auto min-h-11 rounded-xl px-3.5 py-2 text-sm font-medium',
+                                    'relative w-full data-[size=default]:h-auto min-h-11 rounded-xl px-3.5 py-2 text-base md:text-sm font-medium',
                                     'bg-bg-app dark:bg-bg-app border border-border-ui text-text-main',
                                     'data-placeholder:font-normal data-placeholder:text-text-muted/60',
                                     'transition-[color,background-color,border-color,box-shadow] duration-200',
@@ -171,7 +171,7 @@ export function ControlledSelector<TFieldValues extends FieldValues>({
                                                     if (!navegacion.includes(e.key)) e.stopPropagation()
                                                 }}
                                                 placeholder={searchPlaceholder}
-                                                className="h-9 w-full rounded-lg border border-border-ui bg-bg-app pl-9 pr-3 text-sm font-medium text-text-main outline-none transition-colors placeholder:font-normal placeholder:text-text-muted/60 focus:border-brand/60"
+                                                className="h-9 w-full rounded-lg border border-border-ui bg-bg-app pl-9 pr-3 text-base md:text-sm font-medium text-text-main outline-none transition-colors placeholder:font-normal placeholder:text-text-muted/60 focus:border-brand/60"
                                             />
                                         </div>
                                     </div>

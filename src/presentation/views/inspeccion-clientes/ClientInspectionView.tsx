@@ -2,6 +2,8 @@
 import { ClientRowActions } from '#/presentation/components/inspeccion-clientes/ClientRowActions'
 import {
     DataTable,
+    STICKY_ACTIONS_CELL,
+    STICKY_ACTIONS_HEADER,
     type DataTableColumns,
 } from '#/presentation/components/shared/table/DataTable'
 import type { Cliente } from '#/presentation/types/clientes/clientes.types'
@@ -21,7 +23,11 @@ function crearColumnas(
         {
             id: 'acciones',
             header: 'Acciones',
-            meta: { align: 'center', cellClassName: 'py-2' },
+            meta: {
+                align: 'center',
+                headerClassName: STICKY_ACTIONS_HEADER,
+                cellClassName: `py-2 ${STICKY_ACTIONS_CELL}`,
+            },
             cell: ({ row }) => (
                 <ClientRowActions
                     cliente={row.original}

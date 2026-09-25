@@ -1,6 +1,7 @@
 import { QualityStatusBadge } from '#/presentation/components/pesajes/PesajeCells'
 import {
     DataTable,
+    HIDE_BELOW_LG,
     type DataTableColumns,
 } from '#/presentation/components/shared/table/DataTable'
 import { formatDate } from '#/presentation/helpers/date/formatDate'
@@ -34,7 +35,7 @@ function createColumns(): DataTableColumns<PesajeData> {
             accessorKey: 'unidad_medida',
             header: 'Unidad de medida',
             enableSorting: true,
-            meta: { cellClassName: 'font-bold' },
+            meta: { headerClassName: HIDE_BELOW_LG, cellClassName: `font-bold ${HIDE_BELOW_LG}` },
         },
         {
             accessorKey: 'peso_bruto',
@@ -66,7 +67,8 @@ function createColumns(): DataTableColumns<PesajeData> {
         {
             accessorKey: 'fuera_de_rango',
             header: 'Fuera de rango',
-            meta: { align: 'center' },
+            // Repite lo que ya dice el badge de "Estado": es la primera en irse.
+            meta: { align: 'center', headerClassName: HIDE_BELOW_LG, cellClassName: HIDE_BELOW_LG },
             cell: ({ row }) => (row.original.fuera_de_rango ? 'Sí' : 'No'),
         },
     ]
