@@ -5,6 +5,7 @@ import { createFileRoute, Outlet, redirect, useLocation, useNavigate } from '@ta
 import { Button } from '#/components/ui/button'
 import { ErrorBoundary } from '#/presentation/components/shared/ErrorBoundary'
 import { LoadingState } from '#/presentation/components/shared/LoadingState'
+import { MobileNav } from '#/presentation/components/shared/MobileNav'
 import { Sidebar } from '#/presentation/components/shared/SideBar'
 import { leerToken } from '#/presentation/hooks/auth/almacenamientoSesion'
 import { useAuth } from '#/presentation/hooks/auth/useAuth'
@@ -33,9 +34,10 @@ function PortalLayout() {
 
     const { reset: limpiarErrorDeQuery } = useQueryErrorResetBoundary()
 
-    return <div className="flex w-full min-h-screen">
+    return <div className="flex flex-col md:flex-row w-full min-h-screen">
+        <MobileNav />
         <Sidebar />
-        <main className="flex-1 p-8 overflow-y-auto">
+        <main className="flex-1 p-4 md:p-8 overflow-y-auto">
             <ErrorBoundary
                 key={pathname}
                 fallback={(error, reset) => (

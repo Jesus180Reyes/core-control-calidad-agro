@@ -56,6 +56,23 @@ const CLASES_MARCA_HIJO_ACTIVA = 'h-5 w-[3px] bg-brand shadow-[0_0_8px_-1px_var(
 const CLASES_MARCA_HIJO_INACTIVA = 'h-1.5 w-[3px] bg-text-muted/35 group-hover/hijo:h-3.5 group-hover/hijo:bg-text-muted/70'
 
 export function Sidebar() {
+    return (
+        <aside className="hidden md:flex w-72 h-[calc(100vh-2rem)] my-4 ml-4 bg-surface border border-border-ui/60 rounded-[28px] p-4 shadow-clay-card flex-col justify-between transition-colors animate-in fade-in slide-in-from-left-6 duration-500 ease-out">
+            <SidebarContent />
+        </aside>
+    )
+}
+
+interface SidebarContentProps {
+    /** Lo llama cada link al tocarse; el drawer móvil lo usa para cerrarse. */
+    onNavigate?: () => void
+}
+
+/**
+ * Marca, navegación y pie de la barra lateral. Lo comparten el `<aside>` de
+ * escritorio y el drawer de `MobileNav`: el contenedor pone el `flex-col justify-between`.
+ */
+export function SidebarContent({ onNavigate }: SidebarContentProps) {
     const { usuario, logout } = useAuth()
     const { has } = usePermissions()
     const { pathname } = useLocation()
@@ -106,8 +123,7 @@ export function Sidebar() {
     ]
 
     return (
-        <aside className="w-72 h-[calc(100vh-2rem)] my-4 ml-4 bg-surface border border-border-ui/60 rounded-[28px] p-4 shadow-clay-card flex flex-col justify-between transition-colors animate-in fade-in slide-in-from-left-6 duration-500 ease-out">
-
+        <>
             <div className="space-y-7">
                 <div className="flex items-center gap-3.5 px-2.5 pt-2">
                     <div className="relative w-11 h-11 rounded-2xl bg-linear-to-br from-brand to-brand/70 flex items-center justify-center text-white shadow-clay-btn ring-1 ring-inset ring-white/20 transition-transform duration-300 ease-out hover:scale-105 hover:rotate-6">
@@ -127,6 +143,7 @@ export function Sidebar() {
                     <Can permission={PERMISSIONS.USARCHATIA}>
                         <Link
                             to="/agri"
+                            onClick={onNavigate}
                             aria-current={pathname === '/agri' ? 'page' : undefined}
                             style={{ animationDuration: '400ms' }}
                             className={`${CLASES_ITEM} ${CLASES_ENTRADA} ${pathname === '/agri' ? CLASES_ACTIVO : CLASES_INACTIVO}`}
@@ -182,6 +199,7 @@ export function Sidebar() {
                                 <Link
                                     key={item.label}
                                     to={item.to}
+                                    onClick={onNavigate}
                                     aria-current={activo ? 'page' : undefined}
                                     style={estilosEntrada}
                                     className={`${CLASES_ITEM} ${CLASES_ENTRADA} ${activo ? CLASES_ACTIVO : CLASES_INACTIVO}`}
@@ -227,6 +245,7 @@ export function Sidebar() {
                                                     <Link
                                                         key={hijo.to}
                                                         to={hijo.to}
+                                                        onClick={onNavigate}
                                                         tabIndex={abierto ? undefined : -1}
                                                         aria-current={hijoEsActivo ? 'page' : undefined}
                                                         style={abierto ? { animationDelay: `${indiceHijo * 50}ms`, animationDuration: '260ms' } : undefined}
@@ -271,6 +290,7 @@ export function Sidebar() {
                         no un módulo del backend. */}
                     <Link
                         to="/ajustes"
+                        onClick={onNavigate}
                         activeProps={{ className: CLASES_ACTIVO }}
                         inactiveProps={{
                             className: 'text-text-muted hover:bg-muted/70 hover:text-text-main',
@@ -294,7 +314,6 @@ export function Sidebar() {
                     </button>
                 </div>
             </div>
-
-        </aside>
+        </>
     )
 }
