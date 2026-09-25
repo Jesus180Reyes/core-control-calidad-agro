@@ -53,7 +53,7 @@ export function NotFound() {
                     <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center">
                         <Link
                             to="/"
-                            className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#3F3FD4] px-6 py-4 text-sm font-bold text-white shadow-lg shadow-blue-500/10 transition-all hover:bg-[#3434B8] active:scale-[0.98] dark:shadow-none"
+                            className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#2E6B45] px-6 py-4 text-sm font-bold text-white shadow-lg shadow-indigo-500/10 transition-all hover:bg-[#215736] active:scale-[0.98] dark:shadow-none"
                         >
                             <House className="size-4 shrink-0" />
                             Ir al panel

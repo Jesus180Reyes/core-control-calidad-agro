@@ -99,7 +99,7 @@
 
   /* El acento de Agri, el chat IA. Se usa **sólo** en `/agri` y en su item del
      Sidebar: es lo que diferencia esa pantalla del resto sin sacarla de la app.
-     Arranca del índigo de `--brand` y va al púrpura. */
+     Sale de la escala de `--brand`: un degradado entre dos de sus verdes. */
   --color-agri-from: var(--agri-from);
   --color-agri-to: var(--agri-to);
 
@@ -128,20 +128,51 @@
   --color-input: var(--border-ui);
   --color-ring: var(--brand);
 
-  --shadow-clay-card: 
-    inset 2px 2px 4px rgba(255, 255, 255, 0.4), 
-    inset -2px -2px 4px rgba(165, 180, 252, 0.05), 
-    0px 8px 24px -4px rgba(79, 70, 229, 0.04);
+  /* Las sombras llevan el tinte del color de marca (`#2E6B45` y un verde
+     claro de su misma escala). */
+  --shadow-clay-card:
+    inset 2px 2px 4px rgba(255, 255, 255, 0.4),
+    inset -2px -2px 4px rgba(169, 194, 176, 0.05),
+    0px 8px 24px -4px rgba(46, 107, 69, 0.04);
 
-  --shadow-clay-btn: 
-    inset 1px 1px 2px rgba(255, 255, 255, 0.5), 
+  --shadow-clay-btn:
+    inset 1px 1px 2px rgba(255, 255, 255, 0.5),
     inset -1px -1px 2px rgba(0, 0, 0, 0.04),
-    0px 4px 12px -2px rgba(79, 70, 229, 0.08);
+    0px 4px 12px -2px rgba(46, 107, 69, 0.08);
 
   --shadow-clay-btn-hover:
     inset 1px 1px 2px rgba(255, 255, 255, 0.6),
     inset -1px -1px 2px rgba(0, 0, 0, 0.06),
-    0px 6px 16px -2px rgba(79, 70, 229, 0.12);
+    0px 6px 16px -2px rgba(46, 107, 69, 0.12);
+
+  /* Varias pantallas escriben el color de marca a mano (`bg-indigo-600`,
+     `text-indigo-500`, el degradado del login con `violet`) en vez de usar
+     `brand`. Redefinir esas dos escalas con el verde de marca es lo que hace
+     que también cambien sin tocar los componentes: `indigo` ya no es índigo.
+     El 600 es `--brand` claro y el 400 es `--brand` oscuro. */
+  --color-indigo-50: #EEF8F0;
+  --color-indigo-100: #DDF1E1;
+  --color-indigo-200: #C0E6CA;
+  --color-indigo-300: #99D9AD;
+  --color-indigo-400: #6FC48E;
+  --color-indigo-500: #3D8D5C;
+  --color-indigo-600: #2E6B45;
+  --color-indigo-700: #215736;
+  --color-indigo-800: #1C4129;
+  --color-indigo-900: #15301F;
+  --color-indigo-950: #0A1D11;
+
+  --color-violet-50: #EEF8F0;
+  --color-violet-100: #DDF1E1;
+  --color-violet-200: #C0E6CA;
+  --color-violet-300: #A9C2B0;
+  --color-violet-400: #6FC48E;
+  --color-violet-500: #3D8D5C;
+  --color-violet-600: #215736;
+  --color-violet-700: #1C4129;
+  --color-violet-800: #15301F;
+  --color-violet-900: #102618;
+  --color-violet-950: #0A1D11;
 
   /* Cursor falso de los casilleros de PIN (InputOTPSlot). */
   --animate-caret-blink: caret-blink 1.25s ease-out infinite;
@@ -154,7 +185,7 @@
 
 
 :root, .light {
-  --brand: #4f46e5;
+  --brand: #2E6B45;
   --success: #10b981;
   --warning: #d97706;
   --bg-app: #f9fafb;
@@ -163,8 +194,8 @@
   --text-main: #0f172a;
   --text-muted: #64748b;
 
-  --agri-from: #6366f1;
-  --agri-to: #a855f7;
+  --agri-from: var(--brand);
+  --agri-to: var(--color-indigo-500);
 
   /* Sólo para la paleta de shadcn: el fondo de los estados hover/selected de
      las primitivas, el color de error y el texto sobre `brand`. */
@@ -175,7 +206,7 @@
 }
 
 .dark {
-  --brand: #818cf8;
+  --brand: #6FC48E;
   --success: #34d399;
   --warning: #fbbf24;
   --bg-app: #090d16;
@@ -184,12 +215,13 @@
   --text-main: #f8fafc;
   --text-muted: #94a3b8;
 
-  /* Dos pasos más claros que en el tema claro: sobre `#090d16` el par
-     índigo/púrpura original se apaga y el ícono blanco del avatar se pierde. */
-  --agri-from: #818cf8;
-  --agri-to: #c084fc;
+  /* Un paso más claro que en el tema claro: sobre `#090d16` el verde de marca
+     claro se apaga. No termina en un verde más claro que `--brand` porque el
+     ícono blanco del avatar se perdería. */
+  --agri-from: var(--color-indigo-500);
+  --agri-to: var(--brand);
 
-  --brand-foreground: #0f172a;
+  --brand-foreground: #0C1410;
   --muted: #1f2937;
   --destructive: #f87171;
 }

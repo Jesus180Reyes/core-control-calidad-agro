@@ -197,7 +197,7 @@ export function AlertaDesconexionBascula({
                     <div className="w-full space-y-3">
                         <button
                             onClick={onReintentar}
-                            className="w-full bg-[#3F3FD4] hover:bg-[#3434B8] text-white font-bold py-4 rounded-2xl flex items-center justify-center gap-2 transition-all shadow-md active:scale-[0.98] cursor-pointer"
+                            className="w-full bg-[#2E6B45] hover:bg-[#215736] text-white font-bold py-4 rounded-2xl flex items-center justify-center gap-2 transition-all shadow-md active:scale-[0.98] cursor-pointer"
                         >
                             Reintentar conexión
                         </button>

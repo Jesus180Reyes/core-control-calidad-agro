@@ -105,7 +105,7 @@ export function LoginCard({ control, onSubmit, enviando, errorLogin, verPassword
 
 function BrandPanel() {
     return (
-        <aside className="relative hidden md:flex flex-col justify-between overflow-hidden p-12 bg-linear-to-br from-indigo-400 via-indigo-500 to-violet-600 dark:from-indigo-600 dark:via-indigo-700 dark:to-violet-800">
+        <aside className="relative hidden md:flex flex-col justify-between overflow-hidden p-12 bg-linear-to-br from-indigo-600 via-indigo-700 to-violet-800 dark:from-indigo-700 dark:via-indigo-800 dark:to-violet-900">
             {/* Halos difuminados: le dan profundidad al degradado plano. */}
             <div aria-hidden className="absolute -top-24 -right-16 size-72 rounded-full bg-white/25 blur-3xl" />
             <div aria-hidden className="absolute -bottom-28 -left-20 size-80 rounded-full bg-violet-300/25 blur-3xl" />

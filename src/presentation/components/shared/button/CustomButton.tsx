@@ -28,7 +28,7 @@ export function CustomButton({
     const disabledStyles = "disabled:bg-gray-200 disabled:text-gray-500 disabled:border-gray-200 dark:disabled:bg-gray-800 dark:disabled:text-gray-500 dark:disabled:border-gray-800"
 
     const variantStyles: Record<ButtonVariant, string> = {
-        primary: "bg-[#3F3FD4] hover:bg-[#3434B8] text-white py-4.5 lg:py-5 text-sm lg:text-base shadow-lg shadow-blue-500/10 dark:shadow-none",
+        primary: "bg-[#2E6B45] hover:bg-[#215736] text-white py-4.5 lg:py-5 text-sm lg:text-base shadow-lg shadow-indigo-500/10 dark:shadow-none",
 
         secondary: "bg-slate-50 dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800/80 hover:bg-slate-100 dark:hover:bg-zinc-800 text-slate-700 dark:text-zinc-300 py-4 px-4 text-xs lg:text-sm",
 

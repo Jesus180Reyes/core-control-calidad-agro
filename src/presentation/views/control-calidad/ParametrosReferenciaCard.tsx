@@ -82,7 +82,7 @@ export function WeightProgressBar({ percentage, isUnderMin, isOverMax }: WeightP
         <div className="space-y-3">
             <div className="relative w-full h-8 bg-[#E2E8F0]/40 dark:bg-zinc-800/60 rounded-full flex items-center">
 
-                <div className="mx-auto w-[40%] h-full bg-[#C3DAFE]/40 dark:bg-indigo-950/40 border-l border-r border-[#A3BFFA]"></div>
+                <div className="mx-auto w-[40%] h-full bg-[#C0E6CA]/40 dark:bg-indigo-950/40 border-l border-r border-[#99D9AD]"></div>
 
                 <div
                     className="absolute top-1/2 -translate-y-1/2 w-6 h-6 flex items-center justify-center select-none pointer-events-none"
