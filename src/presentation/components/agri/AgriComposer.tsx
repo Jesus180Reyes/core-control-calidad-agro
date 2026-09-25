@@ -57,7 +57,7 @@ export function AgriComposer({ isThinking, onSend }: AgriComposerProps) {
         <div>
             {/* El borde es un gradiente, y un gradiente no se pinta con
                 `border-color`: el marco es este `p-px` con el degradé de fondo,
-                que al foco pasa del gris del borde al violeta de Agri. */}
+                que al foco pasa del gris del borde al verde de Agri. */}
             <div
                 className={
                     'rounded-[28px] p-px transition-all duration-300 ease-out ' +
