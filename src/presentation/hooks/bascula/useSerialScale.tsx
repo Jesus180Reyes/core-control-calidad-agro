@@ -821,6 +821,8 @@ export function useSerialScale({
         isConnected,
         isStabilizing,
         tiempoRestante,
+        /** Duración total de la ventana; con `tiempoRestante` da el avance. */
+        segundosEstabilizacion,
         error,
         connectSerial: conectar,
         disconnectSerial: desconectar,

@@ -82,7 +82,12 @@ function ControlCalidadPage() {
             />
 
             {scale.isStabilizing && (
-                <BannerEstabilizacion tiempo={scale.tiempoRestante} />
+                <BannerEstabilizacion
+                    tiempo={scale.tiempoRestante}
+                    total={scale.segundosEstabilizacion}
+                    pesoActual={scale.pesoActual}
+                    unidad={parametros.unidad}
+                />
             )}
 
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
