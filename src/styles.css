@@ -50,12 +50,57 @@
      quien pidió menos movimiento. En `.agri-dot` el problema es otro y peor:
      `infinite` con duración 0.01ms es un parpadeo permanente. Apagada la
      animación, el punto queda quieto y opaco, que es su estado base. */
+  /* El destello que recorre las líneas del `ScaleConnectedDialog`, a lo
+     Ecoflow. El trazo lleva `pathLength="100"` y `stroke-dasharray: 12 100`:
+     el hueco es más largo que la línea, así que el offset arranca y termina
+     con el destello fuera del trazo y el `infinite` no se ve reiniciar. */
+  .scale-flow {
+    stroke-dasharray: 12 100;
+    animation: scale-flow 1.8s linear infinite;
+  }
+
+  /* La superficie del líquido del orbe: un SVG del doble de ancho que se
+     corre la mitad, así la ola cierra donde abrió. */
+  .scale-wave {
+    animation: scale-wave 3.2s linear infinite;
+  }
+
+  /* El orbe se "carga" al abrir, como la batería que se llena. */
+  .scale-charge {
+    animation: scale-charge 1.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .md-word,
-    .agri-dot {
+    .agri-dot,
+    .scale-flow,
+    .scale-wave,
+    .scale-charge {
       animation: none !important;
     }
   }
+}
+
+@keyframes scale-flow {
+  from { stroke-dashoffset: 12; }
+  to   { stroke-dashoffset: -100; }
+}
+
+@keyframes scale-wave {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+@keyframes scale-charge {
+  from { height: 0%; }
+}
+
+/* La barra que avisa cuánto falta para que el dialog se cierre solo. La
+   duración la escribe el componente en el `style`: es la misma constante que
+   usa el timer del hook, y así no pueden desfasarse. */
+@keyframes scale-countdown {
+  from { transform: scaleX(1); }
+  to   { transform: scaleX(0); }
 }
 
 /* El `both` de `.md-word` es lo que mantiene la palabra invisible durante su

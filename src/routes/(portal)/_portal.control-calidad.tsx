@@ -3,6 +3,7 @@ import { BannerEstabilizacion } from '#/presentation/components/control-calidad/
 import { BloqueoCriticoDialog } from '#/presentation/components/control-calidad/BloqueoCriticoDialog'
 import { HeaderControlCalidad } from '#/presentation/components/control-calidad/HeaderControlCalidad'
 import { PrintTicketDialog } from '#/presentation/components/control-calidad/PrintTicketDialog'
+import { ScaleConnectedDialog } from '#/presentation/components/control-calidad/ScaleConnectedDialog'
 import { SelectorBasculaDialog } from '#/presentation/components/control-calidad/SelectorBasculaDialog'
 import { TaraPesajeDialog } from '#/presentation/components/control-calidad/TaraPesajeDialog'
 import { useControlCalidad } from '#/presentation/hooks/bascula/useControlCalidad'
@@ -55,7 +56,7 @@ function ControlCalidadPage() {
         tara,
         guardando,
         impresion,
-
+        conexion,
     } = useControlCalidad(cliente, lote)
 
     return (
@@ -145,6 +146,18 @@ function ControlCalidadPage() {
                 onSeleccionar={(clave) => void selector.seleccionar(clave)}
                 onAutorizarNueva={selector.autorizarNueva}
                 onConfirmarAlias={(alias) => void selector.confirmarAlias(alias)}
+            />
+
+            <ScaleConnectedDialog
+                open={conexion.abierta}
+                onClose={conexion.cerrar}
+                alias={conexion.alias}
+                baudRate={conexion.baudRate}
+                pesoActual={scale.pesoActual}
+                unidad={parametros.unidad}
+                cliente={operacion.cliente}
+                lote={operacion.lote}
+                autoCloseMs={conexion.autoCloseMs}
             />
 
             <AlertaDesconexionBascula

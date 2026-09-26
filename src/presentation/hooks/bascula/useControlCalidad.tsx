@@ -8,9 +8,18 @@ import { usePesajes } from "#/presentation/hooks/pesajes/usePesajes"
 import { usePrintEtiqueta } from "#/presentation/hooks/pesajes/usePrintEtiqueta"
 import { useSerialScale } from "./useSerialScale"
 import { useSelectorBascula } from "./useSelectorBascula"
+import { leerAlias, leerPreferida } from "./almacenamientoBasculas"
 
 /** Descargas fallidas que habilitan la salida de emergencia del ticket. */
 const FALLOS_PARA_OMITIR = 2
+
+const BAUD_RATE = 9600
+
+/**
+ * Lo que dura a la vista el aviso de "báscula conectada". Menos que la ventana
+ * de estabilización (5 s): se va antes de que el primer peso quede confirmado.
+ */
+const AVISO_CONEXION_MS = 4000
 
 export function useControlCalidad(cliente: Cliente | null, lote: Lote | null) {
     /**
@@ -45,8 +54,11 @@ export function useControlCalidad(cliente: Cliente | null, lote: Lote | null) {
         onSeleccionar: (puerto) => conectarPuertoRef.current(puerto),
     })
 
+    /** El aviso animado de conexión exitosa, con el alias de la báscula que abrió. */
+    const [avisoConexion, setAvisoConexion] = useState<{ alias: string | null } | null>(null)
+
     const scale = useSerialScale({
-        baudRate: 9600,
+        baudRate: BAUD_RATE,
         umbralCero: 5,
         segundosEstabilizacion: 5,
         // Tolerancia de ruido durante la ventana de estabilización.
@@ -59,7 +71,28 @@ export function useControlCalidad(cliente: Cliente | null, lote: Lote | null) {
         onDesconexion: (info: InfoDesconexion) => {
             console.warn(`⚠️ Báscula (${info.motivo}) a las ${info.hora}: ${info.mensaje}`)
         },
+        onConexion: () => {
+            // Con el ticket o la tara abiertos el aviso quedaría encima de un
+            // paso que el operario no puede perder de vista.
+            if (pesajeRegistrado !== null || taraAbierta) return
+
+            // Toda conexión sale de la preferida: `seleccionar` la guarda antes
+            // de abrir, y la auto-conexión y la reconexión la resuelven.
+            const clave = leerPreferida()
+            setAvisoConexion({ alias: clave ? leerAlias()[clave] ?? null : null })
+        },
     })
+
+    useEffect(() => {
+        if (avisoConexion === null) return
+        const id = setTimeout(() => setAvisoConexion(null), AVISO_CONEXION_MS)
+        return () => clearTimeout(id)
+    }, [avisoConexion])
+
+    // Si la báscula se cae con el aviso abierto, el aviso ya miente.
+    useEffect(() => {
+        if (!scale.isConnected) setAvisoConexion(null)
+    }, [scale.isConnected])
 
     useEffect(() => {
         conectarPuertoRef.current = (puerto) => scale.connectSerial({ puerto })
@@ -248,6 +281,13 @@ export function useControlCalidad(cliente: Cliente | null, lote: Lote | null) {
             requiereReajuste,
         },
         guardando: pesajes.guardando,
+        conexion: {
+            abierta: avisoConexion !== null,
+            alias: avisoConexion?.alias ?? null,
+            baudRate: BAUD_RATE,
+            autoCloseMs: AVISO_CONEXION_MS,
+            cerrar: () => setAvisoConexion(null),
+        },
         tara: {
             abierta: taraAbierta,
             /** `null` mientras la báscula reestabiliza: no hay muestra que guardar. */
