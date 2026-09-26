@@ -304,6 +304,16 @@ export function useSerialScale({
         }, 200)
     }, [confirmarPesaje, detenerTicker])
 
+    /** Arranca la ventana de estabilización tomando `peso` como referencia. */
+    const abrirVentana = useCallback((peso: number) => {
+        objetoEnBasculaRef.current = true
+        referenciaEstabilidadRef.current = peso
+        inicioEstabilidadRef.current = Date.now()
+        setIsStabilizing(true)
+        setTiempoRestante(configRef.current.segundosEstabilizacion)
+        iniciarTicker()
+    }, [iniciarTicker])
+
     const procesarLectura = useCallback((pesoCrudo: number, estableSegunBascula: boolean | null) => {
         const {
             umbralCero: umbral,
@@ -325,15 +335,6 @@ export function useSerialScale({
             return
         }
 
-        const abrirVentana = () => {
-            objetoEnBasculaRef.current = true
-            referenciaEstabilidadRef.current = peso
-            inicioEstabilidadRef.current = Date.now()
-            setIsStabilizing(true)
-            setTiempoRestante(segundos)
-            iniciarTicker()
-        }
-
         if (pesajeCompletadoRef.current) {
             const confirmado = pesoConfirmadoRef.current
             // Muestra ya confirmada y producto quieto: no hay nada que recalcular.
@@ -344,12 +345,12 @@ export function useSerialScale({
             pesajeCompletadoRef.current = false
             pesoConfirmadoRef.current = null
             setPesoEstable(null)
-            abrirVentana()
+            abrirVentana(peso)
             return
         }
 
         if (!objetoEnBasculaRef.current) {
-            abrirVentana()
+            abrirVentana(peso)
             return
         }
 
@@ -363,7 +364,7 @@ export function useSerialScale({
             setTiempoRestante(segundos)
             if (!tickerRef.current) iniciarTicker()
         }
-    }, [iniciarTicker, reiniciarEstabilizacion])
+    }, [abrirVentana, reiniciarEstabilizacion])
 
     // ── Avisos de desconexión ─────────────────────────────────────────────────
     const reportarDesconexion = useCallback((
@@ -732,11 +733,18 @@ export function useSerialScale({
         return conectar(puerto ? { puerto, silencioso: true } : {})
     }, [buscarPuertoAutorizado, cancelarReconexionProgramada, cerrarPuerto, conectar])
 
-    /** Permite tomar otra muestra sin retirar el producto de la plataforma. */
+    /**
+     * Permite tomar otra muestra sin retirar el producto de la plataforma. Si
+     * hay producto, la ventana arranca en el acto —sin esperar a la próxima
+     * trama— para que el operario vea que se está tomando otro pesaje.
+     */
     const reiniciarPesaje = useCallback(() => {
         reiniciarEstabilizacion()
         setPesoEstable(null)
-    }, [reiniciarEstabilizacion])
+
+        const peso = pesoFlujoRef.current
+        if (portRef.current && Math.abs(peso) > configRef.current.umbralCero) abrirVentana(peso)
+    }, [abrirVentana, reiniciarEstabilizacion])
 
     /** Cierra el aviso de desconexión sin cambiar el estado del puerto. */
     const descartarAviso = useCallback(() => {

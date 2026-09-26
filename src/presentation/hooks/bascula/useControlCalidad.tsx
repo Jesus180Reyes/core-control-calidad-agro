@@ -186,18 +186,28 @@ export function useControlCalidad(cliente: Cliente | null, lote: Lote | null) {
         })
     }
 
+    /**
+     * Con el modal abierto la báscula siguió leyendo y el producto que no se
+     * retiró ya reestabilizó por detrás. Al cerrar el ticket la ventana corre
+     * de nuevo, a la vista del operario, para el pesaje siguiente.
+     */
+    const cerrarTicket = (): void => {
+        setPesajeRegistrado(null)
+        scale.reiniciarPesaje()
+    }
+
     /** "Ya lo imprimí": el operario cierra el ticket con el papel en la mano. */
     const confirmarImpresion = (): void => {
         if (!impresionIniciada) return
 
-        setPesajeRegistrado(null)
+        cerrarTicket()
     }
 
     /** Salida de emergencia: sale del ticket sin imprimirlo, tras fallar dos veces. */
     const omitirImpresion = (): void => {
         if (fallosDeImpresion < FALLOS_PARA_OMITIR) return
 
-        setPesajeRegistrado(null)
+        cerrarTicket()
     }
 
     const cancelarTara = () => {
@@ -207,6 +217,8 @@ export function useControlCalidad(cliente: Cliente | null, lote: Lote | null) {
         // Cancelar la tara de un peso crítico devuelve el bloqueo: el pesaje
         // sigue fuera de rango y no puede quedar sin autorizar.
         setAutorizado(false)
+        // La muestra descartada no se reusa: la báscula vuelve a estabilizar.
+        scale.reiniciarPesaje()
     }
 
     const handleRechazarPesaje = () => {
