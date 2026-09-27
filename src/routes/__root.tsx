@@ -18,7 +18,7 @@ export const Route = createRootRoute({
     meta: [
       { charSet: 'utf-8' },
       { name: 'viewport', content: 'width=device-width, initial-scale=1' },
-      { title: 'Core Control Calidad Agro' },
+      { title: 'METRIKA 360' },
       { name: 'description', content: 'Sistema Industrial de Control de Pesaje' },
     ],
     links: [

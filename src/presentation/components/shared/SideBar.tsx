@@ -131,11 +131,8 @@ export function SidebarContent({ onNavigate }: SidebarContentProps) {
                     </div>
                     <div className="leading-tight">
                         <h1 className="text-[17px] font-extrabold tracking-tight text-text-main">
-                            Bascula
+                            METRIKA 360
                         </h1>
-                        <p className="text-[10px] font-bold tracking-[0.18em] uppercase text-text-muted/70">
-                            Quality Inspector
-                        </p>
                     </div>
                 </div>
 

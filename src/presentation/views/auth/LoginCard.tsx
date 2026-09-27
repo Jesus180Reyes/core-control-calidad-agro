@@ -115,11 +115,8 @@ function BrandPanel() {
                     <IconoBascula className="w-7 h-7" />
                 </div>
                 <h1 className="mt-6 text-3xl font-black tracking-tight text-white leading-tight">
-                    Bascula
+                    METRIKA 360
                 </h1>
-                <p className="mt-1 text-[11px] font-bold tracking-[0.2em] uppercase text-white/75">
-                    Quality Inspector
-                </p>
                 <p className="mt-5 max-w-xs text-sm leading-relaxed text-white/90">
                     Control de calidad y pesaje en planta, con trazabilidad de cada lote.
                 </p>
@@ -155,11 +152,8 @@ function LogoBascula() {
             </div>
             <div className="text-center leading-tight">
                 <h1 className="text-lg font-black tracking-tight text-text-main">
-                    Bascula
+                    METRIKA 360
                 </h1>
-                <p className="text-[10px] font-bold tracking-widest uppercase text-text-muted/70">
-                    Quality Inspector
-                </p>
             </div>
         </div>
     )
