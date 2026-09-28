@@ -93,11 +93,17 @@ Dos reglas del flujo, fijadas en SPEC 07:
 
 La sesión guarda `string[]`, no `Permission[]`: un permiso que el backend emite y el catálogo no conoce se persiste igual (en desarrollo, `advertirPermisosDesconocidos` lo avisa por consola). Se guarda ancho y se consulta estrecho.
 
-Ocultar UI por permisos es comodidad, no control de acceso: `localStorage` es editable desde la consola del navegador y quien tiene que rechazar la operación es el backend, endpoint por endpoint. Hoy **ninguna** pantalla los aplica todavía —ni el Sidebar, ni los guards de ruta, ni un botón—; SPEC 07 entrega sólo la herramienta.
+Ocultar UI por permisos es comodidad, no control de acceso: `localStorage` es editable desde la consola del navegador y quien tiene que rechazar la operación es el backend, endpoint por endpoint.
+
+Dónde se aplican hoy:
+
+- **Navegación.** El `Sidebar` esconde cada item de `menuItems` (y cada hijo) cuyo `permission` no está en la sesión, y el item de Agri va envuelto en `<Can permission={PERMISSIONS.USARCHATIA}>`. La portada (`HomeView`) repite **los mismos destinos con los mismos permisos** en sus accesos rápidos y en la tarjeta de Agri: la portada no abre puertas que la barra lateral no muestra. Al agregar o mover un módulo, tocar los dos.
+- **Acciones.** Los botones de crear, aprobar y rechazar, y los menús de fila (`ClientRowActions`, `PesajeRowActions`, `DocumentoFiscalRowActions`), van detrás de un `<Can>`.
+- **Rutas, no.** No hay guard de permisos en ninguna ruta: quien escribe la URL a mano entra a la pantalla, y lo frena el backend.
 
 ### Rutas
 
-Grupos `(auth)` y `(portal)` con layouts pathless: `(portal)/_portal.tsx` monta el `Sidebar` + `<Outlet/>` y hace el guard en `beforeLoad` (hoy `const isLogged = true` — placeholder). Las rutas hijas son archivos planos con punto: `_portal.control-calidad.tsx` → `/control-calidad`. Las URLs no incluyen el grupo ni el layout.
+Grupos `(auth)` y `(portal)` con layouts pathless: `(portal)/_portal.tsx` monta el `Sidebar` + `<Outlet/>` y hace el guard de sesión: `beforeLoad` redirige a `/login` si no hay token en `localStorage` (la ruta es `ssr: false`), y un efecto sobre `estaAutenticado` cubre el cierre de sesión con la pantalla ya abierta. El guard mira sólo la sesión, no los permisos (ver Permisos). La portada es `_portal.index.tsx` → `/`, que monta `HomeView`. Las rutas hijas son archivos planos con punto: `_portal.control-calidad.tsx` → `/control-calidad`. Las URLs no incluyen el grupo ni el layout.
 
 `__root.tsx` es el `shellComponent`: html/body, `QueryClientProvider`, `ThemeProvider` y devtools sólo en dev.
 
@@ -124,7 +130,7 @@ Por eso `guardarPesaje` devuelve el `PesajeCreado` y no un `boolean`, y tanto `i
 
 ### Agri (chat IA)
 
-`/agri` es la pantalla de chat con IA: `routes/(portal)/_portal.agri.tsx` monta `views/agri/AgriChatView.tsx`, que cablea el hook con los cinco componentes de `components/agri/` (avatar, burbuja, indicador de tipeo, compositor y bienvenida). El item del Sidebar vive arriba de la etiqueta "Operación", fuera del `menuItems.map` y **sin permiso**: `PERMISSIONS` sólo lleva strings que el backend emite, y hoy no emite ninguno para el chat.
+`/agri` es la pantalla de chat con IA: `routes/(portal)/_portal.agri.tsx` monta `views/agri/AgriChatView.tsx`, que cablea el hook con los cinco componentes de `components/agri/` (avatar, burbuja, indicador de tipeo, compositor y bienvenida). El item del Sidebar vive arriba de la etiqueta "Operación", fuera del `menuItems.map`, envuelto en `<Can permission={PERMISSIONS.USARCHATIA}>` (`'USAR-CHAT-IA'`); la tarjeta de Agri en la portada pide el mismo permiso.
 
 **El hilo sale de `POST /chat`.** `presentation/hooks/agri/useAgriChat.tsx` manda cada turno por `useExecuteMutation`; `isThinking` es el `isPending` de esa mutación y el hilo sigue viviendo en un `useState`. El backend **no guarda la conversación**: el contexto lo pone el front en cada envío, con `{ mensaje, conversacion, historial }`.
 
