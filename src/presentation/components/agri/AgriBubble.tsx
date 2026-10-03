@@ -8,6 +8,8 @@ interface AgriBubbleProps {
     message: AgriMessage
     /** La barra de acciones. La vista sólo la manda para la última respuesta. */
     children?: ReactNode
+    /** Si es la respuesta más reciente: sólo esa lleva el avatar animado. */
+    isLatest?: boolean
 }
 
 /**
@@ -16,7 +18,7 @@ interface AgriBubbleProps {
  * como en Gemini, porque una respuesta de varios párrafos con tabla y código
  * encerrada en una cápsula se lee peor que el texto suelto.
  */
-export function AgriBubble({ message, children }: AgriBubbleProps) {
+export function AgriBubble({ message, children, isLatest = false }: AgriBubbleProps) {
     if (message.role === 'user') {
         return (
             <div className="flex justify-end">
@@ -39,7 +41,7 @@ export function AgriBubble({ message, children }: AgriBubbleProps) {
 
     return (
         <div className="flex gap-3">
-            <AgriAvatar />
+            <AgriAvatar still={!isLatest} />
 
             {/* El `min-w-0` es lo que deja que un bloque de código largo
                 scrollee por dentro en vez de estirar la columna del hilo. */}

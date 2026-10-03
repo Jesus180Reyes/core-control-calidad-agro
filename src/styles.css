@@ -45,6 +45,45 @@
     animation: agri-dot 1.2s ease-in-out infinite;
   }
 
+  /* El avatar de Agri (`AgriAvatar`). En reposo, cara (`agri-look`), ojos
+     (`agri-eye-*`) y sonrisa (`agri-smile`) recorren un mismo ciclo de 12 s:
+     si se cambia la duración de una, hay que cambiar las cuatro o las
+     expresiones se desarman. Pensando, la cara mira hacia arriba
+     (`agri-think`) y los ojos sólo parpadean (`agri-blink`). Todos son `block`
+     por lo mismo que `.agri-dot`: el `transform` no aplica sobre un span
+     inline. */
+  .agri-swirl {
+    display: block;
+    animation: agri-swirl 9s linear infinite;
+  }
+
+  .agri-look {
+    animation: agri-look 12s ease-in-out infinite;
+  }
+
+  .agri-eye-l {
+    display: block;
+    animation: agri-eye-l 12s ease-in-out infinite;
+  }
+
+  .agri-eye-r {
+    display: block;
+    animation: agri-eye-r 12s ease-in-out infinite;
+  }
+
+  .agri-smile {
+    animation: agri-smile 12s ease-in-out infinite;
+  }
+
+  .agri-think {
+    animation: agri-think 2.4s ease-in-out infinite;
+  }
+
+  .agri-blink {
+    display: block;
+    animation: agri-blink 3s ease-in-out infinite;
+  }
+
   /* El bloque global de más arriba sólo acorta la duración; el retardo seguiría
      escalonando la aparición durante segundos, que es justo lo que molesta a
      quien pidió menos movimiento. En `.agri-dot` el problema es otro y peor:
@@ -73,12 +112,71 @@
   @media (prefers-reduced-motion: reduce) {
     .md-word,
     .agri-dot,
+    .agri-swirl,
+    .agri-look,
+    .agri-eye-l,
+    .agri-eye-r,
+    .agri-smile,
+    .agri-think,
+    .agri-blink,
     .scale-flow,
     .scale-wave,
     .scale-charge {
       animation: none !important;
     }
   }
+}
+
+@keyframes agri-swirl {
+  to { transform: rotate(360deg); }
+}
+
+/* El ciclo de reposo de Agri, en tramos sobre los 12 s:
+     0–10%   parpadeo
+    22–46%   mira arriba a la izquierda, después a la derecha
+    52–72%   sonríe: ojos achinados, cara arriba, aparece la boca
+    76–84%   guiña el ojo derecho, con media sonrisa
+    86–93%   parpadeo doble
+   Cada keyframe que no está en su tramo deja la expresión neutra, que es como
+   se ve el avatar en una captura o con movimiento reducido.
+   `--agri-look` lo fija cada medida del avatar en px. */
+@keyframes agri-look {
+  0%, 20%, 48%, 52%, 74%, 100% { transform: translate(0, 0); }
+  24%, 32% { transform: translate(calc(var(--agri-look) * -1), calc(var(--agri-look) * -0.6)); }
+  36%, 44% { transform: translate(var(--agri-look), 0); }
+  56%, 68% { transform: translate(0, calc(var(--agri-look) * -0.5)); }
+}
+
+@keyframes agri-eye-l {
+  0%, 6%, 9%, 52%, 72%, 76%, 84%, 86%, 89%, 92%, 100% { transform: scaleY(1); }
+  7.5%, 87.5%, 90.5% { transform: scaleY(0.1); }
+  56%, 68% { transform: scaleY(0.45) translateY(-15%); }
+  /* Mientras el derecho guiña, el izquierdo se entrecierra apenas. */
+  78.5%, 81% { transform: scaleY(0.8); }
+}
+
+@keyframes agri-eye-r {
+  0%, 6%, 9%, 52%, 72%, 76%, 84%, 86%, 89%, 92%, 100% { transform: scaleY(1); }
+  7.5%, 87.5%, 90.5% { transform: scaleY(0.1); }
+  56%, 68% { transform: scaleY(0.45) translateY(-15%); }
+  78.5%, 81% { transform: scaleY(0.1); }
+}
+
+@keyframes agri-smile {
+  0%, 52%, 72%, 76%, 84%, 100% { opacity: 0; transform: scaleX(0.5); }
+  56%, 68% { opacity: 1; transform: scaleX(1); }
+  78.5%, 81% { opacity: 0.85; transform: scaleX(0.75) translateX(15%); }
+}
+
+/* Pensando: la mirada arriba, de un lado al otro, como buscando la respuesta. */
+@keyframes agri-think {
+  0%, 100% { transform: translate(calc(var(--agri-look) * -1), calc(var(--agri-look) * -0.7)); }
+  50% { transform: translate(var(--agri-look), calc(var(--agri-look) * -0.7)); }
+}
+
+@keyframes agri-blink {
+  0%, 85%, 100% { transform: scaleY(1); }
+  90% { transform: scaleY(0.15); }
 }
 
 @keyframes scale-flow {

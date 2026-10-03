@@ -17,7 +17,7 @@ const PUNTOS = [0, 1, 2]
 export function AgriTypingIndicator() {
     return (
         <div className="flex gap-3" role="status" aria-label={AVISO}>
-            <AgriAvatar />
+            <AgriAvatar thinking />
 
             <div className="flex items-center gap-1.5 rounded-2xl rounded-bl-lg bg-muted/60 px-4 py-3.5">
                 {PUNTOS.map((punto) => (

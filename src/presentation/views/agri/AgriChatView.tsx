@@ -89,7 +89,7 @@ export function AgriChatView() {
                 ) : (
                     <div className={`${ANCHO_COLUMNA} space-y-6 py-2`}>
                         {messages.map((message, indice) => (
-                            <AgriBubble key={message.id} message={message}>
+                            <AgriBubble key={message.id} message={message} isLatest={indice === indiceUltimo}>
                                 {message.role === 'agri' && indice === indiceUltimo && !isThinking && (
                                     <ResponseActions
                                         copiado={copiado}
