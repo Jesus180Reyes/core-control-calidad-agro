@@ -2,6 +2,7 @@ import { Suspense, useEffect } from 'react'
 import { createFileRoute, redirect, useLocation, useNavigate } from '@tanstack/react-router'
 
 import { ClientesHeader } from '#/presentation/components/clientes/ClientesHeader'
+import { WeighingStepper } from '#/presentation/components/control-calidad/WeighingStepper'
 import { LoadingState } from '#/presentation/components/shared/LoadingState'
 import { LotesView } from '#/presentation/views/lotes/LotesView'
 
@@ -35,8 +36,9 @@ function RouteComponent() {
 
     return (
         <div className="space-y-8">
+            <WeighingStepper current="lote" cliente={cliente} />
+
             <ClientesHeader
-                paso="Paso 2 de 2"
                 backTo="/clientes"
                 titulo="Seleccioná un lote"
                 descripcion={`Elegí el lote de ${cliente.nombre} que vas a pesar. Después de eso se abre la báscula.`}
