@@ -1,8 +1,10 @@
+import type { Paginacion } from '#/presentation/types/shared/paginacion.types';
 
 export interface PesajesResponse {
     ok: boolean;
     msg: string;
     pesajes: PesajeData[];
+    paginacion?: Paginacion; // solo /pesajes/historial con página
 }
 
 export interface PesajeData {
