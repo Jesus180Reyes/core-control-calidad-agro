@@ -79,7 +79,7 @@ export function AgriAvatar({ size = 'sm', thinking = false, still = false, class
                 className={cn(
                     'absolute inset-0 bg-conic from-transparent via-white/35 to-transparent blur-[2px]',
                     animado && 'agri-swirl',
-                    thinking && '[animation-duration:3s]',
+                    thinking && 'animation-duration-[3s]',
                 )}
             />
 
