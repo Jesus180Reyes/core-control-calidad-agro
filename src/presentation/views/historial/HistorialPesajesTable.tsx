@@ -4,6 +4,7 @@ import {
     HIDE_BELOW_LG,
     type DataTableColumns,
 } from '#/presentation/components/shared/table/DataTable'
+import { PaginationBar } from '#/presentation/components/shared/table/PaginationBar'
 import { formatDate } from '#/presentation/helpers/date/formatDate'
 import { formatWeight } from '#/presentation/helpers/number/formatWeight'
 import { useHistorialPesajes } from '#/presentation/hooks/historial/useHistorialPesajes'
@@ -76,22 +77,39 @@ function createColumns(): DataTableColumns<PesajeData> {
 
 interface HistorialPesajesTableProps {
     filtros: FiltrosHistorial
+    pagina: number
+    onPageChange: (pagina: number) => void
+    /** La página nueva está cargando: la anterior queda en pantalla, atenuada. */
+    isPending: boolean
 }
 
-export function HistorialPesajesTable({ filtros }: HistorialPesajesTableProps) {
-    const { pesajes } = useHistorialPesajes(filtros);
+export function HistorialPesajesTable({ filtros, pagina, onPageChange, isPending }: HistorialPesajesTableProps) {
+    const { pesajes, paginacion } = useHistorialPesajes(filtros, pagina);
 
     const columns = createColumns();
 
     return (
-        <DataTable
-            data={pesajes}
-            columns={columns}
-            getRowId={(pesaje) => String(pesaje.id)}
-            defaultSorting={[{ id: 'created_at', desc: true }]}
-            maxHeight="34rem"
-            emptyTitle="No hay pesajes registrados"
-            emptyDescription="Ningún pesaje coincide con los filtros aplicados."
-        />
+        <div className="space-y-4">
+            <div className={`transition-opacity duration-200 ${isPending ? 'opacity-60' : ''}`}>
+                <DataTable
+                    data={pesajes}
+                    columns={columns}
+                    getRowId={(pesaje) => String(pesaje.id)}
+                    defaultSorting={[{ id: 'created_at', desc: true }]}
+                    maxHeight="34rem"
+                    emptyTitle="No hay pesajes registrados"
+                    emptyDescription="Ningún pesaje coincide con los filtros aplicados."
+                />
+            </div>
+
+            {paginacion && (
+                <PaginationBar
+                    paginacion={paginacion}
+                    itemLabel={{ one: 'pesaje', other: 'pesajes' }}
+                    onPageChange={onPageChange}
+                    isPending={isPending}
+                />
+            )}
+        </div>
     )
 }
