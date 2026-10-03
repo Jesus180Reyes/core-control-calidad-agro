@@ -1,4 +1,4 @@
-import { Suspense, useEffect, useState } from 'react'
+import { Suspense, useEffect, useState, useTransition } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
 import { Plus } from 'lucide-react'
 
@@ -26,6 +26,19 @@ export const Route = createFileRoute('/(portal)/_portal/inspeccion-clientes')({
 function RouteComponent() {
     const [dialogoCrearAbierto, setDialogoCrearAbierto] = useState(false)
     const [filtros, setFiltros] = useState<FiltrosClientes>({})
+    const [pagina, setPagina] = useState(1)
+    // `isPending` ya es el de crear cliente: este es el de la página.
+    const [isPagePending, startTransition] = useTransition()
+
+    // Filtrar vuelve a la página 1 y sigue suspendiendo con el LoadingState, como antes.
+    const aplicarFiltros = (nuevos: FiltrosClientes) => {
+        setFiltros(nuevos)
+        setPagina(1)
+    }
+
+    // En transición: la tabla anterior queda en pantalla mientras llega la página nueva.
+    const cambiarPagina = (nueva: number) => startTransition(() => setPagina(nueva))
+
     const form = useForm<CreateClienteSchema>({
         resolver: zodResolver(createClienteSchema),
     });
@@ -72,11 +85,16 @@ function RouteComponent() {
             />
 
             <Suspense fallback={<LoadingState />}>
-                <ClientesFiltersBar filtros={filtros} onApply={setFiltros} />
+                <ClientesFiltersBar filtros={filtros} onApply={aplicarFiltros} />
             </Suspense>
 
             <Suspense fallback={<LoadingState />}>
-                <ClientInspectionView filtros={filtros} />
+                <ClientInspectionView
+                    filtros={filtros}
+                    pagina={pagina}
+                    onPageChange={cambiarPagina}
+                    isPending={isPagePending}
+                />
             </Suspense>
 
             <CustomDialog

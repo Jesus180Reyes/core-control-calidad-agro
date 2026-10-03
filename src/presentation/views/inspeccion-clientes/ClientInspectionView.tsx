@@ -6,6 +6,7 @@ import {
     STICKY_ACTIONS_HEADER,
     type DataTableColumns,
 } from '#/presentation/components/shared/table/DataTable'
+import { PaginationBar } from '#/presentation/components/shared/table/PaginationBar'
 import type { Cliente } from '#/presentation/types/clientes/clientes.types'
 import { useClientInspection } from '#/presentation/hooks/inspeccion-clientes/useClientInspection'
 import type { FiltrosClientes } from '#/presentation/schema/inspeccion-clientes/filtrosClientesSchema'
@@ -72,22 +73,39 @@ function crearColumnas(
 
 interface ClientInspectionViewProps {
     filtros: FiltrosClientes
+    pagina: number
+    onPageChange: (pagina: number) => void
+    /** La página nueva está cargando: la anterior queda en pantalla, atenuada. */
+    isPending: boolean
 }
 
-export function ClientInspectionView({ filtros }: ClientInspectionViewProps) {
-    const { clientes } = useClientInspection(filtros)
+export function ClientInspectionView({ filtros, pagina, onPageChange, isPending }: ClientInspectionViewProps) {
+    const { clientes, paginacion } = useClientInspection(filtros, pagina)
 
     const columns = crearColumnas();
 
     return (
-        <DataTable
-            data={clientes}
-            columns={columns}
-            getRowId={(cliente) => String(cliente.id)}
-            defaultSorting={[{ id: 'nombre', desc: false }]}
-            maxHeight="32rem"
-            emptyTitle="No hay clientes para inspeccionar"
-            emptyDescription="Todavía no hay datos cargados para esta pantalla."
-        />
+        <div className="space-y-4">
+            <div className={`transition-opacity duration-200 ${isPending ? 'opacity-60' : ''}`}>
+                <DataTable
+                    data={clientes}
+                    columns={columns}
+                    getRowId={(cliente) => String(cliente.id)}
+                    defaultSorting={[{ id: 'nombre', desc: false }]}
+                    maxHeight="32rem"
+                    emptyTitle="No hay clientes para inspeccionar"
+                    emptyDescription="Todavía no hay datos cargados para esta pantalla."
+                />
+            </div>
+
+            {paginacion && (
+                <PaginationBar
+                    paginacion={paginacion}
+                    itemLabel={{ one: 'cliente', other: 'clientes' }}
+                    onPageChange={onPageChange}
+                    isPending={isPending}
+                />
+            )}
+        </div>
     )
 }
