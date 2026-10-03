@@ -1,3 +1,4 @@
+import type { Paginacion } from '#/presentation/types/shared/paginacion.types'
 
 export interface Cliente {
     id: number
@@ -12,6 +13,7 @@ export interface ClientesResponse {
     ok: boolean
     msg: string
     clientes: Cliente[]
+    paginacion?: Paginacion // solo cuando se pidió página
 }
 
 

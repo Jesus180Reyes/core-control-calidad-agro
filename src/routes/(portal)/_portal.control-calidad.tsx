@@ -6,6 +6,7 @@ import { PrintTicketDialog } from '#/presentation/components/control-calidad/Pri
 import { ScaleConnectedDialog } from '#/presentation/components/control-calidad/ScaleConnectedDialog'
 import { SelectorBasculaDialog } from '#/presentation/components/control-calidad/SelectorBasculaDialog'
 import { TaraPesajeDialog } from '#/presentation/components/control-calidad/TaraPesajeDialog'
+import { WeighingStepper } from '#/presentation/components/control-calidad/WeighingStepper'
 import { useControlCalidad } from '#/presentation/hooks/bascula/useControlCalidad'
 import { DetallesOperacionCard } from '#/presentation/views/control-calidad/DetallesOperacionCard'
 import { MonitoreoBasculaCard } from '#/presentation/views/control-calidad/MonitoreoBasculaCard'
@@ -72,6 +73,8 @@ function ControlCalidadPage() {
                 onReintentar={() => void scale.reconectar()}
                 onVolver={() => navigate({ to: '/clientes', state: { cliente: cliente ?? undefined } })}
             />
+
+            <WeighingStepper current={impresion.pesaje ? 'etiqueta' : 'pesaje'} cliente={cliente} lote={lote} />
 
             <BannerEstadoBascula
                 estado={scale.estado}

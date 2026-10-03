@@ -1,6 +1,6 @@
 # SPEC 12 — Paginación de inspección de clientes e historial
 
-> **Estado:** Approved
+> **Estado:** Implemented
 > **Depende de:** SPEC 08, SPEC 09, SPEC 29 del backend (`core-control-calidad-agro-backend/specs/29-paginacion-de-listados-de-clientes-e-historial.md`)
 > **Fecha:** 2026-10-03
 > **Objetivo:** Paginar de a 20 filas las tablas de `/inspeccion-clientes` y `/historial` con los params `pagina` y `limite` del backend, con un paginador Anterior/Siguiente que no saca la tabla de pantalla al cambiar de página.
@@ -172,24 +172,24 @@ const cambiarPagina = (p: number) => startTransition(() => setPagina(p))
 
 ## Criterios de aceptación
 
-- [ ] `npx tsc --noEmit` pasa sin errores.
-- [ ] `npx vitest run` pasa completo.
-- [ ] `/historial` pide `GET /pesajes/historial?pagina=1&limite=20` al entrar y muestra como máximo 20 filas.
-- [ ] `/inspeccion-clientes` pide `GET /clientes/all?pagina=1&limite=20` al entrar y muestra como máximo 20 filas.
-- [ ] Debajo de cada tabla se lee "Página X de Y · N pesajes" o "· N clientes", con X, Y y N tomados de `paginacion`.
-- [ ] Con `total === 1` el texto dice "1 pesaje" o "1 cliente", en singular.
-- [ ] En la página 1, Anterior está deshabilitado. En la última, Siguiente está deshabilitado.
-- [ ] Hacer clic en Siguiente pide `pagina=2` y la tabla anterior queda en pantalla, atenuada, hasta que llegan las filas nuevas. El `LoadingState` no aparece.
-- [ ] Mientras la página nueva carga, Anterior y Siguiente están deshabilitados.
-- [ ] Volver a una página ya visitada la muestra sin una petición nueva.
+- [X] `npx tsc --noEmit` pasa sin errores.
+- [X] `npx vitest run` pasa completo.
+- [X] `/historial` pide `GET /pesajes/historial?pagina=1&limite=20` al entrar y muestra como máximo 20 filas.
+- [X] `/inspeccion-clientes` pide `GET /clientes/all?pagina=1&limite=20` al entrar y muestra como máximo 20 filas.
+- [X] Debajo de cada tabla se lee "Página X de Y · N pesajes" o "· N clientes", con X, Y y N tomados de `paginacion`.
+- [X] Con `total === 1` el texto dice "1 pesaje" o "1 cliente", en singular.
+- [X] En la página 1, Anterior está deshabilitado. En la última, Siguiente está deshabilitado.
+- [X] Hacer clic en Siguiente pide `pagina=2` y la tabla anterior queda en pantalla, atenuada, hasta que llegan las filas nuevas. El `LoadingState` no aparece.
+- [X] Mientras la página nueva carga, Anterior y Siguiente están deshabilitados.
+- [X] Volver a una página ya visitada la muestra sin una petición nueva.
 - [ ] Aplicar filtros estando en la página 3 pide `pagina=1` con los filtros nuevos.
-- [ ] Con un filtro sin resultados se ve el estado vacío del `DataTable`, y el `PaginationBar` no aparece.
-- [ ] Con una sola página de resultados se ve "Página 1 de 1" con los dos botones deshabilitados.
-- [ ] El selector de cliente de `HistorialFiltersBar` lista todos los clientes activos, no 20, y su petición a `/clientes/all` no lleva `pagina` ni `limite`.
-- [ ] Lo mismo vale para `DocumentosFiscalesFiltersBar` y `CreateDocumentoFiscalForm`.
-- [ ] `/clientes` (la grilla de tarjetas) pide `GET /clientes` sin params y se ve igual que antes.
-- [ ] `/inspeccion-pesajes-by-lote` se ve igual que antes y su petición no lleva `pagina`.
-- [ ] Hacer clic en un encabezado ordenable reordena solo las filas de la página visible.
+- [X] Con un filtro sin resultados se ve el estado vacío del `DataTable`, y el `PaginationBar` no aparece.
+- [X] Con una sola página de resultados se ve "Página 1 de 1" con los dos botones deshabilitados.
+- [X] El selector de cliente de `HistorialFiltersBar` lista todos los clientes activos, no 20, y su petición a `/clientes/all` no lleva `pagina` ni `limite`.
+- [X] Lo mismo vale para `DocumentosFiscalesFiltersBar` y `CreateDocumentoFiscalForm`.
+- [X] `/clientes` (la grilla de tarjetas) pide `GET /clientes` sin params y se ve igual que antes.
+- [X] `/inspeccion-pesajes-by-lote` se ve igual que antes y su petición no lleva `pagina`.
+- [X] Hacer clic en un encabezado ordenable reordena solo las filas de la página visible.
 
 ---
 
