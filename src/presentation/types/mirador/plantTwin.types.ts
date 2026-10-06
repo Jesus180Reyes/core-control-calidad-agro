@@ -1,24 +1,22 @@
 /**
- * Contrato de `GET /plantas/en-vivo` (SPEC 13). El endpoint todavía no existe:
- * hoy lo imita `plantSnapshotMock.ts` con esta misma forma, así que conectarlo
- * toca sólo el interior de `usePlantTwin`.
+ * Contrato de `GET /plantas/en-vivo` (SPEC 13 del front, SPEC 32 del backend).
  */
 
 /**
- * Casilla del tablero. `rechazado` no tiene casilla: sólo viaja para animar la salida.
- * `despacho` es el estado FINALIZADO del backend: el id interno se conserva para
- * no tocar la escena, y en pantalla se lee "Finalizado".
+ * Casilla del tablero, con el mismo string que manda el backend. `rechazado` no
+ * tiene casilla: sólo viaja (5 min) para animar la salida. `finalizado` es la
+ * última casilla y viaja 7 días.
  */
-export type PlantStage = 'en-pesaje' | 'por-aprobar' | 'despacho' | 'rechazado'
+export type PlantStage = 'en-pesaje' | 'por-aprobar' | 'finalizado' | 'rechazado'
 
 export type ActiveStage = Exclude<PlantStage, 'rechazado'>
 
-export const ACTIVE_STAGES: ActiveStage[] = ['en-pesaje', 'por-aprobar', 'despacho']
+export const ACTIVE_STAGES: ActiveStage[] = ['en-pesaje', 'por-aprobar', 'finalizado']
 
 export const STAGE_LABEL: Record<PlantStage, string> = {
     'en-pesaje': 'En pesaje',
     'por-aprobar': 'Por aprobar',
-    'despacho': 'Finalizado',
+    'finalizado': 'Finalizado',
     'rechazado': 'Rechazado',
 }
 
@@ -57,8 +55,9 @@ export interface PlantClient {
 export interface PlantLot {
     id: number
     nombre_lote: string
-    producto: string
-    unidad_medida: string
+    /** `null` si el lote no tiene producto (viene de un `LEFT JOIN`). */
+    producto: string | null
+    unidad_medida: string | null
     etapa: PlantStage
     peso_minimo: string
     peso_ideal: string
@@ -67,19 +66,18 @@ export interface PlantLot {
     bultos: number
     bultos_fuera_rango: number
     peso_neto_total: number
-    /** `numero_completo` del documento fiscal activo; sólo en `despacho`. */
-    documento_fiscal: string | null
-    /** Los 10 más recientes, del más nuevo al más viejo. Sirve para animar, no para contar. */
+    /** Los 10 activos de mayor `id`, en orden `id` DESC. Sirve para animar, no para contar. */
     ultimos_pesajes: PlantWeighing[]
 }
 
 export interface PlantWeighing {
     id: number
     peso_neto: string
-    /** 0/1, igual que `PesajeData`. */
-    fuera_de_rango: number
-    estado_calidad_codigo: string
-    usuario: string
+    fuera_de_rango: boolean
+    /** `IDEAL` | `MAXIMO` | `MINIMO`, o `null`. */
+    estado_calidad_codigo: string | null
+    /** `null` si el usuario fue borrado. */
+    usuario: string | null
     created_at: string
 }
 

@@ -1086,9 +1086,9 @@ export class PlantScene {
             status: estado ?? (nivel === 'ok' ? 'En rango' : nivel === 'desviado' ? 'Desviado' : 'Fuera de rango'),
             level: nivel,
             value: Number(w.peso_neto),
-            user: w.usuario,
+            user: w.usuario ?? '—',
             lot: lot.nombre_lote,
-            unit: lot.unidad_medida,
+            unit: lot.unidad_medida ?? '',
         }
         this.renderLcd()
     }
@@ -1118,7 +1118,7 @@ export class PlantScene {
         ficha.scale.setScalar(0.01)
         this.scene.add(ficha)
 
-        this.lcd = { ...this.lcd, status: 'Pesando…', level: 'busy', value: 0, user: item.weighing.usuario, lot: lot.nombre_lote, unit: lot.unidad_medida }
+        this.lcd = { ...this.lcd, status: 'Pesando…', level: 'busy', value: 0, user: item.weighing.usuario ?? '—', lot: lot.nombre_lote, unit: lot.unidad_medida ?? '' }
         this.operario.action = 1.2
         this.ayudante.action = 1.2
         const anillo = this.stationRing.material
