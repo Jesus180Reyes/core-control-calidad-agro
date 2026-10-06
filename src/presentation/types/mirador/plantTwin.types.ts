@@ -4,18 +4,21 @@
  * toca sólo el interior de `usePlantTwin`.
  */
 
-/** Casilla del tablero. `rechazado` no tiene casilla: sólo viaja para animar la salida. */
-export type PlantStage = 'en-pesaje' | 'por-aprobar' | 'finalizado' | 'despacho' | 'rechazado'
+/**
+ * Casilla del tablero. `rechazado` no tiene casilla: sólo viaja para animar la salida.
+ * `despacho` es el estado FINALIZADO del backend: el id interno se conserva para
+ * no tocar la escena, y en pantalla se lee "Finalizado".
+ */
+export type PlantStage = 'en-pesaje' | 'por-aprobar' | 'despacho' | 'rechazado'
 
 export type ActiveStage = Exclude<PlantStage, 'rechazado'>
 
-export const ACTIVE_STAGES: ActiveStage[] = ['en-pesaje', 'por-aprobar', 'finalizado', 'despacho']
+export const ACTIVE_STAGES: ActiveStage[] = ['en-pesaje', 'por-aprobar', 'despacho']
 
 export const STAGE_LABEL: Record<PlantStage, string> = {
     'en-pesaje': 'En pesaje',
     'por-aprobar': 'Por aprobar',
-    'finalizado': 'Finalizado',
-    'despacho': 'Despacho',
+    'despacho': 'Finalizado',
     'rechazado': 'Rechazado',
 }
 

@@ -22,8 +22,6 @@ export interface ScenePalette {
     scalePlat: string
     scaleStripe: string
     chevron: string
-    film: string
-    filmOpacity: number
     shadowOpacity: number
     hemiSky: string
     hemiGround: string
@@ -69,8 +67,6 @@ export function readPalette(): ScenePalette {
             scalePlat: '#2A3731',
             scaleStripe: '#E8B92A',
             chevron: mix(surface, muted, 0.35),
-            film: '#CFE8DA',
-            filmOpacity: 0.16,
             shadowOpacity: 0.5,
             hemiSky: '#CFDDF5',
             hemiGround: '#1A2420',
@@ -98,8 +94,6 @@ export function readPalette(): ScenePalette {
         scalePlat: '#3B4943',
         scaleStripe: '#F2C230',
         chevron: mix(bgApp, muted, 0.35),
-        film: '#FFFFFF',
-        filmOpacity: 0.34,
         shadowOpacity: 0.17,
         hemiSky: '#FFFFFF',
         hemiGround: '#B5C3B1',

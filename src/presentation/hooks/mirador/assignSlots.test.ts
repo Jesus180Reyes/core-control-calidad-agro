@@ -21,7 +21,7 @@ const foto = (clientes: PlantClient[]): PlantSnapshot => ({
 describe('assignSlots', () => {
     it('en la primera carga, los clientes más activos van arriba', () => {
         const slots = assignSlots(null, foto([
-            cliente(1, 'Quieto', [lote(10, 'finalizado')]),
+            cliente(1, 'Quieto', [lote(10, 'despacho')]),
             cliente(2, 'Activo', [lote(20, 'en-pesaje'), lote(21, 'por-aprobar')]),
         ]))
         expect(slots.rows).toEqual({ 2: 0, 1: 1 })

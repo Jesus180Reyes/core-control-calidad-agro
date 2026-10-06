@@ -4,6 +4,7 @@ import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js'
 import { clientColor, clientInitials } from '#/presentation/components/mirador/clientColors'
 import { qualityLevel, targetPoint } from '#/presentation/hooks/mirador/qualityTarget'
 import {
+    ACTIVE_STAGES,
     STAGE_LABEL,
     type ActiveStage,
     type PlantClient,
@@ -299,9 +300,8 @@ export class PlantScene {
             tile: std('tile', { roughness: 0.9 }), tileSide: std('tileSide'),
             pallet: std('pallet', { roughness: 0.95 }), palletSide: std('palletSide', { roughness: 0.95 }),
             scaleBase: std('scaleBase', { roughness: 0.6 }), scalePlat: std('scalePlat', { roughness: 0.45, metalness: 0.25 }),
-            scaleStripe: std('scaleStripe', { roughness: 0.5 }), chevron: std('chevron'), strap: std('brand', { roughness: 0.5 }),
+            scaleStripe: std('scaleStripe', { roughness: 0.5 }), chevron: std('chevron'),
             ok: calidad('ok'), desviado: calidad('desviado'), fuera: calidad('fuera'),
-            film: (() => { const m = new THREE.MeshStandardMaterial({ transparent: true, roughness: 0.15, depthWrite: false }); this.onTheme((p) => { m.color.set(p.film); m.opacity = p.filmOpacity }); return m })(),
             diamond: (() => { const m = new THREE.MeshStandardMaterial({ roughness: 0.3, metalness: 0.2 }); this.onTheme((p) => { m.color.set(p.desviado); m.emissive.set(p.desviado).multiplyScalar(0.45) }); return m })(),
         }
         this.B = {
@@ -316,7 +316,7 @@ export class PlantScene {
             discBand: basic((m, p) => m.color.set(p.ok), { opacity: 0.14 }),
         }
 
-        this.tileLabelMats = [0, 1, 2, 3].map(() => new THREE.MeshBasicMaterial({ transparent: true, depthWrite: false }))
+        this.tileLabelMats = TILE_X.map(() => new THREE.MeshBasicMaterial({ transparent: true, depthWrite: false }))
         this.flowTexture = this.makeFlowTexture()
 
         // ---- estación de pesaje
@@ -566,7 +566,7 @@ export class PlantScene {
         x.strokeStyle = this.palette.tileLine
         x.lineWidth = 5
         x.setLineDash([22, 16])
-        const slots = k === 3 ? [SLOT_OFFSETS[0], SLOT_OFFSETS[2]] : SLOT_OFFSETS
+        const slots = k === STAGE_INDEX.despacho ? [SLOT_OFFSETS[0], SLOT_OFFSETS[2]] : SLOT_OFFSETS
         for (const s of slots) {
             const cx = ((s.x + TILE_W / 2) / TILE_W) * W
             const cy = ((s.z + TILE_D / 2) / TILE_D) * H
@@ -579,7 +579,7 @@ export class PlantScene {
         x.fillStyle = this.palette.tileInk
         x.font = '600 50px "Geist Variable", Geist, system-ui, sans-serif'
         if ('letterSpacing' in x) (x as CanvasRenderingContext2D & { letterSpacing: string }).letterSpacing = '7px'
-        const etapa = (['en-pesaje', 'por-aprobar', 'finalizado', 'despacho'] as ActiveStage[])[k]
+        const etapa = ACTIVE_STAGES[k]
         x.fillText(`${k + 1}  ${STAGE_LABEL[etapa].toUpperCase()}`, 58, H - 52)
         const t = new THREE.CanvasTexture(c)
         t.colorSpace = THREE.SRGBColorSpace
@@ -681,8 +681,8 @@ export class PlantScene {
                 const [vest, hat] = chalecos[(i * 2 + (carril > 0 ? 1 : 0)) % chalecos.length]
                 const person = createPerson({ vest, hat, skin: SKIN[(i + (carril > 0 ? 3 : 0)) % SKIN.length], sack: rnd() < 0.5, phase: rnd() * 6 })
                 this.ambient.add(person.root)
-                const x = 2 + rnd() * 24
-                this.walkers.push({ person, z: z + carril, x: carril > 0 ? x : 29 - x, dir: carril > 0 ? 1 : -1, speed: 0.75 + rnd() * 0.5, wait: 0 })
+                const x = 2 + rnd() * (STRIP_X1 - 4.6)
+                this.walkers.push({ person, z: z + carril, x: carril > 0 ? x : STRIP_X1 + 0.4 - x, dir: carril > 0 ? 1 : -1, speed: 0.75 + rnd() * 0.5, wait: 0 })
             }
         })
 
@@ -731,7 +731,7 @@ export class PlantScene {
             rotulo.position.set(tx, TILE_TOP + 0.004, 0)
             rotulo.renderOrder = 1
             group.add(rotulo)
-            if (k < 3) {
+            if (k < TILE_X.length - 1) {
                 const flecha = addMesh(group, new THREE.ConeGeometry(0.2, 0.34, 3), this.M.chevron, tx + TILE_W / 2 + 0.25, TILE_TOP - 0.02, 2.9, false)
                 flecha.rotation.z = -Math.PI / 2
                 flecha.scale.set(1, 1, 0.35)
@@ -791,7 +791,7 @@ export class PlantScene {
     }
 
     private updateOverflow(cv: ClientVisual, overflow: Partial<Record<ActiveStage, number>>) {
-        for (const etapa of ['en-pesaje', 'por-aprobar', 'finalizado', 'despacho'] as ActiveStage[]) {
+        for (const etapa of ACTIVE_STAGES) {
             const n = overflow[etapa] ?? 0
             let label = cv.overflow.get(etapa)
             if (n > 0 && !label) {
@@ -965,15 +965,6 @@ export class PlantScene {
                 supervisor.root.rotation.y = Math.atan2(-1.32, -1.38)
                 lv.status.add(supervisor.root)
                 lv.people.push({ person: supervisor, kind: 'supervisor' })
-            }
-            if (lv.stage === 'finalizado') {
-                const h = Math.max(0.3, niveles * CHIP_H + 0.06)
-                const film = new THREE.Mesh(new THREE.BoxGeometry(2.0, h, 2.0), this.M.film)
-                film.position.y = 0.2 + h / 2
-                film.renderOrder = 3
-                lv.status.add(film)
-                addMesh(lv.status, new THREE.BoxGeometry(0.18, 0.02, 2.04), this.M.strap, 0, 0.2 + h, 0, false)
-                addMesh(lv.status, new THREE.BoxGeometry(2.04, 0.02, 0.18), this.M.strap, 0, 0.2 + h + 0.005, 0, false)
             }
         }
 
@@ -1251,7 +1242,7 @@ export class PlantScene {
         const alto = Math.max(1, this.height - (this.insets.bottom + this.insets.top) * 0.9)
         const aspecto = ancho / alto
         const fondo = rowZ(this.maxRow) - rowZ(this.minRow) + TERR_D + 4.2
-        return clamp(Math.max(46 / (0.536 * aspecto), (fondo * 0.75) / 0.536) * 1.25, 30, 220)
+        return clamp(Math.max((BOARD_X1 - BOARD_X0 + 2) / (0.536 * aspecto), (fondo * 0.75) / 0.536) * 1.25, 30, 220)
     }
 
     private focusCamera(instantaneo: boolean) {
@@ -1267,7 +1258,7 @@ export class PlantScene {
             this.goal.target.set((STRIP_X0 + STRIP_X1) / 2, 0, rowZ(cv.row))
             this.goal.r = 42 * k
         } else {
-            this.goal.target.set(10, 0, this.stationZ())
+            this.goal.target.set((BOARD_X0 + BOARD_X1) / 2 + 1, 0, this.stationZ())
             this.goal.r = this.plantaRadius()
             this.goal.el = 0.82
             this.goal.theta = 0.5

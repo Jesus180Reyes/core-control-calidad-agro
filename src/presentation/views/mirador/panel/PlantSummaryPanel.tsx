@@ -18,8 +18,7 @@ const LEYENDA = [
     { figura: <span className="size-4 rounded-full bg-warning shadow-[inset_0_-3px_0_rgba(0,0,0,0.2)]" />, texto: 'Ficha ámbar: en rango, pero a más del 60 % del camino hacia un límite' },
     { figura: <span className="size-4 rounded-full bg-destructive shadow-[inset_0_-3px_0_rgba(0,0,0,0.2)]" />, texto: 'Ficha roja: fuera de rango, apilada aparte en su lote' },
     { figura: <span className="size-5 rounded-full border-[3px] border-warning" />, texto: 'Anillo ámbar y supervisor: el lote espera aprobación' },
-    { figura: <span className="h-4 w-5 rounded-[4px] border border-brand/50 bg-brand/15" />, texto: 'Film y fleje: lote finalizado' },
-    { figura: <span className="h-3.5 w-6 rounded-[3px] bg-[repeating-linear-gradient(90deg,var(--text-muted)_0_2px,transparent_2px_5px)] opacity-80" />, texto: 'Contenedor con su camión: lote en despacho. Cuando sale de planta, el camión se lo lleva' },
+    { figura: <span className="h-3.5 w-6 rounded-[3px] bg-[repeating-linear-gradient(90deg,var(--text-muted)_0_2px,transparent_2px_5px)] opacity-80" />, texto: 'Contenedor con su camión: lote finalizado. Cuando sale de planta, el camión se lo lleva' },
     { figura: <Persona color="#F2B705" />, texto: 'Estibador: acompaña a cada lote en pesaje y recibe cada bulto' },
     { figura: <Persona color="#E2E8F0" />, texto: 'Gente en los pasillos, carritos de picking y operario de báscula: ambientación, no son datos' },
 ]

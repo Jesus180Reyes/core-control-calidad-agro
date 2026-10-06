@@ -8,7 +8,6 @@ import { ACTIVE_STAGES, type ActiveStage, type PlantClient, type PlantSnapshot, 
 export const STAGE_SLOTS: Record<ActiveStage, number[]> = {
     'en-pesaje': [0, 1, 2, 3],
     'por-aprobar': [0, 1, 2, 3],
-    'finalizado': [0, 1, 2, 3],
     'despacho': [0, 2],
 }
 

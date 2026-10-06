@@ -41,11 +41,11 @@ type ClaveProducto = keyof typeof PRODUCTOS
 const OPERARIOS = ['M. Castillo', 'J. Ramírez', 'A. Flores', 'D. Mejía']
 
 const CLIENTES_INICIALES: { id: number; nombre: string; prod: ClaveProducto; codigo: string | null; plan: PlantStage[] }[] = [
-    { id: 101, nombre: 'Beneficio Montaña Azul', prod: 'cafe', codigo: 'EXP-0142', plan: ['en-pesaje', 'en-pesaje', 'por-aprobar', 'finalizado', 'despacho'] },
-    { id: 102, nombre: 'Agroexport del Valle', prod: 'melon', codigo: 'EXP-0087', plan: ['en-pesaje', 'por-aprobar', 'por-aprobar', 'finalizado', 'despacho', 'despacho'] },
-    { id: 103, nombre: 'Cooperativa Los Cedros', prod: 'cacao', codigo: 'EXP-0211', plan: ['en-pesaje', 'en-pesaje', 'finalizado'] },
+    { id: 101, nombre: 'Beneficio Montaña Azul', prod: 'cafe', codigo: 'EXP-0142', plan: ['en-pesaje', 'en-pesaje', 'por-aprobar', 'despacho'] },
+    { id: 102, nombre: 'Agroexport del Valle', prod: 'melon', codigo: 'EXP-0087', plan: ['en-pesaje', 'por-aprobar', 'por-aprobar', 'despacho', 'despacho'] },
+    { id: 103, nombre: 'Cooperativa Los Cedros', prod: 'cacao', codigo: 'EXP-0211', plan: ['en-pesaje', 'en-pesaje', 'despacho'] },
     { id: 104, nombre: 'Frutas del Litoral', prod: 'pina', codigo: 'EXP-0156', plan: ['en-pesaje', 'por-aprobar', 'despacho'] },
-    { id: 105, nombre: 'Finca El Roble', prod: 'platano', codigo: null, plan: ['finalizado'] },
+    { id: 105, nombre: 'Finca El Roble', prod: 'platano', codigo: null, plan: ['despacho'] },
 ]
 
 interface MockPesaje {
@@ -74,7 +74,7 @@ interface MockCliente {
     lotes: MockLote[]
 }
 
-const CAPACIDAD: Record<Exclude<PlantStage, 'rechazado'>, number> = { 'en-pesaje': 4, 'por-aprobar': 4, 'finalizado': 4, 'despacho': 2 }
+const CAPACIDAD: Record<Exclude<PlantStage, 'rechazado'>, number> = { 'en-pesaje': 4, 'por-aprobar': 4, 'despacho': 2 }
 
 export class PlantMockServer {
     private semilla = 20261005
@@ -101,7 +101,7 @@ export class PlantMockServer {
             const cliente: MockCliente = { id: base.id, nombre: base.nombre, prod: base.prod, codigo: base.codigo, lotes: [] }
             for (const etapa of base.plan) {
                 const n = etapa === 'en-pesaje' ? 6 + this.entero(20) : etapa === 'por-aprobar' ? 30 + this.entero(16) : 36 + this.entero(22)
-                const edad = etapa === 'en-pesaje' || etapa === 'por-aprobar' ? 0 : etapa === 'finalizado' ? 22 * 3600e3 : (2 + this.rnd() * 2) * 86400e3
+                const edad = etapa === 'en-pesaje' || etapa === 'por-aprobar' ? 0 : (2 + this.rnd() * 2) * 86400e3
                 this.crearLote(cliente, etapa, n, ahora - edad)
             }
             this.clientes.push(cliente)
@@ -201,17 +201,16 @@ export class PlantMockServer {
             const de = (etapa: PlantStage) => c.lotes.filter((l) => l.etapa === etapa)
             const hayLugar = (etapa: Exclude<PlantStage, 'rechazado'>) => de(etapa).length < CAPACIDAD[etapa]
 
-            if (de('finalizado').length && !hayLugar('despacho')) {
+            if (de('por-aprobar').length && !hayLugar('despacho')) {
                 const masViejo = de('despacho')[0]
                 if (masViejo) acciones.push(() => { c.lotes.splice(c.lotes.indexOf(masViejo), 1) })
             }
-            for (const l of de('finalizado')) {
+            for (const l of de('por-aprobar')) {
                 if (hayLugar('despacho')) acciones.push(() => {
                     l.etapa = 'despacho'
                     l.documento = `FAC 001-001-01-${String(++this.docSeq).padStart(8, '0')}`
                 })
             }
-            for (const l of de('por-aprobar')) if (hayLugar('finalizado')) acciones.push(() => { l.etapa = 'finalizado' })
             for (const l of de('en-pesaje')) if (l.pesajes.length >= 26 && hayLugar('por-aprobar')) acciones.push(() => { l.etapa = 'por-aprobar' })
             if (de('en-pesaje').length < 2 && hayLugar('en-pesaje')) acciones.push(() => this.crearLote(c, 'en-pesaje', 0, this.reloj))
         }
