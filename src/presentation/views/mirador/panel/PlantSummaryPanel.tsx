@@ -83,10 +83,6 @@ export function PlantSummaryPanel({ snapshot, slots, onSelect }: PlantSummaryPan
                     </li>
                 ))}
             </ul>
-
-            <p className="mt-6 border-t border-border-ui pt-3.5 text-[11.5px] leading-relaxed text-text-muted">
-                Maqueta con datos de ejemplo. La foto real de la planta va a salir de un endpoint de sólo lectura que se pide cada 10 segundos.
-            </p>
         </>
     )
 }
