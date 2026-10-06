@@ -96,7 +96,6 @@ interface LotVisual {
     container: THREE.Group | null
     topY: number
     label: Label
-    docLabel: Label | null
     /** Pesajes que todavía están volando: no se dibujan en la pila hasta que aterrizan. */
     pending: Set<number>
     moving: boolean
@@ -146,7 +145,6 @@ const CLASES = {
     cliente: 'pointer-events-auto cursor-pointer flex items-center gap-2.5 rounded-2xl border border-border-ui/80 bg-surface/95 py-1.5 pl-1.5 pr-3 shadow-clay-card backdrop-blur transition-opacity duration-200',
     lote: 'pointer-events-auto cursor-pointer flex items-center gap-1.5 rounded-full border border-border-ui/80 bg-surface/95 px-2 py-0.5 text-[11px] text-text-main shadow-sm transition-opacity duration-200',
     loteActivo: '!bg-primary !text-primary-foreground !border-transparent',
-    doc: 'pointer-events-none rounded-md border border-dashed border-text-muted/60 bg-surface/95 px-1.5 py-0.5 font-mono text-[10px] font-semibold text-text-main transition-opacity duration-200',
     exceso: 'pointer-events-none rounded-full bg-text-main/80 px-2 py-0.5 text-[10px] font-bold text-surface transition-opacity duration-200',
     visor: 'pointer-events-none min-w-[196px] rounded-xl border border-[#A8F6C6]/20 bg-[#0C1611] px-3 pt-2 pb-2.5 text-[#A8F6C6] shadow-[0_10px_30px_rgba(0,0,0,0.35)] transition-opacity duration-200',
 }
@@ -840,7 +838,7 @@ export class PlantScene {
         const lv: LotVisual = {
             id: lot.id, clientId, data: lot, stage, slot, row, group, base, stacks, status,
             picks: [base], tokens: new Map(), pulse: null, spin: null, people: [], truck: null, container: null,
-            topY: 0.2, label: null as unknown as Label, docLabel: null, pending: new Set(), moving: false,
+            topY: 0.2, label: null as unknown as Label, pending: new Set(), moving: false,
         }
         lv.label = this.addLabel(CLASES.lote, () => lv.group.position.clone().add(new V3(0, lv.topY + 0.45, 0)), () => this.callbacks.onPick({ kind: 'lote', clientId, lotId: lot.id }))
         this.lots.set(lot.id, lv)
@@ -913,13 +911,7 @@ export class PlantScene {
             lv.status.add(cargador.root)
             lv.people.push({ person: cargador, kind: 'cargador' })
             niveles = 8
-            if (!lv.docLabel && d.documento_fiscal) {
-                lv.docLabel = this.addLabel(CLASES.doc, () => lv.group.position.clone().add(new V3(0, 1.0, 1.0)))
-                lv.docLabel.el.textContent = d.documento_fiscal
-                lv.docLabel.show = lv.label.show
-            }
         } else {
-            if (lv.docLabel) { this.removeLabel(lv.docLabel); lv.docLabel = null }
             const c = this.visibleCounts(lv)
             const muestraEnRango = Math.min(c.enRango, CAP_IN)
             const muestraFuera = Math.min(c.fuera, CAP_OUT)
@@ -1014,7 +1006,6 @@ export class PlantScene {
 
     private removeLot(lv: LotVisual, evento: Extract<PlantEvent, { type: 'lot-removed' }> | undefined) {
         this.lots.delete(lv.id)
-        if (lv.docLabel) { this.removeLabel(lv.docLabel); lv.docLabel = null }
         const terminar = () => { this.scene.remove(lv.group); this.removeLabel(lv.label) }
         if (!evento) { terminar(); return }
 
@@ -1525,7 +1516,6 @@ export class PlantScene {
             const mostrar = this.introDone && (this.selection.clientId === lv.clientId || this.hoverClientId === lv.clientId || this.selection.lotId === lv.id)
             if (this.introDone) {
                 lv.label.show = mostrar
-                if (lv.docLabel) lv.docLabel.show = mostrar
             }
             for (const { person, kind } of lv.people) this.animateLotPerson(person, kind, dt)
         })

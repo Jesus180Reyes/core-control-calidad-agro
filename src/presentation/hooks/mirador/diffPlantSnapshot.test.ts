@@ -4,14 +4,14 @@ import type { PlantClient, PlantLot, PlantSnapshot, PlantStage, PlantWeighing } 
 
 import { diffPlantSnapshot } from './diffPlantSnapshot'
 
-const pesaje = (id: number, fuera = 0): PlantWeighing => ({
-    id, peso_neto: '69.00', fuera_de_rango: fuera, estado_calidad_codigo: 'EN_RANGO', usuario: 'M. Castillo', created_at: `2026-10-05T10:00:${String(id % 60).padStart(2, '0')}Z`,
+const pesaje = (id: number, fuera = false): PlantWeighing => ({
+    id, peso_neto: '69.00', fuera_de_rango: fuera, estado_calidad_codigo: 'IDEAL', usuario: 'M. Castillo', created_at: `2026-10-05T10:00:${String(id % 60).padStart(2, '0')}Z`,
 })
 
 const lote = (id: number, etapa: PlantStage, pesajes: number[] = [], extra: Partial<PlantLot> = {}): PlantLot => ({
     id, nombre_lote: `L-${id}`, producto: 'Café oro', unidad_medida: 'kg', etapa,
     peso_minimo: '68.60', peso_ideal: '69.00', peso_maximo: '69.50',
-    bultos: pesajes.length, bultos_fuera_rango: 0, peso_neto_total: pesajes.length * 69, documento_fiscal: null,
+    bultos: pesajes.length, bultos_fuera_rango: 0, peso_neto_total: pesajes.length * 69,
     ultimos_pesajes: pesajes.slice().sort((a, b) => b - a).slice(0, 10).map((p) => pesaje(p)),
     ...extra,
 })

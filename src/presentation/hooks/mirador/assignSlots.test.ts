@@ -7,7 +7,7 @@ import { assignSlots } from './assignSlots'
 const lote = (id: number, etapa: PlantStage): PlantLot => ({
     id, nombre_lote: `L-${id}`, producto: 'Café oro', unidad_medida: 'kg', etapa,
     peso_minimo: '68.60', peso_ideal: '69.00', peso_maximo: '69.50',
-    bultos: 0, bultos_fuera_rango: 0, peso_neto_total: 0, documento_fiscal: null, ultimos_pesajes: [],
+    bultos: 0, bultos_fuera_rango: 0, peso_neto_total: 0, ultimos_pesajes: [],
 })
 
 const cliente = (id: number, nombre: string, lotes: PlantLot[]): PlantClient => ({ id, nombre, producto: null, codigo_exportacion: null, lotes })

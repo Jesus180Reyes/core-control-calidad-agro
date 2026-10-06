@@ -63,7 +63,6 @@ interface MockLote {
     /** Corrimiento propio del lote: algunos vienen cargados hacia un lado. */
     sesgo: number
     pesajes: MockPesaje[]
-    documento: string | null
 }
 
 interface MockCliente {
@@ -82,7 +81,6 @@ export class PlantMockServer {
     private pesajeSeq = 45100
     private loteSeq = 900
     private loteNum = 6
-    private docSeq = 4507
     private reloj: number
     private proximoPesaje: number
     private proximaEtapa: number
@@ -133,7 +131,6 @@ export class PlantMockServer {
                         bultos: l.pesajes.length,
                         bultos_fuera_rango: l.pesajes.filter((x) => this.fuera(l, x.peso)).length,
                         peso_neto_total: Math.round(l.pesajes.reduce((s, x) => s + x.peso, 0) * 100) / 100,
-                        documento_fiscal: l.etapa === 'finalizado' ? l.documento : null,
                         ultimos_pesajes: l.pesajes.slice(-RECENT_WINDOW).reverse().map((x) => this.aPesaje(l, x)),
                     }
                 }),
@@ -206,10 +203,7 @@ export class PlantMockServer {
                 if (masViejo) acciones.push(() => { c.lotes.splice(c.lotes.indexOf(masViejo), 1) })
             }
             for (const l of de('por-aprobar')) {
-                if (hayLugar('finalizado')) acciones.push(() => {
-                    l.etapa = 'finalizado'
-                    l.documento = `FAC 001-001-01-${String(++this.docSeq).padStart(8, '0')}`
-                })
+                if (hayLugar('finalizado')) acciones.push(() => { l.etapa = 'finalizado' })
             }
             for (const l of de('en-pesaje')) if (l.pesajes.length >= 26 && hayLugar('por-aprobar')) acciones.push(() => { l.etapa = 'por-aprobar' })
             if (de('en-pesaje').length < 2 && hayLugar('en-pesaje')) acciones.push(() => this.crearLote(c, 'en-pesaje', 0, this.reloj))
@@ -225,7 +219,6 @@ export class PlantMockServer {
             etapa,
             sesgo: this.gauss() * PRODUCTOS[cliente.prod].sd * 0.45,
             pesajes: [],
-            documento: etapa === 'finalizado' ? `FAC 001-001-01-${String(++this.docSeq).padStart(8, '0')}` : null,
         }
         const desdeMedianoche = Math.max(30 * 60e3, hasta - this.inicioDelDia - 5 * 60e3)
         const lapso = etapa === 'en-pesaje' || etapa === 'por-aprobar' ? Math.min(4.5 * 3600e3, desdeMedianoche) : 6 * 3600e3
@@ -250,8 +243,8 @@ export class PlantMockServer {
         return {
             id: x.id,
             peso_neto: x.peso.toFixed(2),
-            fuera_de_rango: fuera ? 1 : 0,
-            estado_calidad_codigo: fuera ? 'FUERA_RANGO' : 'EN_RANGO',
+            fuera_de_rango: fuera,
+            estado_calidad_codigo: !fuera ? 'IDEAL' : x.peso < PRODUCTOS[lote.prod].min ? 'MINIMO' : 'MAXIMO',
             usuario: x.usuario,
             created_at: new Date(x.at).toISOString(),
         }

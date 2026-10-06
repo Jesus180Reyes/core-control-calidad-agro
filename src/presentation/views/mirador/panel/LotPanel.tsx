@@ -73,13 +73,6 @@ export function LotPanel({ client, lot, color, weighings, onSelect }: LotPanelPr
                 ]}
             />
 
-            {lot.documento_fiscal && (
-                <div className="mt-3.5 flex justify-between gap-3 rounded-xl border border-dashed border-border-ui bg-muted/50 px-3 py-2.5 text-[12.5px]">
-                    <span className="text-text-muted">Documento fiscal</span>
-                    <b className="font-mono text-xs text-text-main">{lot.documento_fiscal}</b>
-                </div>
-            )}
-
             <SectionHeading>Diana de calidad</SectionHeading>
             {weighings.length ? (
                 <>

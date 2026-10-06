@@ -44,8 +44,7 @@ export function describeEvents(events: PlantEvent[], prev: PlantSnapshot, next: 
             }
             case 'lot-stage-changed': {
                 const lote = buscarLote(next, evento.clientId, evento.lotId)
-                const extra = evento.to === 'finalizado' && lote?.documento_fiscal ? ` con ${lote.documento_fiscal}` : ''
-                entradas.push({ ...base, tone: 'etapa', lotName: lote?.nombre_lote ?? null, message: `pasó a ${STAGE_LABEL[evento.to].toLowerCase()}${extra}` })
+                entradas.push({ ...base, tone: 'etapa', lotName: lote?.nombre_lote ?? null, message: `pasó a ${STAGE_LABEL[evento.to].toLowerCase()}` })
                 return
             }
             case 'lot-removed': {
