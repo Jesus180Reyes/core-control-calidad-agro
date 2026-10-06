@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
-import type { Query } from '@tanstack/react-query'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useQueryClient, type Query } from '@tanstack/react-query'
 
 import { assignSlots } from '#/presentation/hooks/mirador/assignSlots'
 import { describeEvents, type ActivityEntry } from '#/presentation/hooks/mirador/describeEvents'
@@ -103,6 +103,20 @@ export function usePlantTwin() {
         if (!lote) return { clientId: cliente.id, lotId: null, weighingId: null }
         return { clientId: cliente.id, lotId: lote.id, weighingId: seleccion.weighingId }
     }, [seleccion, twin.snapshot])
+
+    // Si la foto trajo un pesaje nuevo o anulado del lote abierto, su detalle
+    // (`GET /pesajes/byLote/:loteId`) se vuelve a pedir. Una vez por foto: cambiar
+    // de lote no reprocesa los eventos de la foto anterior.
+    const queryClient = useQueryClient()
+    const fotoProcesada = useRef(twin.seq)
+    useEffect(() => {
+        if (fotoProcesada.current === twin.seq) return
+        fotoProcesada.current = twin.seq
+        const lotId = selection.lotId
+        if (lotId === null) return
+        const cambio = twin.events.some((e) => (e.type === 'weighing-added' || e.type === 'weighing-voided') && e.lotId === lotId)
+        if (cambio) void queryClient.invalidateQueries({ queryKey: ['pesajes', 'byLote', lotId] })
+    }, [twin.seq, twin.events, selection.lotId, queryClient])
 
     const select = useCallback((next: Partial<PlantSelection>) => {
         setSeleccion({ clientId: next.clientId ?? null, lotId: next.lotId ?? null, weighingId: next.weighingId ?? null })
