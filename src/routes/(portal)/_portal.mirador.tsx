@@ -14,7 +14,7 @@ function RouteComponent() {
     // El tablero ocupa justo la pantalla, igual que `/agri`: se descuenta el
     // padding de `<main>` y, en el teléfono, el header de `MobileNav`.
     return (
-        <div className="h-[calc(100dvh_-_2rem_-_var(--mobile-nav-h))] md:h-[calc(100vh-4rem)]">
+        <div className="h-[calc(100dvh-2rem-var(--mobile-nav-h))] md:h-[calc(100vh-4rem)]">
             <PlantTwinView twin={twin} />
         </div>
     )

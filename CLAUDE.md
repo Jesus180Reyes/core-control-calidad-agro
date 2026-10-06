@@ -97,7 +97,7 @@ Ocultar UI por permisos es comodidad, no control de acceso: `localStorage` es ed
 
 Dónde se aplican hoy:
 
-- **Navegación.** El `Sidebar` esconde cada item de `menuItems` (y cada hijo) cuyo `permission` no está en la sesión, y el item de Agri va envuelto en `<Can permission={PERMISSIONS.USARCHATIA}>`. La portada (`HomeView`) repite **los mismos destinos con los mismos permisos** en sus accesos rápidos y en la tarjeta de Agri: la portada no abre puertas que la barra lateral no muestra. Al agregar o mover un módulo, tocar los dos.
+- **Navegación.** El `Sidebar` esconde cada item de `menuItems` (y cada hijo) cuyo `permission` no está en la sesión, y los items de Agri y del Mirador van envueltos en un `<Can>` (`USARCHATIA` y `VERMIRADOR3D`). La portada (`HomeView`) repite **los mismos destinos con los mismos permisos** en sus accesos rápidos y en las tarjetas de Agri y del Mirador: la portada no abre puertas que la barra lateral no muestra. Al agregar o mover un módulo, tocar los dos.
 - **Acciones.** Los botones de crear, aprobar y rechazar, y los menús de fila (`ClientRowActions`, `PesajeRowActions`, `DocumentoFiscalRowActions`), van detrás de un `<Can>`.
 - **Rutas, no.** No hay guard de permisos en ninguna ruta: quien escribe la URL a mano entra a la pantalla, y lo frena el backend.
 
@@ -164,7 +164,9 @@ Tres cosas que el chat **no** hace, y que no conviene agregar de prepo porque ca
 
 `/mirador` es el tablero 3D de la planta: `routes/(portal)/_portal.mirador.tsx` → `usePlantTwin` → `views/mirador/PlantTwinView.tsx`, con la escena en `components/mirador/scene/PlantScene.ts` (Three.js, fuera de React, con su propio `requestAnimationFrame`). El contrato fuente es el SPEC 32 del backend.
 
-**La foto es la verdad; el diff lo hace el front.** `GET /plantas/en-vivo` (sin params ni body; no filtra por cartera ni pide permiso, por eso el item del `Sidebar` no va detrás de un `<Can>`) devuelve la planta entera: KPIs del día y los clientes con sus lotes. No manda eventos: `diffPlantSnapshot` compara cada foto con la anterior y la escena anima eso y nada más. El diff depende de dos garantías del backend: los ids de pesaje son correlativos y nunca se reutilizan (`ultimos_pesajes` son los 10 de mayor `id`, en orden `id` DESC), y `bultos` cuenta **todos** los pesajes activos del lote, así que una anulación se detecta porque `bultos` baja más de lo que explican los pesajes nuevos.
+El item del `Sidebar` (arriba de "Operación", junto al de Agri) va envuelto en `<Can permission={PERMISSIONS.VERMIRADOR3D}>` (`'VER-MIRADOR-3D'`), y la `MiradorCard` de la portada pide el mismo permiso.
+
+**La foto es la verdad; el diff lo hace el front.** `GET /plantas/en-vivo` (sin params ni body; no filtra por cartera) devuelve la planta entera: KPIs del día y los clientes con sus lotes. No manda eventos: `diffPlantSnapshot` compara cada foto con la anterior y la escena anima eso y nada más. El diff depende de dos garantías del backend: los ids de pesaje son correlativos y nunca se reutilizan (`ultimos_pesajes` son los 10 de mayor `id`, en orden `id` DESC), y `bultos` cuenta **todos** los pesajes activos del lote, así que una anulación se detecta porque `bultos` baja más de lo que explican los pesajes nuevos.
 
 Las casillas son `'en-pesaje' | 'por-aprobar' | 'finalizado'`, con el mismo string que manda el backend; `'rechazado'` no tiene casilla y sólo viaja para animar la salida. **No hay casilla de despacho ni `documento_fiscal`**: volver a tenerlos exige un spec en el backend primero. `pct_en_rango_hoy` es `null` sin pesajes en el día y se pinta "—"; `lote.producto`, `lote.unidad_medida`, `pesaje.usuario` y `estado_calidad_codigo` (`IDEAL`/`MAXIMO`/`MINIMO`) pueden venir en `null`. Un lote con `etapa_id` en `NULL` en la base no sale en la foto: es una regla del backend, no un bug.
 
