@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 import { Link } from '@tanstack/react-router'
-import { ArrowRight, ClipboardCheck, FileText, History, Printer, Scale, Sparkles, Users } from 'lucide-react'
+import { ArrowRight, ClipboardCheck, FileText, History, Printer, Scale, Sparkles, Telescope, Users } from 'lucide-react'
 
 import { AgriAvatar } from '#/presentation/components/agri/AgriAvatar'
 import { getInitials } from '#/presentation/components/shared/getInitials'
@@ -112,6 +112,9 @@ export function HomeView() {
                     </div>
                 )}
             </section>
+
+            {/* Mismo destino que el item del Sidebar, y como él, sin permiso mientras corre con datos de ejemplo. */}
+            <MiradorCard />
 
             <div className="grid gap-6 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)]">
                 <WorkflowCard />
@@ -246,6 +249,53 @@ function WorkflowCard() {
                 ))}
             </ol>
         </section>
+    )
+}
+
+/** Acceso al Mirador, la planta en vivo en 3D. */
+function MiradorCard() {
+    return (
+        <Link
+            to="/mirador"
+            className={
+                'group relative flex flex-col gap-5 overflow-hidden rounded-[28px] border border-border-ui/60 bg-surface p-6 shadow-clay-card ' +
+                'outline-none transition-all duration-200 ease-out hover:-translate-y-1 hover:border-brand/30 focus-visible:ring-2 focus-visible:ring-brand/40 ' +
+                'sm:flex-row sm:items-center sm:p-7 animate-in fade-in slide-in-from-bottom-3 fill-mode-both'
+            }
+            style={{ animationDelay: '420ms', animationDuration: '420ms' }}
+        >
+            <span aria-hidden className="pointer-events-none absolute -left-10 -bottom-16 size-48 rounded-full bg-brand/10 blur-3xl" />
+
+            {/* Un tablero isométrico en miniatura: cuatro casillas y una pila de fichas. */}
+            <div aria-hidden className="relative grid h-24 w-36 shrink-0 place-items-center">
+                <div className="grid rotate-x-[55deg] rotate-z-[-35deg] grid-cols-4 gap-1 rounded-xl bg-brand/12 p-1.5 transition-transform duration-500 group-hover:rotate-z-[-28deg] [transform-style:preserve-3d]">
+                    {['bg-success', 'bg-warning', 'bg-brand/50', 'bg-text-muted/40'].map((color, i) => (
+                        <span key={i} className="grid size-6 place-items-center rounded-md bg-surface shadow-clay-btn">
+                            <span className={`size-3 rounded-full ${color}`} />
+                        </span>
+                    ))}
+                </div>
+            </div>
+
+            <div className="relative flex-1 space-y-1.5">
+                <p className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.14em] text-text-muted/70">
+                    <span aria-hidden className="size-1.5 rounded-full bg-success animate-pulse" />
+                    Planta en vivo · 3D
+                </p>
+                <h3 className="flex items-center gap-2 text-lg font-extrabold tracking-tight text-text-main">
+                    <Telescope className="size-5 text-brand" strokeWidth={2.2} />
+                    Mirador
+                </h3>
+                <p className="max-w-xl text-sm leading-relaxed text-text-muted">
+                    Toda la planta en un tablero: cada cliente con sus lotes por etapa y cada pesaje como una ficha que aterriza en vivo.
+                </p>
+            </div>
+
+            <span className="relative inline-flex items-center gap-2 self-start rounded-full bg-brand px-4 py-2 text-xs font-bold text-primary-foreground shadow-clay-btn sm:self-center">
+                Abrir Mirador
+                <ArrowRight className="size-3.5 transition-transform duration-200 group-hover:translate-x-0.5" strokeWidth={2.6} />
+            </span>
+        </Link>
     )
 }
 
