@@ -3,6 +3,7 @@ import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js'
 
 import { clientColor, clientInitials } from '#/presentation/components/mirador/clientColors'
 import { qualityLevel, targetPoint } from '#/presentation/hooks/mirador/qualityTarget'
+import { INTERVALO_POLLING_MS } from '#/presentation/hooks/mirador/usePlantTwin'
 import {
     ACTIVE_STAGES,
     STAGE_LABEL,
@@ -139,7 +140,17 @@ const nf2 = new Intl.NumberFormat('es-HN', { minimumFractionDigits: 2, maximumFr
 
 /** Más de esto por foto se aplica sin animar: la escena nunca se atrasa respecto del dato. */
 const MAX_VUELOS = 6
-const ESPACIO_VUELOS = 1.15
+/** Segundos entre vuelos: nunca en ráfaga, y nunca tan separados que el último quede colgado. */
+const ESPACIO_MIN_VUELOS = 1.15
+const ESPACIO_MAX_VUELOS = 12
+
+/**
+ * Los vuelos de una foto se reparten en el 80 % del intervalo de polling, para
+ * que la planta no quede quieta hasta la foto siguiente.
+ */
+function espacioEntreVuelos(n: number) {
+    return Math.min(ESPACIO_MAX_VUELOS, Math.max(ESPACIO_MIN_VUELOS, ((INTERVALO_POLLING_MS / 1000) * 0.8) / n))
+}
 
 const CLASES = {
     cliente: 'pointer-events-auto cursor-pointer flex items-center gap-2.5 rounded-2xl border border-border-ui/80 bg-surface/95 py-1.5 pl-1.5 pr-3 shadow-clay-card backdrop-blur transition-opacity duration-200',
@@ -219,6 +230,7 @@ export class PlantScene {
     private readonly trail: THREE.Mesh<THREE.SphereGeometry, THREE.MeshBasicMaterial>[] = []
     private readonly weighQueue: { lotId: number; weighing: PlantWeighing }[] = []
     private nextWeighAt = 0
+    private weighSpacing = ESPACIO_MIN_VUELOS
 
     private readonly cam = { target: new V3(9, 0, 17), theta: 0.5, el: 0.82, r: 90 }
     private readonly goal = { target: new V3(9, 0, 17), theta: 0.5, el: 0.82, r: 90 }
@@ -444,6 +456,8 @@ export class PlantScene {
         // Pesajes nuevos: vuelan los más recientes; el resto ya está en los conteos.
         const nuevos = events.filter((e): e is Extract<PlantEvent, { type: 'weighing-added' }> => e.type === 'weighing-added')
         if (animar) {
+            // Lo que quedó en cola de la foto anterior aterriza sin vuelo: la escena no se atrasa.
+            while (this.weighQueue.length) this.landWithoutFlight(this.weighQueue.shift()!)
             for (const e of nuevos.slice(-MAX_VUELOS)) {
                 const lv = this.lots.get(e.lotId)
                 if (!lv) continue
@@ -451,7 +465,10 @@ export class PlantScene {
                 if (!lv.moving) this.rebuildLot(lv)
                 this.weighQueue.push({ lotId: e.lotId, weighing: e.weighing })
             }
-            while (this.weighQueue.length > MAX_VUELOS) this.landWithoutFlight(this.weighQueue.shift()!)
+            if (this.weighQueue.length) {
+                this.weighSpacing = espacioEntreVuelos(this.weighQueue.length)
+                this.nextWeighAt = Math.min(this.nextWeighAt, this.time)
+            }
         }
 
         if (primera) {
@@ -1067,7 +1084,7 @@ export class PlantScene {
     private processWeighQueue() {
         if (!this.weighQueue.length || this.time < this.nextWeighAt || !this.introDone) return
         const item = this.weighQueue.shift()!
-        this.nextWeighAt = this.time + ESPACIO_VUELOS
+        this.nextWeighAt = this.time + this.weighSpacing
         this.fly(item)
     }
 
