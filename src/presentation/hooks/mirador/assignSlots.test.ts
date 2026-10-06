@@ -21,7 +21,7 @@ const foto = (clientes: PlantClient[]): PlantSnapshot => ({
 describe('assignSlots', () => {
     it('en la primera carga, los clientes más activos van arriba', () => {
         const slots = assignSlots(null, foto([
-            cliente(1, 'Quieto', [lote(10, 'despacho')]),
+            cliente(1, 'Quieto', [lote(10, 'finalizado')]),
             cliente(2, 'Activo', [lote(20, 'en-pesaje'), lote(21, 'por-aprobar')]),
         ]))
         expect(slots.rows).toEqual({ 2: 0, 1: 1 })
@@ -43,12 +43,12 @@ describe('assignSlots', () => {
         expect(b.lots[10]).toEqual({ stage: 'por-aprobar', slot: 1 })
     })
 
-    it('despacho deja la columna derecha para el camión: sólo slots 0 y 2', () => {
-        const slots = assignSlots(null, foto([cliente(1, 'A', [lote(10, 'despacho'), lote(11, 'despacho'), lote(12, 'despacho')])]))
-        expect(slots.lots[10]).toEqual({ stage: 'despacho', slot: 0 })
-        expect(slots.lots[11]).toEqual({ stage: 'despacho', slot: 2 })
+    it('finalizado deja la columna derecha para el camión: sólo slots 0 y 2', () => {
+        const slots = assignSlots(null, foto([cliente(1, 'A', [lote(10, 'finalizado'), lote(11, 'finalizado'), lote(12, 'finalizado')])]))
+        expect(slots.lots[10]).toEqual({ stage: 'finalizado', slot: 0 })
+        expect(slots.lots[11]).toEqual({ stage: 'finalizado', slot: 2 })
         expect(slots.lots[12]).toBeUndefined()
-        expect(slots.overflow[1]).toEqual({ despacho: 1 })
+        expect(slots.overflow[1]).toEqual({ finalizado: 1 })
     })
 
     it('los lotes rechazados no ocupan lugar', () => {

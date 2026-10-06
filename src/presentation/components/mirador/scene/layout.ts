@@ -14,7 +14,7 @@ export const BOARD_X0 = -13
 export const BOARD_X1 = 24.2
 export const SCALE_X = -7.4
 
-export const STAGE_INDEX: Record<ActiveStage, number> = { 'en-pesaje': 0, 'por-aprobar': 1, 'despacho': 2 }
+export const STAGE_INDEX: Record<ActiveStage, number> = { 'en-pesaje': 0, 'por-aprobar': 1, 'finalizado': 2 }
 
 /** Atrás-izquierda, atrás-derecha, adelante-izquierda, adelante-derecha. */
 export const SLOT_OFFSETS = [

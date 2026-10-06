@@ -41,11 +41,11 @@ type ClaveProducto = keyof typeof PRODUCTOS
 const OPERARIOS = ['M. Castillo', 'J. Ramírez', 'A. Flores', 'D. Mejía']
 
 const CLIENTES_INICIALES: { id: number; nombre: string; prod: ClaveProducto; codigo: string | null; plan: PlantStage[] }[] = [
-    { id: 101, nombre: 'Beneficio Montaña Azul', prod: 'cafe', codigo: 'EXP-0142', plan: ['en-pesaje', 'en-pesaje', 'por-aprobar', 'despacho'] },
-    { id: 102, nombre: 'Agroexport del Valle', prod: 'melon', codigo: 'EXP-0087', plan: ['en-pesaje', 'por-aprobar', 'por-aprobar', 'despacho', 'despacho'] },
-    { id: 103, nombre: 'Cooperativa Los Cedros', prod: 'cacao', codigo: 'EXP-0211', plan: ['en-pesaje', 'en-pesaje', 'despacho'] },
-    { id: 104, nombre: 'Frutas del Litoral', prod: 'pina', codigo: 'EXP-0156', plan: ['en-pesaje', 'por-aprobar', 'despacho'] },
-    { id: 105, nombre: 'Finca El Roble', prod: 'platano', codigo: null, plan: ['despacho'] },
+    { id: 101, nombre: 'Beneficio Montaña Azul', prod: 'cafe', codigo: 'EXP-0142', plan: ['en-pesaje', 'en-pesaje', 'por-aprobar', 'finalizado'] },
+    { id: 102, nombre: 'Agroexport del Valle', prod: 'melon', codigo: 'EXP-0087', plan: ['en-pesaje', 'por-aprobar', 'por-aprobar', 'finalizado', 'finalizado'] },
+    { id: 103, nombre: 'Cooperativa Los Cedros', prod: 'cacao', codigo: 'EXP-0211', plan: ['en-pesaje', 'en-pesaje', 'finalizado'] },
+    { id: 104, nombre: 'Frutas del Litoral', prod: 'pina', codigo: 'EXP-0156', plan: ['en-pesaje', 'por-aprobar', 'finalizado'] },
+    { id: 105, nombre: 'Finca El Roble', prod: 'platano', codigo: null, plan: ['finalizado'] },
 ]
 
 interface MockPesaje {
@@ -74,7 +74,7 @@ interface MockCliente {
     lotes: MockLote[]
 }
 
-const CAPACIDAD: Record<Exclude<PlantStage, 'rechazado'>, number> = { 'en-pesaje': 4, 'por-aprobar': 4, 'despacho': 2 }
+const CAPACIDAD: Record<Exclude<PlantStage, 'rechazado'>, number> = { 'en-pesaje': 4, 'por-aprobar': 4, 'finalizado': 2 }
 
 export class PlantMockServer {
     private semilla = 20261005
@@ -133,7 +133,7 @@ export class PlantMockServer {
                         bultos: l.pesajes.length,
                         bultos_fuera_rango: l.pesajes.filter((x) => this.fuera(l, x.peso)).length,
                         peso_neto_total: Math.round(l.pesajes.reduce((s, x) => s + x.peso, 0) * 100) / 100,
-                        documento_fiscal: l.etapa === 'despacho' ? l.documento : null,
+                        documento_fiscal: l.etapa === 'finalizado' ? l.documento : null,
                         ultimos_pesajes: l.pesajes.slice(-RECENT_WINDOW).reverse().map((x) => this.aPesaje(l, x)),
                     }
                 }),
@@ -201,13 +201,13 @@ export class PlantMockServer {
             const de = (etapa: PlantStage) => c.lotes.filter((l) => l.etapa === etapa)
             const hayLugar = (etapa: Exclude<PlantStage, 'rechazado'>) => de(etapa).length < CAPACIDAD[etapa]
 
-            if (de('por-aprobar').length && !hayLugar('despacho')) {
-                const masViejo = de('despacho')[0]
+            if (de('por-aprobar').length && !hayLugar('finalizado')) {
+                const masViejo = de('finalizado')[0]
                 if (masViejo) acciones.push(() => { c.lotes.splice(c.lotes.indexOf(masViejo), 1) })
             }
             for (const l of de('por-aprobar')) {
-                if (hayLugar('despacho')) acciones.push(() => {
-                    l.etapa = 'despacho'
+                if (hayLugar('finalizado')) acciones.push(() => {
+                    l.etapa = 'finalizado'
                     l.documento = `FAC 001-001-01-${String(++this.docSeq).padStart(8, '0')}`
                 })
             }
@@ -225,7 +225,7 @@ export class PlantMockServer {
             etapa,
             sesgo: this.gauss() * PRODUCTOS[cliente.prod].sd * 0.45,
             pesajes: [],
-            documento: etapa === 'despacho' ? `FAC 001-001-01-${String(++this.docSeq).padStart(8, '0')}` : null,
+            documento: etapa === 'finalizado' ? `FAC 001-001-01-${String(++this.docSeq).padStart(8, '0')}` : null,
         }
         const desdeMedianoche = Math.max(30 * 60e3, hasta - this.inicioDelDia - 5 * 60e3)
         const lapso = etapa === 'en-pesaje' || etapa === 'por-aprobar' ? Math.min(4.5 * 3600e3, desdeMedianoche) : 6 * 3600e3

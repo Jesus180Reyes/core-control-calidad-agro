@@ -566,7 +566,7 @@ export class PlantScene {
         x.strokeStyle = this.palette.tileLine
         x.lineWidth = 5
         x.setLineDash([22, 16])
-        const slots = k === STAGE_INDEX.despacho ? [SLOT_OFFSETS[0], SLOT_OFFSETS[2]] : SLOT_OFFSETS
+        const slots = k === STAGE_INDEX.finalizado ? [SLOT_OFFSETS[0], SLOT_OFFSETS[2]] : SLOT_OFFSETS
         for (const s of slots) {
             const cx = ((s.x + TILE_W / 2) / TILE_W) * W
             const cy = ((s.z + TILE_D / 2) / TILE_D) * H
@@ -894,7 +894,7 @@ export class PlantScene {
         const d = lv.data
         let niveles = 0
 
-        if (lv.stage === 'despacho') {
+        if (lv.stage === 'finalizado') {
             const cont = new THREE.Group()
             lv.status.add(cont)
             const caja = addMesh(cont, slab(2.25, 1.2, 1.7, 0.12, 0.04), cliente?.contMat ?? this.M.pallet, 0, 0.2, 0)
@@ -1000,7 +1000,7 @@ export class PlantScene {
             lv.group.scale.set(1.15, 0.8, 1.15)
             this.tween(0.45, (t) => { const s = easeBack(t); lv.group.scale.set(1.15 - 0.15 * s, 0.8 + 0.2 * s, 1.15 - 0.15 * s) })
             this.ripple(hasta, this.palette.brand)
-            if (stage === 'despacho' && etapaAnterior !== 'despacho' && lv.truck) {
+            if (stage === 'finalizado' && etapaAnterior !== 'finalizado' && lv.truck) {
                 const camion = lv.truck
                 camion.root.position.x = 7.5
                 this.tween(1.6, (t) => {

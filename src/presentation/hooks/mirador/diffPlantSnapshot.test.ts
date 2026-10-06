@@ -71,11 +71,11 @@ describe('diffPlantSnapshot', () => {
     })
 
     it('un lote que desaparece sale, y uno rechazado sale como rechazo', () => {
-        const a = foto([cliente(1, [lote(10, 'despacho'), lote(11, 'en-pesaje', [1])])])
+        const a = foto([cliente(1, [lote(10, 'finalizado'), lote(11, 'en-pesaje', [1])])])
         const b = foto([cliente(1, [lote(11, 'rechazado', [1])])])
         expect(diffPlantSnapshot(a, b)).toEqual([
             { type: 'lot-removed', clientId: 1, lotId: 11, lastStage: 'en-pesaje', reason: 'rechazado' },
-            { type: 'lot-removed', clientId: 1, lotId: 10, lastStage: 'despacho', reason: 'salida' },
+            { type: 'lot-removed', clientId: 1, lotId: 10, lastStage: 'finalizado', reason: 'salida' },
         ])
     })
 
