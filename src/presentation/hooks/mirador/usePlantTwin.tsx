@@ -1,16 +1,34 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useQueryClient, type Query } from '@tanstack/react-query'
 
 import { assignSlots } from '#/presentation/hooks/mirador/assignSlots'
 import { describeEvents, type ActivityEntry } from '#/presentation/hooks/mirador/describeEvents'
 import { diffPlantSnapshot } from '#/presentation/hooks/mirador/diffPlantSnapshot'
-import { getPlantMockServer } from '#/presentation/hooks/mirador/plantSnapshotMock'
-import type { PlantEvent, PlantLevel, PlantSelection, PlantSnapshot, SlotMap } from '#/presentation/types/mirador/plantTwin.types'
+import { useExecuteQuery } from '#/presentation/hooks/shared/useExecuteQuery'
+import type { PlantEvent, PlantLevel, PlantSelection, PlantSnapshot, PlantSnapshotResponse, SlotMap } from '#/presentation/types/mirador/plantTwin.types'
 
-/** Cada cuánto se pide la foto de la planta. */
-export const INTERVALO_POLLING_MS = 10_000
+/**
+ * Base del intervalo; a cada pedido se le suma un desfase. Acordado con el
+ * backend (SPEC 32): nunca más de 2 min entre fotos, porque un lote rechazado
+ * viaja sólo 5 min; y no bajarlo sin hablarlo allá, que no tiene caché.
+ */
+export const INTERVALO_POLLING_MS = 75_000
 
-/** Después de esto sin una foto nueva, el indicador "en vivo" avisa. */
-export const FOTO_VIEJA_MS = 30_000
+/** Hasta este desfase extra, para que las pantallas no pidan todas a la vez. */
+export const DESFASE_POLLING_MS = 30_000
+
+/** Sin foto nueva en este tiempo, el indicador "en vivo" avisa. Más de dos intervalos máximos. */
+export const FOTO_VIEJA_MS = 4 * 60_000
+
+/**
+ * 75–105 s. El desfase sale de la hora del último pedido y no de `Math.random()`:
+ * React Query recalcula esto en cada render y reinicia el timer si el valor
+ * cambia, así que tiene que ser estable entre renders y cambiar entre pedidos.
+ */
+function intervalo(query: Query<PlantSnapshotResponse>) {
+    const ultimo = Math.max(query.state.dataUpdatedAt, query.state.errorUpdatedAt)
+    return INTERVALO_POLLING_MS + (ultimo % DESFASE_POLLING_MS)
+}
 
 const ACTIVIDAD_MAX = 40
 
@@ -23,11 +41,10 @@ interface TwinState {
     seq: number
     slots: SlotMap
     activity: ActivityEntry[]
-    updatedAt: number
 }
 
 /** Pura: StrictMode puede llamarla dos veces con lo mismo. */
-function avanzar(prev: TwinState, next: PlantSnapshot, updatedAt: number): TwinState {
+function avanzar(prev: TwinState, next: PlantSnapshot): TwinState {
     if (prev.snapshot === next) return prev
     const events = diffPlantSnapshot(prev.snapshot, next)
     const seq = prev.seq + 1
@@ -38,7 +55,6 @@ function avanzar(prev: TwinState, next: PlantSnapshot, updatedAt: number): TwinS
         seq,
         slots: assignSlots(prev.slots, next),
         activity: [...nuevas, ...prev.activity].slice(0, ACTIVIDAD_MAX),
-        updatedAt,
     }
 }
 
@@ -53,41 +69,29 @@ function nivelDe(seleccion: PlantSelection): PlantLevel {
  * La planta en vivo para el Mirador: la foto, lo que cambió desde la anterior,
  * el lugar estable de cada cliente y lote, el feed de actividad y la selección.
  *
- * MOCK: hoy la foto sale de `getPlantMockServer()`. Con el endpoint, el interior
- * pasa a ser
- *
- *     const { data, dataUpdatedAt } = useExecuteQuery<PlantSnapshotResponse>(
- *         ['planta', 'en-vivo'], '/plantas/en-vivo',
- *         { refetchInterval: INTERVALO_POLLING_MS, refetchIntervalInBackground: false },
- *     )
- *     useEffect(() => setTwin((prev) => avanzar(prev, data.planta, dataUpdatedAt)), [data, dataUpdatedAt])
- *
- * y el resto del hook no cambia.
+ * La foto sale de `GET /plantas/en-vivo`, que no manda eventos: el diff lo hace
+ * `diffPlantSnapshot`. Se pide sólo con la pestaña visible, y al volver a ella
+ * se pide enseguida. Usa `useSuspenseQuery`: lo cubren el `<Suspense>` y el
+ * `ErrorBoundary` del layout del portal. Un refetch que falla no lo dispara
+ * (ya hay datos): la escena se queda con la última foto y el indicador "en
+ * vivo" avisa cuando pasa `FOTO_VIEJA_MS`.
  */
 export function usePlantTwin() {
-    const [twin, setTwin] = useState<TwinState>(() => {
-        const snapshot = getPlantMockServer().snapshot().planta
-        return { snapshot, events: [], seq: 0, slots: assignSlots(null, snapshot), activity: [], updatedAt: Date.now() }
+    const { data, dataUpdatedAt } = useExecuteQuery<PlantSnapshotResponse>(['planta', 'en-vivo'], '/plantas/en-vivo', {
+        refetchInterval: intervalo,
+        refetchIntervalInBackground: false,
+        refetchOnWindowFocus: true,
+        staleTime: 0,
     })
+
+    const [twin, setTwin] = useState<TwinState>(() => ({
+        snapshot: data.planta, events: [], seq: 0, slots: assignSlots(null, data.planta), activity: [],
+    }))
     const [seleccion, setSeleccion] = useState<PlantSelection>(SIN_SELECCION)
 
-    useEffect(() => {
-        const pedir = () => {
-            const next = getPlantMockServer().snapshot().planta
-            const at = Date.now()
-            setTwin((prev) => avanzar(prev, next, at))
-        }
-        const id = window.setInterval(() => {
-            if (document.visibilityState === 'visible') pedir()
-        }, INTERVALO_POLLING_MS)
-        // Al volver a la pestaña se pide enseguida, como `refetchOnWindowFocus`.
-        const alVolver = () => { if (document.visibilityState === 'visible') pedir() }
-        document.addEventListener('visibilitychange', alVolver)
-        return () => {
-            window.clearInterval(id)
-            document.removeEventListener('visibilitychange', alVolver)
-        }
-    }, [])
+    // `structuralSharing` devuelve la misma referencia si el JSON no cambió:
+    // una foto idéntica no genera eventos.
+    useEffect(() => setTwin((prev) => avanzar(prev, data.planta)), [data])
 
     // Si lo seleccionado ya no está en la foto, la selección sube un nivel.
     const selection = useMemo<PlantSelection>(() => {
@@ -99,6 +103,20 @@ export function usePlantTwin() {
         if (!lote) return { clientId: cliente.id, lotId: null, weighingId: null }
         return { clientId: cliente.id, lotId: lote.id, weighingId: seleccion.weighingId }
     }, [seleccion, twin.snapshot])
+
+    // Si la foto trajo un pesaje nuevo o anulado del lote abierto, su detalle
+    // (`GET /pesajes/byLote/:loteId`) se vuelve a pedir. Una vez por foto: cambiar
+    // de lote no reprocesa los eventos de la foto anterior.
+    const queryClient = useQueryClient()
+    const fotoProcesada = useRef(twin.seq)
+    useEffect(() => {
+        if (fotoProcesada.current === twin.seq) return
+        fotoProcesada.current = twin.seq
+        const lotId = selection.lotId
+        if (lotId === null) return
+        const cambio = twin.events.some((e) => (e.type === 'weighing-added' || e.type === 'weighing-voided') && e.lotId === lotId)
+        if (cambio) void queryClient.invalidateQueries({ queryKey: ['pesajes', 'byLote', lotId] })
+    }, [twin.seq, twin.events, selection.lotId, queryClient])
 
     const select = useCallback((next: Partial<PlantSelection>) => {
         setSeleccion({ clientId: next.clientId ?? null, lotId: next.lotId ?? null, weighingId: next.weighingId ?? null })
@@ -118,7 +136,8 @@ export function usePlantTwin() {
         seq: twin.seq,
         slots: twin.slots,
         activity: twin.activity,
-        updatedAt: twin.updatedAt,
+        // Del pedido, no de la foto: una foto idéntica también dice que la planta responde.
+        updatedAt: dataUpdatedAt,
         selection,
         level: nivelDe(selection),
         select,

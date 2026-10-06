@@ -14,9 +14,8 @@ interface LotPanelProps {
 }
 
 /**
- * Nivel Lote. Con el endpoint real, los pesajes salen de `useGetInspeccionPesajes`
- * y su `<Suspense>` + `ErrorBoundary` van acá adentro, no en la ruta: suspender
- * la ruta cambiaría el tablero entero por un spinner.
+ * Nivel Lote. Los pesajes llegan ya cargados: los pide `LotWeighingsLoader`,
+ * que tiene su propio `<Suspense>` y `ErrorBoundary`.
  */
 export function LotPanel({ client, lot, color, weighings, onSelect }: LotPanelProps) {
     const indice = ACTIVE_STAGES.indexOf(lot.etapa as (typeof ACTIVE_STAGES)[number])
@@ -72,13 +71,6 @@ export function LotPanel({ client, lot, color, weighings, onSelect }: LotPanelPr
                     { label: 'En rango', value: pct === null ? '—' : `${nf1.format(pct)} %` },
                 ]}
             />
-
-            {lot.documento_fiscal && (
-                <div className="mt-3.5 flex justify-between gap-3 rounded-xl border border-dashed border-border-ui bg-muted/50 px-3 py-2.5 text-[12.5px]">
-                    <span className="text-text-muted">Documento fiscal</span>
-                    <b className="font-mono text-xs text-text-main">{lot.documento_fiscal}</b>
-                </div>
-            )}
 
             <SectionHeading>Diana de calidad</SectionHeading>
             {weighings.length ? (

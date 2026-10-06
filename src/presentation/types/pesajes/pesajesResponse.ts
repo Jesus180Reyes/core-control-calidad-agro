@@ -14,7 +14,7 @@ export interface PesajeData {
     peso_bruto: string;
     tara: string;
     peso_neto: string;
-    fuera_de_rango: number;
+    fuera_de_rango: boolean;
     estado_calidad_codigo: string;
     estado_calidad: string;
     usuario: string;

@@ -156,27 +156,27 @@ export function SidebarContent({ onNavigate }: SidebarContentProps) {
                         </Link>
                     </Can>
 
-                    {/* Sin permiso mientras el Mirador corre con datos de ejemplo (SPEC 13):
-                        el permiso llega con el endpoint de la planta. */}
-                    <Link
-                        to="/mirador"
-                        onClick={onNavigate}
-                        aria-current={pathname === '/mirador' ? 'page' : undefined}
-                        style={{ animationDelay: '70ms', animationDuration: '400ms' }}
-                        className={`${CLASES_ITEM} ${CLASES_ENTRADA} ${pathname === '/mirador' ? CLASES_ACTIVO : CLASES_INACTIVO}`}
-                    >
-                        {pathname === '/mirador' && <span className={CLASES_MARCA_ACTIVA} aria-hidden />}
-                        <span className={`${CLASES_CHIP} relative ${pathname === '/mirador' ? 'bg-brand/15 text-brand' : 'bg-muted/60 text-text-muted group-hover:text-text-main'}`}>
-                            <Telescope className="size-4.5" strokeWidth={2.1} />
-                            <span aria-hidden className="absolute -top-0.5 -right-0.5 size-2 rounded-full bg-success ring-2 ring-surface animate-pulse" />
-                        </span>
-                        <span className="leading-tight overflow-hidden">
-                            <span className="block truncate">Mirador</span>
-                            <span className="block text-[10px] font-bold uppercase tracking-[0.14em] text-text-muted/70">
-                                Planta en vivo · 3D
+                    <Can permission={PERMISSIONS.VERMIRADOR3D}>
+                        <Link
+                            to="/mirador"
+                            onClick={onNavigate}
+                            aria-current={pathname === '/mirador' ? 'page' : undefined}
+                            style={{ animationDelay: '70ms', animationDuration: '400ms' }}
+                            className={`${CLASES_ITEM} ${CLASES_ENTRADA} ${pathname === '/mirador' ? CLASES_ACTIVO : CLASES_INACTIVO}`}
+                        >
+                            {pathname === '/mirador' && <span className={CLASES_MARCA_ACTIVA} aria-hidden />}
+                            <span className={`${CLASES_CHIP} relative ${pathname === '/mirador' ? 'bg-brand/15 text-brand' : 'bg-muted/60 text-text-muted group-hover:text-text-main'}`}>
+                                <Telescope className="size-4.5" strokeWidth={2.1} />
+                                <span aria-hidden className="absolute -top-0.5 -right-0.5 size-2 rounded-full bg-success ring-2 ring-surface animate-pulse" />
                             </span>
-                        </span>
-                    </Link>
+                            <span className="leading-tight overflow-hidden">
+                                <span className="block truncate">Mirador</span>
+                                <span className="block text-[10px] font-bold uppercase tracking-[0.14em] text-text-muted/70">
+                                    Planta en vivo · 3D
+                                </span>
+                            </span>
+                        </Link>
+                    </Can>
 
                     <p className="px-3.5 pt-4 pb-1 text-[10px] font-bold uppercase tracking-[0.16em] text-text-muted/50">
                         Operación

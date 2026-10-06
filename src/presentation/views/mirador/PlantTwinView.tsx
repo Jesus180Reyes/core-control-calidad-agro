@@ -6,12 +6,12 @@ import { PlantBrandCard } from '#/presentation/components/mirador/PlantBrandCard
 import { PlantBreadcrumbs } from '#/presentation/components/mirador/PlantBreadcrumbs'
 import { PlantCanvas, type PlantCanvasHandle } from '#/presentation/components/mirador/PlantCanvas'
 import { PlantControls } from '#/presentation/components/mirador/PlantControls'
+import { LotWeighingsLoader } from '#/presentation/components/mirador/LotWeighingsLoader'
 import { PlantKpiBar } from '#/presentation/components/mirador/PlantKpiBar'
 import { useFullscreen } from '#/presentation/hooks/mirador/useFullscreen'
-import { useLotWeighings } from '#/presentation/hooks/mirador/useLotWeighings'
 import { usePersistentFlag } from '#/presentation/hooks/mirador/usePersistentFlag'
 import type { PlantTwin } from '#/presentation/hooks/mirador/usePlantTwin'
-import type { PlantPickTarget } from '#/presentation/types/mirador/plantTwin.types'
+import type { PlantPickTarget, PlantWeighing } from '#/presentation/types/mirador/plantTwin.types'
 
 import { ClientPanel } from './panel/ClientPanel'
 import { LotPanel } from './panel/LotPanel'
@@ -45,6 +45,9 @@ export function PlantTwinView({ twin }: { twin: PlantTwin }) {
     const [hojaAbierta, setHojaAbierta] = useState(false)
     const [kpisOcultos, setKpisOcultos] = usePersistentFlag('mirador-kpis-ocultos')
     const [actividadPlegada, setActividadPlegada] = usePersistentFlag('mirador-actividad-plegada')
+    // Los pesajes del lote seleccionado, tal como los entrega `LotWeighingsLoader`.
+    const [cargados, setCargados] = useState<{ lotId: number; weighings: PlantWeighing[] } | null>(null)
+    const alCargarPesajes = useCallback((lotId: number, weighings: PlantWeighing[]) => setCargados({ lotId, weighings }), [])
     // Para el televisor de planta: el tablero solo, sin la barra lateral del portal.
     const pantallaCompleta = useFullscreen(rootRef)
 
@@ -70,10 +73,10 @@ export function PlantTwinView({ twin }: { twin: PlantTwin }) {
 
     const cliente = selection.clientId !== null ? snapshot.clientes.find((c) => c.id === selection.clientId) ?? null : null
     const lote = cliente && selection.lotId !== null ? cliente.lotes.find((l) => l.id === selection.lotId) ?? null : null
-    const pesajesDelLote = useLotWeighings(selection.lotId ?? -1, seq)
-    const pesajes = lote ? pesajesDelLote : null
+    // `null` mientras llegan: los de otro lote no se muestran nunca en este.
+    const pesajes = lote && cargados?.lotId === lote.id ? cargados.weighings : null
     const pesaje = lote && selection.weighingId !== null
-        ? pesajesDelLote.find((w) => w.id === selection.weighingId) ?? lote.ultimos_pesajes.find((w) => w.id === selection.weighingId) ?? null
+        ? pesajes?.find((w) => w.id === selection.weighingId) ?? lote.ultimos_pesajes.find((w) => w.id === selection.weighingId) ?? null
         : null
     const color = cliente ? clientColor(slots.rows[cliente.id]) : ''
 
@@ -95,8 +98,14 @@ export function PlantTwinView({ twin }: { twin: PlantTwin }) {
     let contenido
     if (!cliente) contenido = <PlantSummaryPanel snapshot={snapshot} slots={slots} onSelect={select} />
     else if (!lote) contenido = <ClientPanel client={cliente} color={color} onSelect={select} />
-    else if (pesaje) contenido = <WeighingPanel client={cliente} lot={lote} color={color} weighing={pesaje} weighings={pesajes ?? []} onSelect={select} />
-    else contenido = <LotPanel client={cliente} lot={lote} color={color} weighings={pesajes ?? []} onSelect={select} />
+    else contenido = (
+        <>
+            <LotWeighingsLoader lotId={lote.id} onLoad={alCargarPesajes} />
+            {pesajes && (pesaje
+                ? <WeighingPanel client={cliente} lot={lote} color={color} weighing={pesaje} weighings={pesajes} onSelect={select} />
+                : <LotPanel client={cliente} lot={lote} color={color} weighings={pesajes} onSelect={select} />)}
+        </>
+    )
 
     const tituloHoja = pesaje ? `Pesaje #${pesaje.id}` : lote ? `Lote ${lote.nombre_lote}` : cliente ? cliente.nombre : 'Clientes en planta'
 

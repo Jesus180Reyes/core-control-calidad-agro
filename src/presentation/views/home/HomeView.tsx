@@ -113,8 +113,7 @@ export function HomeView() {
                 )}
             </section>
 
-            {/* Mismo destino que el item del Sidebar, y como él, sin permiso mientras corre con datos de ejemplo. */}
-            <MiradorCard />
+            {has(PERMISSIONS.VERMIRADOR3D) && <MiradorCard />}
 
             <div className="grid gap-6 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)]">
                 <WorkflowCard />

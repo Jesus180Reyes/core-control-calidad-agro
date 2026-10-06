@@ -2,13 +2,13 @@ import { ACTIVE_STAGES, type ActiveStage, type PlantClient, type PlantSnapshot, 
 
 /**
  * Slots de cada casilla, en orden de llenado: atrás-izquierda, atrás-derecha,
- * adelante-izquierda, adelante-derecha. En despacho la columna derecha es del
+ * adelante-izquierda, adelante-derecha. En finalizado la columna derecha es del
  * camión, así que sólo entran dos contenedores.
  */
 export const STAGE_SLOTS: Record<ActiveStage, number[]> = {
     'en-pesaje': [0, 1, 2, 3],
     'por-aprobar': [0, 1, 2, 3],
-    'despacho': [0, 2],
+    'finalizado': [0, 2],
 }
 
 function actividad(cliente: PlantClient): number {

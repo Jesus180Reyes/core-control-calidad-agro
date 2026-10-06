@@ -3,6 +3,7 @@ import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js'
 
 import { clientColor, clientInitials } from '#/presentation/components/mirador/clientColors'
 import { qualityLevel, targetPoint } from '#/presentation/hooks/mirador/qualityTarget'
+import { INTERVALO_POLLING_MS } from '#/presentation/hooks/mirador/usePlantTwin'
 import {
     ACTIVE_STAGES,
     STAGE_LABEL,
@@ -96,7 +97,6 @@ interface LotVisual {
     container: THREE.Group | null
     topY: number
     label: Label
-    docLabel: Label | null
     /** Pesajes que todavía están volando: no se dibujan en la pila hasta que aterrizan. */
     pending: Set<number>
     moving: boolean
@@ -140,13 +140,22 @@ const nf2 = new Intl.NumberFormat('es-HN', { minimumFractionDigits: 2, maximumFr
 
 /** Más de esto por foto se aplica sin animar: la escena nunca se atrasa respecto del dato. */
 const MAX_VUELOS = 6
-const ESPACIO_VUELOS = 1.15
+/** Segundos entre vuelos: nunca en ráfaga, y nunca tan separados que el último quede colgado. */
+const ESPACIO_MIN_VUELOS = 1.15
+const ESPACIO_MAX_VUELOS = 12
+
+/**
+ * Los vuelos de una foto se reparten en el 80 % del intervalo de polling, para
+ * que la planta no quede quieta hasta la foto siguiente.
+ */
+function espacioEntreVuelos(n: number) {
+    return Math.min(ESPACIO_MAX_VUELOS, Math.max(ESPACIO_MIN_VUELOS, ((INTERVALO_POLLING_MS / 1000) * 0.8) / n))
+}
 
 const CLASES = {
     cliente: 'pointer-events-auto cursor-pointer flex items-center gap-2.5 rounded-2xl border border-border-ui/80 bg-surface/95 py-1.5 pl-1.5 pr-3 shadow-clay-card backdrop-blur transition-opacity duration-200',
     lote: 'pointer-events-auto cursor-pointer flex items-center gap-1.5 rounded-full border border-border-ui/80 bg-surface/95 px-2 py-0.5 text-[11px] text-text-main shadow-sm transition-opacity duration-200',
     loteActivo: '!bg-primary !text-primary-foreground !border-transparent',
-    doc: 'pointer-events-none rounded-md border border-dashed border-text-muted/60 bg-surface/95 px-1.5 py-0.5 font-mono text-[10px] font-semibold text-text-main transition-opacity duration-200',
     exceso: 'pointer-events-none rounded-full bg-text-main/80 px-2 py-0.5 text-[10px] font-bold text-surface transition-opacity duration-200',
     visor: 'pointer-events-none min-w-[196px] rounded-xl border border-[#A8F6C6]/20 bg-[#0C1611] px-3 pt-2 pb-2.5 text-[#A8F6C6] shadow-[0_10px_30px_rgba(0,0,0,0.35)] transition-opacity duration-200',
 }
@@ -221,6 +230,7 @@ export class PlantScene {
     private readonly trail: THREE.Mesh<THREE.SphereGeometry, THREE.MeshBasicMaterial>[] = []
     private readonly weighQueue: { lotId: number; weighing: PlantWeighing }[] = []
     private nextWeighAt = 0
+    private weighSpacing = ESPACIO_MIN_VUELOS
 
     private readonly cam = { target: new V3(9, 0, 17), theta: 0.5, el: 0.82, r: 90 }
     private readonly goal = { target: new V3(9, 0, 17), theta: 0.5, el: 0.82, r: 90 }
@@ -446,6 +456,8 @@ export class PlantScene {
         // Pesajes nuevos: vuelan los más recientes; el resto ya está en los conteos.
         const nuevos = events.filter((e): e is Extract<PlantEvent, { type: 'weighing-added' }> => e.type === 'weighing-added')
         if (animar) {
+            // Lo que quedó en cola de la foto anterior aterriza sin vuelo: la escena no se atrasa.
+            while (this.weighQueue.length) this.landWithoutFlight(this.weighQueue.shift()!)
             for (const e of nuevos.slice(-MAX_VUELOS)) {
                 const lv = this.lots.get(e.lotId)
                 if (!lv) continue
@@ -453,7 +465,10 @@ export class PlantScene {
                 if (!lv.moving) this.rebuildLot(lv)
                 this.weighQueue.push({ lotId: e.lotId, weighing: e.weighing })
             }
-            while (this.weighQueue.length > MAX_VUELOS) this.landWithoutFlight(this.weighQueue.shift()!)
+            if (this.weighQueue.length) {
+                this.weighSpacing = espacioEntreVuelos(this.weighQueue.length)
+                this.nextWeighAt = Math.min(this.nextWeighAt, this.time)
+            }
         }
 
         if (primera) {
@@ -566,7 +581,7 @@ export class PlantScene {
         x.strokeStyle = this.palette.tileLine
         x.lineWidth = 5
         x.setLineDash([22, 16])
-        const slots = k === STAGE_INDEX.despacho ? [SLOT_OFFSETS[0], SLOT_OFFSETS[2]] : SLOT_OFFSETS
+        const slots = k === STAGE_INDEX.finalizado ? [SLOT_OFFSETS[0], SLOT_OFFSETS[2]] : SLOT_OFFSETS
         for (const s of slots) {
             const cx = ((s.x + TILE_W / 2) / TILE_W) * W
             const cy = ((s.z + TILE_D / 2) / TILE_D) * H
@@ -840,7 +855,7 @@ export class PlantScene {
         const lv: LotVisual = {
             id: lot.id, clientId, data: lot, stage, slot, row, group, base, stacks, status,
             picks: [base], tokens: new Map(), pulse: null, spin: null, people: [], truck: null, container: null,
-            topY: 0.2, label: null as unknown as Label, docLabel: null, pending: new Set(), moving: false,
+            topY: 0.2, label: null as unknown as Label, pending: new Set(), moving: false,
         }
         lv.label = this.addLabel(CLASES.lote, () => lv.group.position.clone().add(new V3(0, lv.topY + 0.45, 0)), () => this.callbacks.onPick({ kind: 'lote', clientId, lotId: lot.id }))
         this.lots.set(lot.id, lv)
@@ -894,7 +909,7 @@ export class PlantScene {
         const d = lv.data
         let niveles = 0
 
-        if (lv.stage === 'despacho') {
+        if (lv.stage === 'finalizado') {
             const cont = new THREE.Group()
             lv.status.add(cont)
             const caja = addMesh(cont, slab(2.25, 1.2, 1.7, 0.12, 0.04), cliente?.contMat ?? this.M.pallet, 0, 0.2, 0)
@@ -913,13 +928,7 @@ export class PlantScene {
             lv.status.add(cargador.root)
             lv.people.push({ person: cargador, kind: 'cargador' })
             niveles = 8
-            if (!lv.docLabel && d.documento_fiscal) {
-                lv.docLabel = this.addLabel(CLASES.doc, () => lv.group.position.clone().add(new V3(0, 1.0, 1.0)))
-                lv.docLabel.el.textContent = d.documento_fiscal
-                lv.docLabel.show = lv.label.show
-            }
         } else {
-            if (lv.docLabel) { this.removeLabel(lv.docLabel); lv.docLabel = null }
             const c = this.visibleCounts(lv)
             const muestraEnRango = Math.min(c.enRango, CAP_IN)
             const muestraFuera = Math.min(c.fuera, CAP_OUT)
@@ -1000,7 +1009,7 @@ export class PlantScene {
             lv.group.scale.set(1.15, 0.8, 1.15)
             this.tween(0.45, (t) => { const s = easeBack(t); lv.group.scale.set(1.15 - 0.15 * s, 0.8 + 0.2 * s, 1.15 - 0.15 * s) })
             this.ripple(hasta, this.palette.brand)
-            if (stage === 'despacho' && etapaAnterior !== 'despacho' && lv.truck) {
+            if (stage === 'finalizado' && etapaAnterior !== 'finalizado' && lv.truck) {
                 const camion = lv.truck
                 camion.root.position.x = 7.5
                 this.tween(1.6, (t) => {
@@ -1014,7 +1023,6 @@ export class PlantScene {
 
     private removeLot(lv: LotVisual, evento: Extract<PlantEvent, { type: 'lot-removed' }> | undefined) {
         this.lots.delete(lv.id)
-        if (lv.docLabel) { this.removeLabel(lv.docLabel); lv.docLabel = null }
         const terminar = () => { this.scene.remove(lv.group); this.removeLabel(lv.label) }
         if (!evento) { terminar(); return }
 
@@ -1076,7 +1084,7 @@ export class PlantScene {
     private processWeighQueue() {
         if (!this.weighQueue.length || this.time < this.nextWeighAt || !this.introDone) return
         const item = this.weighQueue.shift()!
-        this.nextWeighAt = this.time + ESPACIO_VUELOS
+        this.nextWeighAt = this.time + this.weighSpacing
         this.fly(item)
     }
 
@@ -1086,9 +1094,9 @@ export class PlantScene {
             status: estado ?? (nivel === 'ok' ? 'En rango' : nivel === 'desviado' ? 'Desviado' : 'Fuera de rango'),
             level: nivel,
             value: Number(w.peso_neto),
-            user: w.usuario,
+            user: w.usuario ?? '—',
             lot: lot.nombre_lote,
-            unit: lot.unidad_medida,
+            unit: lot.unidad_medida ?? '',
         }
         this.renderLcd()
     }
@@ -1118,7 +1126,7 @@ export class PlantScene {
         ficha.scale.setScalar(0.01)
         this.scene.add(ficha)
 
-        this.lcd = { ...this.lcd, status: 'Pesando…', level: 'busy', value: 0, user: item.weighing.usuario, lot: lot.nombre_lote, unit: lot.unidad_medida }
+        this.lcd = { ...this.lcd, status: 'Pesando…', level: 'busy', value: 0, user: item.weighing.usuario ?? '—', lot: lot.nombre_lote, unit: lot.unidad_medida ?? '' }
         this.operario.action = 1.2
         this.ayudante.action = 1.2
         const anillo = this.stationRing.material
@@ -1525,7 +1533,6 @@ export class PlantScene {
             const mostrar = this.introDone && (this.selection.clientId === lv.clientId || this.hoverClientId === lv.clientId || this.selection.lotId === lv.id)
             if (this.introDone) {
                 lv.label.show = mostrar
-                if (lv.docLabel) lv.docLabel.show = mostrar
             }
             for (const { person, kind } of lv.people) this.animateLotPerson(person, kind, dt)
         })
