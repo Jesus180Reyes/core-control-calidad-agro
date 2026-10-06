@@ -160,6 +160,26 @@ Tres cosas que el chat **no** hace, y que no conviene agregar de prepo porque ca
 
 `MarkdownContent` monta `remark-gfm`, que es lo que hace que las tablas se pinten como `<table>`. Sin él, `react-markdown` es CommonMark pelado y un `| Lote | Peso |` sale como un párrafo con los pipes a la vista — tanto en el chat como en el resumen IA de lotes.
 
+### Mirador (planta en vivo, SPEC 13)
+
+`/mirador` es el tablero 3D de la planta: `routes/(portal)/_portal.mirador.tsx` → `usePlantTwin` → `views/mirador/PlantTwinView.tsx`, con la escena en `components/mirador/scene/PlantScene.ts` (Three.js, fuera de React, con su propio `requestAnimationFrame`). El contrato fuente es el SPEC 32 del backend.
+
+**La foto es la verdad; el diff lo hace el front.** `GET /plantas/en-vivo` (sin params ni body; no filtra por cartera ni pide permiso, por eso el item del `Sidebar` no va detrás de un `<Can>`) devuelve la planta entera: KPIs del día y los clientes con sus lotes. No manda eventos: `diffPlantSnapshot` compara cada foto con la anterior y la escena anima eso y nada más. El diff depende de dos garantías del backend: los ids de pesaje son correlativos y nunca se reutilizan (`ultimos_pesajes` son los 10 de mayor `id`, en orden `id` DESC), y `bultos` cuenta **todos** los pesajes activos del lote, así que una anulación se detecta porque `bultos` baja más de lo que explican los pesajes nuevos.
+
+Las casillas son `'en-pesaje' | 'por-aprobar' | 'finalizado'`, con el mismo string que manda el backend; `'rechazado'` no tiene casilla y sólo viaja para animar la salida. **No hay casilla de despacho ni `documento_fiscal`**: volver a tenerlos exige un spec en el backend primero. `pct_en_rango_hoy` es `null` sin pesajes en el día y se pinta "—"; `lote.producto`, `lote.unidad_medida`, `pesaje.usuario` y `estado_calidad_codigo` (`IDEAL`/`MAXIMO`/`MINIMO`) pueden venir en `null`. Un lote con `etapa_id` en `NULL` en la base no sale en la foto: es una regla del backend, no un bug.
+
+**El intervalo es un acuerdo con el backend, no una preferencia.** `INTERVALO_POLLING_MS` (75 s) más un desfase de hasta `DESFASE_POLLING_MS` (30 s), sólo con la pestaña visible y un pedido inmediato al volver a ella.
+
+- **Nunca más de 2 min.** Un lote rechazado viaja sólo 5 min desde `rechazado_en`; con más intervalo una pantalla puede no verlo nunca. Subirlo exige agrandar esa ventana en `plantas.repository.ts` del backend.
+- **Nunca bajarlo sin hablarlo allá.** El backend no tiene caché: a 10 s, 50 pantallas son 5 req/s de cinco consultas cada una.
+- **El desfase sale de la hora del último pedido, no de `Math.random()`.** React Query recalcula `refetchInterval` en cada render y reinicia el timer si el valor cambió: un valor aleatorio posterga el pedido cada vez que alguien toca la escena.
+
+El indicador "en vivo" (`FOTO_VIEJA_MS`, 4 min) mira el `dataUpdatedAt` de la query, no `generado_en` (el reloj de MySQL y el del navegador no están sincronizados) ni el de la última foto distinta (una planta quieta devuelve la misma foto y eso también dice que responde). Un refetch que falla no dispara el `ErrorBoundary`, porque ya hay datos: la escena se queda con la última foto y el indicador avisa.
+
+**Los pesajes vuelan repartidos en el intervalo.** Con `n` pesajes nuevos en una foto (como mucho `MAX_VUELOS`, 6), el espacio entre vuelos es `clamp(intervalo × 0,8 / n, 1,15 s, 12 s)`. Lo que quedó en cola al llegar la foto siguiente aterriza sin vuelo: la escena nunca se atrasa respecto del dato.
+
+**El detalle del lote sale de `GET /pesajes/byLote/:loteId`** (`useLotWeighings`, sobre `useGetInspeccionPesajes`), ordenado por `created_at` DESC, no por `id`. Lo pide `LotWeighingsLoader`, que se monta sólo con un lote seleccionado y tiene su propio `<Suspense>` y `ErrorBoundary`: suspender la vista desmontaría la escena 3D cada vez que se elige un lote. Le pasa los pesajes a la vista por `onLoad`, que los reparte entre el panel y la diana de la escena. `usePlantTwin` invalida esa query cuando una foto trae un `weighing-added` o `weighing-voided` del lote abierto.
+
 ## Estilos
 
 Tailwind v4 sin `tailwind.config.js`: los tokens viven en `src/styles.css` bajo `@theme`, con variables CSS redefinidas en `:root/.light` y `.dark`. Usar los tokens semánticos (`bg-surface`, `text-text-main`, `text-text-muted`, `border-border-ui`, `bg-bg-app`, `shadow-clay-card`, `shadow-clay-btn`) en vez de colores crudos cuando exista el token. El modo oscuro es por clase en `<html>` (`ThemeProvider`, persistido en `localStorage` bajo `bascula-ui-theme`) y se declara con `@variant dark (.dark &)`.

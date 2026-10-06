@@ -156,8 +156,8 @@ export function SidebarContent({ onNavigate }: SidebarContentProps) {
                         </Link>
                     </Can>
 
-                    {/* Sin permiso mientras el Mirador corre con datos de ejemplo (SPEC 13):
-                        el permiso llega con el endpoint de la planta. */}
+                    {/* Sin permiso a propósito (SPEC 13): `GET /plantas/en-vivo` no pide
+                        ninguno y cualquier usuario autenticado ve la planta entera. */}
                     <Link
                         to="/mirador"
                         onClick={onNavigate}
