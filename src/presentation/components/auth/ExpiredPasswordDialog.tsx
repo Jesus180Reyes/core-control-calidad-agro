@@ -12,7 +12,7 @@ interface ExpiredPasswordDialogProps {
     currentPassword: string
     /** El `message` del 403. */
     reason?: string
-    onRenewed: (newPassword: string) => void
+    onRenewed: () => void
     onClose: () => void
 }
 
@@ -56,7 +56,7 @@ export function ExpiredPasswordDialog({
                 if (!abierto && !enviando) onClose()
             }}
             title="Tu contraseña venció"
-            description={`${reason}. Elegí una contraseña nueva para ingresar.`}
+            description={`${reason}. Elegí una contraseña nueva y después ingresá con ella.`}
             size="sm"
             footer={
                 <>

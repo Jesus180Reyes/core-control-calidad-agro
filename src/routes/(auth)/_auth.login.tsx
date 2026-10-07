@@ -1,4 +1,4 @@
-import { createFileRoute } from '@tanstack/react-router'
+﻿import { createFileRoute } from '@tanstack/react-router'
 
 import { useLogin } from '#/presentation/hooks/auth/useLogin'
 import { LoginCard } from '#/presentation/views/auth/LoginCard'
@@ -17,7 +17,7 @@ function LoginPage() {
         alternarVerPassword,
         expiredCredentials,
         closeExpiredDialog,
-        loginAfterRenewal,
+        handlePasswordRenewed,
     } = useLogin()
 
     return (
@@ -30,7 +30,7 @@ function LoginPage() {
             alternarVerPassword={alternarVerPassword}
             expiredCredentials={expiredCredentials}
             closeExpiredDialog={closeExpiredDialog}
-            loginAfterRenewal={loginAfterRenewal}
+            handlePasswordRenewed={handlePasswordRenewed}
         />
     )
 }

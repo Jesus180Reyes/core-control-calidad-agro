@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { useForm, useWatch, type Control } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { toast } from 'sonner'
 
 import { useExecuteMutation } from '#/presentation/hooks/shared/useExecuteMutation'
 import {
@@ -16,7 +17,8 @@ interface UseRenewPasswordParams {
     username: string
     /** La contraseña del intento que dio el 403. Vive solo en memoria. */
     currentPassword: string
-    onRenewed: (newPassword: string) => void
+    /** La renovación no devuelve token: quien llama cierra el diálogo y el usuario ingresa a mano. */
+    onRenewed: () => void
 }
 
 export interface RenewPasswordRule {
@@ -64,8 +66,11 @@ export function useRenewPassword({ username, currentPassword, onRenewed }: UseRe
     }, [schema, passwordNueva, confirmacion])
 
     const mutation = useExecuteMutation<RenovarPasswordResponse, RenovarPasswordRequest>('/auth/renovar-password', {
-        onSuccess: (_data, variables) => {
-            onRenewed(variables.password_nueva)
+        onSuccess: (data) => {
+            toast.success(data.msg || 'Contraseña actualizada correctamente', {
+                description: 'Ingresá con tu contraseña nueva.',
+            })
+            onRenewed()
         },
         // Con `onError` propio no sale el toast automático: el error se pinta
         // dentro del diálogo, que sigue abierto para reintentar o cancelar.

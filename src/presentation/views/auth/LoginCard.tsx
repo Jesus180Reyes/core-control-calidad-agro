@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react'
+﻿import type { ReactNode } from 'react'
 import type { Control } from 'react-hook-form'
 
 import { ExpiredPasswordDialog } from '#/presentation/components/auth/ExpiredPasswordDialog'
@@ -14,7 +14,7 @@ interface LoginCardProps {
     alternarVerPassword: () => void
     expiredCredentials: ExpiredCredentials | null
     closeExpiredDialog: () => void
-    loginAfterRenewal: (newPassword: string) => void
+    handlePasswordRenewed: () => void
 }
 export function LoginCard({
     control,
@@ -25,7 +25,7 @@ export function LoginCard({
     alternarVerPassword,
     expiredCredentials,
     closeExpiredDialog,
-    loginAfterRenewal,
+    handlePasswordRenewed,
 }: LoginCardProps) {
     return (
         <>
@@ -33,7 +33,7 @@ export function LoginCard({
             <ExpiredPasswordDialog
                 username={expiredCredentials.username}
                 currentPassword={expiredCredentials.password}
-                onRenewed={loginAfterRenewal}
+                onRenewed={handlePasswordRenewed}
                 onClose={closeExpiredDialog}
             />
         )}

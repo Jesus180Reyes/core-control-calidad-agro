@@ -28,7 +28,8 @@ interface UseLoginResult {
     /** Con valor, el `ExpiredPasswordDialog` está abierto. */
     expiredCredentials: ExpiredCredentials | null
     closeExpiredDialog: () => void
-    loginAfterRenewal: (newPassword: string) => void
+    /** Cierra el diálogo después de renovar y deja el login listo para la nueva. */
+    handlePasswordRenewed: () => void
 }
 
 export function useLogin(): UseLoginResult {
@@ -41,7 +42,7 @@ export function useLogin(): UseLoginResult {
     // Se borran al cerrar el diálogo y al renovar.
     const [expiredCredentials, setExpiredCredentials] = useState<ExpiredCredentials | null>(null)
 
-    const { control, handleSubmit } = useForm<LoginFormValues>({
+    const { control, handleSubmit, resetField } = useForm<LoginFormValues>({
         resolver: zodResolver(loginSchema),
         mode: 'onChange',
         reValidateMode: 'onChange',
@@ -90,15 +91,13 @@ export function useLogin(): UseLoginResult {
         mutation.mutate(data)
     })
 
-    // Mismo camino de entrada que el formulario: el `onSuccess` de arriba pone
-    // la sesión, pide los permisos y navega. Si falla, el error cae en el banner.
-    const loginAfterRenewal = (newPassword: string) => {
-        if (!expiredCredentials) return
-
-        const { username } = expiredCredentials
+    // La renovación no inicia sesión: se cierra el diálogo y el usuario ingresa
+    // a mano con la nueva. El campo de contraseña se vacía para que no reintente
+    // con la vieja, que sigue escrita; el usuario queda como estaba.
+    const handlePasswordRenewed = () => {
         setExpiredCredentials(null)
         setErrorLogin(null)
-        mutation.mutate({ username, password: newPassword })
+        resetField('password')
     }
 
     return {
@@ -110,6 +109,6 @@ export function useLogin(): UseLoginResult {
         alternarVerPassword: () => setVerPassword((valor) => !valor),
         expiredCredentials,
         closeExpiredDialog: () => setExpiredCredentials(null),
-        loginAfterRenewal,
+        handlePasswordRenewed,
     }
 }

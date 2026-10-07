@@ -3,7 +3,7 @@
 > **Estado:** Approved
 > **Depende de:** SPEC 33 del backend (`core-control-calidad-agro-backend/specs/33-renovacion-de-password-vencida.md`), implementado en la rama `spec-33-renovacion-de-password-vencida` del backend y **todavía sin mergear**; SPEC 02 (login y sesión) y SPEC 07 (permisos pedidos en el login) de este repo
 > **Fecha:** 2026-10-07
-> **Objetivo:** Cuando `POST /auth/login` responda 403 con `passwordVencida: true`, abrir sobre el login un `ExpiredPasswordDialog` que pida la contraseña nueva, la renueve con `POST /auth/renovar-password` e inicie sesión solo con ella.
+> **Objetivo:** Cuando `POST /auth/login` responda 403 con `passwordVencida: true`, abrir sobre el login un `ExpiredPasswordDialog` que pida la contraseña nueva, la renueve con `POST /auth/renovar-password` y devuelva al usuario al login para ingresar con la nueva.
 
 ---
 
@@ -29,7 +29,7 @@ Hay tres cosas que conviene saber antes de leer el resto.
 - Un `ExpiredPasswordDialog` sobre `CustomDialog`, con dos campos: contraseña nueva y confirmación.
 - Un checklist en vivo de las reglas. El botón queda deshabilitado hasta que se cumplan todas.
 - `POST /auth/renovar-password` con `{ username, password_actual, password_nueva }`. Los dos primeros se toman de lo escrito en el login.
-- Al renovar con éxito, login automático con la contraseña nueva por el camino normal de `useLogin`: sesión, `GET /permisos/me` y navegación a `/`.
+- Al renovar con éxito, un `toast.success`, el diálogo se cierra y el campo de contraseña del login queda vacío. El usuario ingresa a mano con la nueva, por el camino normal de `useLogin`.
 - El diálogo se puede cerrar con Cancelar, la X o Esc, y se vuelve al login sin sesión.
 - Tipos: `passwordVencida` en `LoginResponse`, más el request y la response de la renovación.
 - Tests de la detección del 403 y de las reglas del schema.
@@ -153,7 +153,7 @@ Se apoya en `CustomDialog` con `size="sm"`. Lleva:
 - Dos `ControlledInput` de tipo password, con el ojo de `accionDerecha` como en el login.
 - El checklist.
 - El error del servidor en un banner como el del `LoginCard` (`role="alert"`).
-- En el pie, **Cancelar** y **Cambiar contraseña**. Este último queda deshabilitado mientras el formulario es inválido o hay un envío en curso, y muestra "Cambiando…" durante la renovación y "Ingresando…" durante el login automático.
+- En el pie, **Cancelar** y **Cambiar contraseña**. Este último queda deshabilitado mientras el formulario es inválido o hay un envío en curso, y muestra "Cambiando…" durante la renovación.
 
 `showCloseButton` queda en `true`. Mientras hay un envío en curso, `onOpenChange(false)` se ignora, así no se cierra a mitad de la renovación.
 
@@ -178,43 +178,44 @@ Se apoya en `CustomDialog` con `size="sm"`. Lleva:
    - Un `Error` cualquiera da `false`.
 3. Crear `renewPasswordSchema.ts` con `createRenewPasswordSchema` y su test: cada regla por separado, la contraseña igual a la actual y una confirmación que no coincide.
 4. Crear `useRenewPassword.tsx`:
-   - Recibe `{ username, currentPassword, onRenewed(newPassword) }`.
+   - Recibe `{ username, currentPassword, onRenewed() }`.
    - Arma el `useForm` con el schema de la factory.
    - Llama a `useExecuteMutation<RenovarPasswordResponse, RenovarPasswordRequest>('/auth/renovar-password')` con `onError` propio.
-   - En `onSuccess` llama a `onRenewed(password_nueva)`.
+   - En `onSuccess` pinta el `toast.success` (el `msg` del backend, con "Ingresá con tu contraseña nueva.") y llama a `onRenewed()`.
    - Devuelve `control`, `onSubmit`, `enviando`, `errorRenovacion`, el estado de cada regla para el checklist y el toggle de visibilidad.
 5. Crear `ExpiredPasswordDialog.tsx`, que solo pinta lo que le da `useRenewPassword`. Todavía no se monta en ningún lado.
 6. En `useLogin.tsx`:
    - El `onError` pregunta primero `isExpiredPasswordError(error)`. Si es `true`, guarda las credenciales del intento en `expiredCredentials` y **no** llama a `setErrorLogin`. Si no, sigue igual que hoy.
-   - Expone `expiredCredentials`, `closeExpiredDialog()` (las borra) y `loginAfterRenewal(newPassword)`.
-   - `loginAfterRenewal` borra `expiredCredentials` y llama a `mutation.mutate({ username, password: newPassword })`, que es la misma mutación del login y el mismo `onSuccess` (sesión, permisos y navegación).
+   - Expone `expiredCredentials`, `closeExpiredDialog()` (las borra) y `handlePasswordRenewed()`.
+   - `handlePasswordRenewed` borra `expiredCredentials` y el banner, y vacía el campo `password` del formulario con `resetField`. El `username` queda escrito. No inicia sesión.
    - Las credenciales del intento salen de las `variables` del `onError` (`onError(error, variables)`), no de releer el formulario.
-7. En `LoginCard.tsx`, montar `<ExpiredPasswordDialog>` cuando `expiredCredentials` no es `null`, con `onRenewed={loginAfterRenewal}` y `onClose={closeExpiredDialog}`. Prueba manual contra el backend del SPEC 33: un usuario con `password_vence_en = NOW()` abre el diálogo, renueva y entra a `/`.
-8. Cubrir el fallo del login automático. Si `loginAfterRenewal` falla, el diálogo ya está cerrado y el error se pinta en el banner del `LoginCard` con el mensaje que trae, como cualquier login fallido. La contraseña ya cambió, así que el usuario reintenta con la nueva.
+7. En `LoginCard.tsx`, montar `<ExpiredPasswordDialog>` cuando `expiredCredentials` no es `null`, con `onRenewed={handlePasswordRenewed}` y `onClose={closeExpiredDialog}`. Prueba manual contra el backend del SPEC 33: un usuario con `password_vence_en = NOW()` abre el diálogo, renueva, vuelve al login e ingresa con la nueva hasta `/`.
+8. Después de renovar, el ingreso es un login normal: si falla, el error se pinta en el banner del `LoginCard` como cualquier login fallido. No hace falta código propio.
 9. Actualizar `CLAUDE.md`: una sección breve del flujo, que explique que el 403 de login se distingue por `body.passwordVencida`, que las credenciales viven solo en memoria, y que `useLogin` y `useRenewPassword` traen `onError` propio.
 
 ---
 
 ## Criterios de aceptación
 
-- [ ] `npx tsc --noEmit` y `npm run test` pasan.
-- [ ] Un usuario con la contraseña vigente ingresa igual que antes de este spec, sin ver el diálogo.
-- [ ] Credenciales incorrectas siguen mostrando el banner rojo del login, y el diálogo no se abre.
-- [ ] Un usuario con la contraseña vencida y la contraseña correcta ve el `ExpiredPasswordDialog` encima del login, y el banner rojo **no** aparece.
-- [ ] Un 403 sin `passwordVencida: true` en el cuerpo se pinta en el banner y no abre el diálogo.
-- [ ] El diálogo pide solo la contraseña nueva y su confirmación. No pide usuario ni contraseña actual.
-- [ ] El checklist marca cada regla en cuanto se cumple: 8+ caracteres, mayúscula, número, distinta de la actual y confirmación igual.
-- [ ] "Cambiar contraseña" queda deshabilitado mientras alguna regla falla.
-- [ ] Escribir como nueva la misma contraseña del login deja la regla "Distinta de la contraseña actual" sin cumplir y el botón deshabilitado.
-- [ ] La petición a `POST /auth/renovar-password` sale sin header `Authorization` y con `{ username, password_actual, password_nueva }`.
-- [ ] Al renovar con éxito, el usuario termina en `/` con sesión iniciada y permisos cargados, sin volver a escribir nada.
-- [ ] Después de renovar, el login con la contraseña vieja da 401 y con la nueva da 200.
-- [ ] Un 401 o 400 de la renovación se pinta dentro del diálogo, sin toast, y el diálogo sigue abierto.
-- [ ] Cancelar, la X y Esc cierran el diálogo y vuelven al login sin sesión.
-- [ ] Mientras la renovación está en curso, el diálogo no se puede cerrar.
-- [ ] Después de cerrar el diálogo, volver a ingresar con la contraseña vencida lo abre de nuevo.
-- [ ] Las credenciales del intento vencido no aparecen en `localStorage`.
-- [ ] Contra un backend sin el SPEC 33, el login funciona igual que hoy.
+- [X] `npx tsc --noEmit` y `npm run test` pasan.
+- [X] Un usuario con la contraseña vigente ingresa igual que antes de este spec, sin ver el diálogo.
+- [X] Credenciales incorrectas siguen mostrando el banner rojo del login, y el diálogo no se abre.
+- [X] Un usuario con la contraseña vencida y la contraseña correcta ve el `ExpiredPasswordDialog` encima del login, y el banner rojo **no** aparece.
+- [X] Un 403 sin `passwordVencida: true` en el cuerpo se pinta en el banner y no abre el diálogo.
+- [X] El diálogo pide solo la contraseña nueva y su confirmación. No pide usuario ni contraseña actual.
+- [X] El checklist marca cada regla en cuanto se cumple: 8+ caracteres, mayúscula, número, distinta de la actual y confirmación igual.
+- [X] "Cambiar contraseña" queda deshabilitado mientras alguna regla falla.
+- [X] Escribir como nueva la misma contraseña del login deja la regla "Distinta de la contraseña actual" sin cumplir y el botón deshabilitado.
+- [X] La petición a `POST /auth/renovar-password` sale sin header `Authorization` y con `{ username, password_actual, password_nueva }`.
+- [X] Al renovar con éxito sale un toast de éxito, el diálogo se cierra, no hay sesión iniciada y el campo de contraseña del login queda vacío con el usuario escrito.
+- [X] Ingresando a mano con la contraseña nueva, el usuario termina en `/` con sesión y permisos cargados.
+- [X] Después de renovar, el login con la contraseña vieja da 401 y con la nueva da 200.
+- [X] Un 401 o 400 de la renovación se pinta dentro del diálogo, sin toast, y el diálogo sigue abierto.
+- [X] Cancelar, la X y Esc cierran el diálogo y vuelven al login sin sesión.
+- [X] Mientras la renovación está en curso, el diálogo no se puede cerrar.
+- [X] Después de cerrar el diálogo, volver a ingresar con la contraseña vencida lo abre de nuevo.
+- [X] Las credenciales del intento vencido no aparecen en `localStorage`.
+- [X] Contra un backend sin el SPEC 33, el login funciona igual que hoy.
 
 ---
 
@@ -225,8 +226,9 @@ Se apoya en `CustomDialog` con `size="sm"`. Lleva:
 - **Sí:** reutilizar `CustomDialog`. Ya es la base de nueve diálogos del proyecto.
 - **Sí:** el diálogo pide solo la nueva y la confirmación. Decisión del usuario. El 403 garantiza que las credenciales que se acaban de escribir son válidas.
 - **No:** volver a pedir la contraseña actual. Repetiría algo que se validó un segundo antes.
-- **Sí:** login automático después de renovar, reutilizando la mutación de `useLogin`. Decisión del usuario. Hay un solo camino de entrada: el mismo `onSuccess`, los mismos permisos y la misma navegación.
-- **No:** cerrar y que el usuario ingrese a mano. Agrega un paso sin ganar nada.
+- **Sí:** después de renovar, cerrar el diálogo y que el usuario ingrese a mano con la nueva. Decisión del usuario, revisada durante la implementación (reemplaza al login automático). El usuario confirma que conoce la contraseña nueva y entra por el único camino de entrada que ya existe.
+- **Sí:** un `toast.success` y el campo de contraseña del login vacío. Sin vaciarlo, la contraseña vieja sigue escrita y el siguiente intento da 401.
+- **No:** login automático con la contraseña nueva. Era la decisión original; se descartó.
 - **Sí:** el diálogo se puede cerrar. Decisión del usuario. Sin token no hay acceso, así que bloquearlo no protege nada y solo atrapa al usuario.
 - **No:** un diálogo bloqueante como el `PrintTicketDialog`. Allá el bloqueo protege un bulto sin etiqueta; acá no protege nada.
 - **Sí:** checklist en vivo. Decisión del usuario. Las reglas son cuatro y conocidas, y mostrarlas antes evita un 400 por cada intento.
@@ -246,7 +248,7 @@ Se apoya en `CustomDialog` con `size="sm"`. Lleva:
 | --- | --- |
 | El front se despliega antes que el backend del SPEC 33 | No se rompe nada. El 403 no llega nunca, el diálogo no se abre y `passwordVencida` es opcional. |
 | El backend se despliega antes que este spec | **Ningún usuario nuevo puede entrar**: nace vencido, y el 403 se pinta en el banner sin salida. Hay que desplegar este spec **antes o junto** con el backend. |
-| La renovación sale bien y el login automático falla (red, timeout) | La contraseña ya cambió. El paso 8 pinta el error en el banner del login y el usuario reintenta con la nueva. |
+| La renovación sale bien y el usuario intenta ingresar con la vieja | El campo de contraseña queda vacío y el toast le pide la nueva. Si igual escribe la vieja, el backend da 401 y se pinta en el banner. |
 | La contraseña en claro queda en memoria mientras el diálogo está abierto | Es la misma que ya está en el formulario del login. Se borra al cerrar o al renovar, y nunca se persiste. |
 | El checklist del front y las reglas del backend se desalinean | El backend vuelve a validar y su 400 se pinta en el diálogo. Si cambian las reglas en `RenovarPasswordDto`, hay que tocar `createRenewPasswordSchema`. |
 | El campo `username` del login usa `uppercase` y el usuario se guardó en minúsculas | El diálogo manda el mismo valor que mandó el login, que el backend acaba de aceptar. No se transforma de nuevo. |
