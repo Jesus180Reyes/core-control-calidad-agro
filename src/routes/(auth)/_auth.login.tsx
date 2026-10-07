@@ -8,7 +8,17 @@ export const Route = createFileRoute('/(auth)/_auth/login')({
 })
 
 function LoginPage() {
-    const { control, onSubmit, enviando, errorLogin, verPassword, alternarVerPassword } = useLogin()
+    const {
+        control,
+        onSubmit,
+        enviando,
+        errorLogin,
+        verPassword,
+        alternarVerPassword,
+        expiredCredentials,
+        closeExpiredDialog,
+        loginAfterRenewal,
+    } = useLogin()
 
     return (
         <LoginCard
@@ -18,6 +28,9 @@ function LoginPage() {
             errorLogin={errorLogin}
             verPassword={verPassword}
             alternarVerPassword={alternarVerPassword}
+            expiredCredentials={expiredCredentials}
+            closeExpiredDialog={closeExpiredDialog}
+            loginAfterRenewal={loginAfterRenewal}
         />
     )
 }
