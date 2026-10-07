@@ -7,9 +7,16 @@ import { useExecuteMutation } from '#/presentation/hooks/shared/useExecuteMutati
 import { useAuth } from '#/presentation/hooks/auth/useAuth'
 import { guardarPermisos } from '#/presentation/hooks/auth/almacenamientoSesion'
 import { loginSchema, type LoginFormValues } from '#/presentation/hooks/auth/loginSchema'
+import { isExpiredPasswordError } from '#/presentation/hooks/auth/passwordVencida'
 import { httpGet, mensajeDeError } from '#/infrastructure/http/http-client'
 import type { LoginResponse, PermisosResponse } from '#/presentation/types/auth/auth.types'
 import { advertirPermisosDesconocidos } from '#/presentation/types/auth/permissions'
+
+/** Las credenciales del intento que dio el 403 de contraseña vencida (SPEC 14). */
+export interface ExpiredCredentials {
+    username: string
+    password: string
+}
 
 interface UseLoginResult {
     control: Control<LoginFormValues>
@@ -18,6 +25,11 @@ interface UseLoginResult {
     errorLogin: string | null
     verPassword: boolean
     alternarVerPassword: () => void
+    /** Con valor, el `ExpiredPasswordDialog` está abierto. */
+    expiredCredentials: ExpiredCredentials | null
+    closeExpiredDialog: () => void
+    /** Cierra el diálogo después de renovar y deja el login listo para la nueva. */
+    handlePasswordRenewed: () => void
 }
 
 export function useLogin(): UseLoginResult {
@@ -26,8 +38,11 @@ export function useLogin(): UseLoginResult {
     const [verPassword, setVerPassword] = useState(false)
     const [errorLogin, setErrorLogin] = useState<string | null>(null)
     const [cargandoPermisos, setCargandoPermisos] = useState(false)
+    // Solo en memoria: una contraseña en claro no se persiste en ningún lado.
+    // Se borran al cerrar el diálogo y al renovar.
+    const [expiredCredentials, setExpiredCredentials] = useState<ExpiredCredentials | null>(null)
 
-    const { control, handleSubmit } = useForm<LoginFormValues>({
+    const { control, handleSubmit, resetField } = useForm<LoginFormValues>({
         resolver: zodResolver(loginSchema),
         mode: 'onChange',
         reValidateMode: 'onChange',
@@ -57,7 +72,16 @@ export function useLogin(): UseLoginResult {
         },
         // Con `onError` propio no sale el toast automático: el login pinta el
         // error dentro del formulario, no flotando.
-        onError: (error) => {
+        onError: (error, variables) => {
+            // El 403 de contraseña vencida solo llega con la contraseña correcta:
+            // las credenciales del intento son válidas y las reutiliza el diálogo.
+            // Salen de `variables` y no del formulario, para que sean exactamente
+            // las que dieron el 403.
+            if (isExpiredPasswordError(error)) {
+                setExpiredCredentials({ username: variables.username, password: variables.password })
+                return
+            }
+
             setErrorLogin(mensajeDeError(error))
         },
     })
@@ -67,6 +91,15 @@ export function useLogin(): UseLoginResult {
         mutation.mutate(data)
     })
 
+    // La renovación no inicia sesión: se cierra el diálogo y el usuario ingresa
+    // a mano con la nueva. El campo de contraseña se vacía para que no reintente
+    // con la vieja, que sigue escrita; el usuario queda como estaba.
+    const handlePasswordRenewed = () => {
+        setExpiredCredentials(null)
+        setErrorLogin(null)
+        resetField('password')
+    }
+
     return {
         control,
         onSubmit,
@@ -74,5 +107,8 @@ export function useLogin(): UseLoginResult {
         errorLogin,
         verPassword,
         alternarVerPassword: () => setVerPassword((valor) => !valor),
+        expiredCredentials,
+        closeExpiredDialog: () => setExpiredCredentials(null),
+        handlePasswordRenewed,
     }
 }

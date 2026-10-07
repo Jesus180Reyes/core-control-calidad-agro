@@ -101,6 +101,18 @@ Dónde se aplican hoy:
 - **Acciones.** Los botones de crear, aprobar y rechazar, y los menús de fila (`ClientRowActions`, `PesajeRowActions`, `DocumentoFiscalRowActions`), van detrás de un `<Can>`.
 - **Rutas, no.** No hay guard de permisos en ninguna ruta: quien escribe la URL a mano entra a la pantalla, y lo frena el backend.
 
+### Contraseña vencida (SPEC 14)
+
+El backend vence las contraseñas (SPEC 33 de allá), y todo usuario creado con `POST /auth/register` **nace vencido**: sin este flujo, ningún usuario nuevo entra. `POST /auth/login` con la contraseña correcta y vencida responde **403** con `passwordVencida: true` en el cuerpo, sin token.
+
+- **Se distingue por el cuerpo, no solo por el status.** `isExpiredPasswordError` (`hooks/auth/passwordVencida.ts`) pide `esProhibido` **y** `body.passwordVencida === true`; un 403 por otro motivo sigue al banner del login. Vive en `presentation/` y no en `http-errors.ts`, porque `core/` no conoce el dominio.
+- **El 403 solo llega con la contraseña correcta.** Por eso el `ExpiredPasswordDialog` (`components/auth/`) no vuelve a pedir usuario ni contraseña actual: `useLogin.onError` guarda las del intento —sacadas de `variables`, no del formulario— en `expiredCredentials`, y el diálogo se monta mientras eso no es `null`.
+- **Las credenciales viven solo en memoria**, en ese `useState`. Nunca en `localStorage` ni en la sesión. Se borran al cerrar el diálogo y al renovar.
+- **`POST /auth/renovar-password`** es público y no devuelve token, y **renovar no inicia sesión**. `useRenewPassword` pinta el `toast.success` y `handlePasswordRenewed` cierra el diálogo y vacía el campo de contraseña del login (con `resetField`; el usuario queda escrito): el usuario ingresa a mano con la nueva, por el login de siempre. Sin vaciarlo, la vieja sigue escrita y el próximo intento es un 401.
+- **`useLogin` y `useRenewPassword` traen `onError` propio**, así que ninguno de los dos toastea un error: el login pinta en su banner y la renovación dentro del diálogo, que sigue abierto.
+- `createRenewPasswordSchema(currentPassword)` es una factory porque "distinta de la actual" se valida en el front. Sus mensajes (`RENEW_PASSWORD_MESSAGES`) son a la vez el checklist del diálogo, y repiten las reglas de `RenovarPasswordDto` del backend: si cambian allá, se tocan acá.
+- El diálogo se puede cerrar (Cancelar, X, Esc) salvo con la renovación en curso. No es bloqueante como el `PrintTicketDialog`: sin token no hay acceso, así que trabarlo no protege nada.
+
 ### Rutas
 
 Grupos `(auth)` y `(portal)` con layouts pathless: `(portal)/_portal.tsx` monta el `Sidebar` + `<Outlet/>` y hace el guard de sesión: `beforeLoad` redirige a `/login` si no hay token en `localStorage` (la ruta es `ssr: false`), y un efecto sobre `estaAutenticado` cubre el cierre de sesión con la pantalla ya abierta. El guard mira sólo la sesión, no los permisos (ver Permisos). La portada es `_portal.index.tsx` → `/`, que monta `HomeView`. Las rutas hijas son archivos planos con punto: `_portal.control-calidad.tsx` → `/control-calidad`. Las URLs no incluyen el grupo ni el layout.

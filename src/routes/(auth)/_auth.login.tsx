@@ -1,4 +1,4 @@
-import { createFileRoute } from '@tanstack/react-router'
+﻿import { createFileRoute } from '@tanstack/react-router'
 
 import { useLogin } from '#/presentation/hooks/auth/useLogin'
 import { LoginCard } from '#/presentation/views/auth/LoginCard'
@@ -8,7 +8,17 @@ export const Route = createFileRoute('/(auth)/_auth/login')({
 })
 
 function LoginPage() {
-    const { control, onSubmit, enviando, errorLogin, verPassword, alternarVerPassword } = useLogin()
+    const {
+        control,
+        onSubmit,
+        enviando,
+        errorLogin,
+        verPassword,
+        alternarVerPassword,
+        expiredCredentials,
+        closeExpiredDialog,
+        handlePasswordRenewed,
+    } = useLogin()
 
     return (
         <LoginCard
@@ -18,6 +28,9 @@ function LoginPage() {
             errorLogin={errorLogin}
             verPassword={verPassword}
             alternarVerPassword={alternarVerPassword}
+            expiredCredentials={expiredCredentials}
+            closeExpiredDialog={closeExpiredDialog}
+            handlePasswordRenewed={handlePasswordRenewed}
         />
     )
 }

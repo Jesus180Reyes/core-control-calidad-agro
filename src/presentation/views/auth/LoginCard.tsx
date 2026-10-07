@@ -1,8 +1,10 @@
-import type { ReactNode } from 'react'
+﻿import type { ReactNode } from 'react'
 import type { Control } from 'react-hook-form'
 
+import { ExpiredPasswordDialog } from '#/presentation/components/auth/ExpiredPasswordDialog'
 import { ControlledInput } from '#/presentation/components/shared/inputs/ControlledInput'
 import type { LoginFormValues } from '#/presentation/hooks/auth/loginSchema'
+import type { ExpiredCredentials } from '#/presentation/hooks/auth/useLogin'
 interface LoginCardProps {
     control: Control<LoginFormValues>
     onSubmit: () => void
@@ -10,9 +12,32 @@ interface LoginCardProps {
     errorLogin: string | null
     verPassword: boolean
     alternarVerPassword: () => void
+    expiredCredentials: ExpiredCredentials | null
+    closeExpiredDialog: () => void
+    handlePasswordRenewed: () => void
 }
-export function LoginCard({ control, onSubmit, enviando, errorLogin, verPassword, alternarVerPassword }: LoginCardProps) {
+export function LoginCard({
+    control,
+    onSubmit,
+    enviando,
+    errorLogin,
+    verPassword,
+    alternarVerPassword,
+    expiredCredentials,
+    closeExpiredDialog,
+    handlePasswordRenewed,
+}: LoginCardProps) {
     return (
+        <>
+        {expiredCredentials && (
+            <ExpiredPasswordDialog
+                username={expiredCredentials.username}
+                currentPassword={expiredCredentials.password}
+                onRenewed={handlePasswordRenewed}
+                onClose={closeExpiredDialog}
+            />
+        )}
+
         <div className="w-full max-w-sm md:max-w-4xl grid md:grid-cols-2 overflow-hidden bg-surface border border-border-ui/60 rounded-[28px] md:rounded-4xl shadow-clay-card transition-colors duration-300">
             <BrandPanel />
 
@@ -100,6 +125,7 @@ export function LoginCard({ control, onSubmit, enviando, errorLogin, verPassword
                 </p>
             </div>
         </div>
+        </>
     )
 }
 
