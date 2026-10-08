@@ -134,14 +134,14 @@ function WelcomeHero({ nombreCompleto, rol }: WelcomeHeroProps) {
     const fecha = new Intl.DateTimeFormat('es', { weekday: 'long', day: 'numeric', month: 'long' }).format(ahora)
 
     return (
-        <section className="relative overflow-hidden rounded-[32px] bg-linear-to-br from-brand via-brand/90 to-brand/65 p-7 text-white shadow-clay-card sm:p-10">
+        <section className="relative overflow-hidden rounded-4xl bg-linear-to-br from-brand via-brand/90 to-brand/65 p-7 text-white shadow-clay-card sm:p-10">
             {/* Resplandores decorativos, fuera del flujo. */}
             <span aria-hidden className="pointer-events-none absolute -right-16 -top-20 size-72 rounded-full bg-white/10 blur-3xl" />
             <span aria-hidden className="pointer-events-none absolute -bottom-24 left-1/3 size-64 rounded-full bg-emerald-300/15 blur-3xl" />
             <Scale
                 aria-hidden
                 strokeWidth={1.2}
-                className="pointer-events-none absolute -bottom-10 -right-6 size-56 text-white/8 rotate-[-12deg] sm:size-72"
+                className="pointer-events-none absolute -bottom-10 -right-6 size-56 text-white/8 -rotate-12 sm:size-72"
             />
 
             <div className="relative flex flex-col gap-8 md:flex-row md:items-end md:justify-between">
@@ -198,7 +198,7 @@ function QuickActionCard({ action, index }: { action: QuickAction; index: number
             to={action.to}
             style={{ animationDelay: `${150 + index * 70}ms`, animationDuration: '420ms' }}
             className={
-                'group relative flex flex-col gap-4 overflow-hidden rounded-[24px] border border-border-ui/60 bg-surface p-5 ' +
+                'group relative flex flex-col gap-4 overflow-hidden rounded-3xl border border-border-ui/60 bg-surface p-5 ' +
                 'shadow-clay-card outline-none transition-all duration-200 ease-out hover:-translate-y-1 hover:border-brand/30 ' +
                 'active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-brand/40 ' +
                 'animate-in fade-in slide-in-from-bottom-3 fill-mode-both'
@@ -267,7 +267,7 @@ function MiradorCard() {
 
             {/* Un tablero isométrico en miniatura: cuatro casillas y una pila de fichas. */}
             <div aria-hidden className="relative grid h-24 w-36 shrink-0 place-items-center">
-                <div className="grid rotate-x-[55deg] rotate-z-[-35deg] grid-cols-4 gap-1 rounded-xl bg-brand/12 p-1.5 transition-transform duration-500 group-hover:rotate-z-[-28deg] [transform-style:preserve-3d]">
+                <div className="grid rotate-x-55 rotate-z-[-35deg] grid-cols-4 gap-1 rounded-xl bg-brand/12 p-1.5 transition-transform duration-500 group-hover:rotate-z-[-28deg] transform-3d">
                     {['bg-success', 'bg-warning', 'bg-brand/50', 'bg-text-muted/40'].map((color, i) => (
                         <span key={i} className="grid size-6 place-items-center rounded-md bg-surface shadow-clay-btn">
                             <span className={`size-3 rounded-full ${color}`} />

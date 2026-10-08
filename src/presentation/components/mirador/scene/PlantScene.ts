@@ -521,7 +521,7 @@ export class PlantScene {
             const m = o as THREE.Mesh
             if (m.isMesh) {
                 geometrias.add(m.geometry)
-                ;(Array.isArray(m.material) ? m.material : [m.material]).forEach((x) => materiales.add(x))
+                    ; (Array.isArray(m.material) ? m.material : [m.material]).forEach((x) => materiales.add(x))
             }
         })
         geometrias.forEach((g) => g.dispose())
@@ -830,7 +830,7 @@ export class PlantScene {
         const terminar = () => {
             this.scene.remove(cv.group)
             this.themed.delete(cv.theme)
-            ;[cv.topMat, cv.sideMat, cv.contMat, cv.ribMat].forEach((m) => m.dispose())
+                ;[cv.topMat, cv.sideMat, cv.contMat, cv.ribMat].forEach((m) => m.dispose())
             cv.flowMat.map?.dispose()
             cv.flowMat.dispose()
         }
@@ -874,7 +874,7 @@ export class PlantScene {
         const d = lv.data
         const pct = d.bultos ? ((d.bultos - d.bultos_fuera_rango) / d.bultos) * 100 : null
         const color = this.clients.get(lv.clientId)?.color ?? '#888'
-        lv.label.el.innerHTML = `<i class="size-[7px] rounded-full" style="background:${color}"></i><b class="font-mono text-[11px] font-semibold">${escapar(d.nombre_lote)}</b>`
+        lv.label.el.innerHTML = `<i class="size-1.75 rounded-full" style="background:${color}"></i><b class="font-mono text-[11px] font-semibold">${escapar(d.nombre_lote)}</b>`
             + `<span class="tabular-nums opacity-70">${nf0.format(d.bultos)}${pct === null ? '' : ` · ${nf0.format(pct)}%`}</span>`
     }
 
@@ -1106,7 +1106,7 @@ export class PlantScene {
         const valor = l.value === null ? '—.——' : nf2.format(l.value)
         this.lcdLabel.el.innerHTML =
             `<div class="flex items-center justify-between gap-3 font-mono text-[10px] uppercase tracking-[0.08em] text-[#5E8E72]">`
-            + `<span class="flex items-center gap-1.5"><i class="inline-block size-[7px] rounded-full ${PUNTO_VISOR[l.level]}"></i>Estación 1</span><span>${escapar(l.status)}</span></div>`
+            + `<span class="flex items-center gap-1.5"><i class="inline-block size-1.75 rounded-full ${PUNTO_VISOR[l.level]}"></i>Estación 1</span><span>${escapar(l.status)}</span></div>`
             + `<div class="mt-0.5 text-right font-mono text-[26px] font-semibold leading-tight tabular-nums">${valor}<small class="ml-1 text-xs text-[#5E8E72]">${escapar(l.unit)}</small></div>`
             + `<div class="flex justify-between gap-2.5 font-mono text-[10.5px] text-[#5E8E72]"><span>${escapar(l.user)}</span><span>${escapar(l.lot)}</span></div>`
     }

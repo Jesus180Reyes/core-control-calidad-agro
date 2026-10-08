@@ -25,8 +25,8 @@ const LEYENDA = [
 
 function Persona({ color }: { color: string }) {
     return (
-        <span className="relative mt-2 h-[18px] w-3 rounded-t-[6px] rounded-b-[3px] border border-border-ui" style={{ background: color }}>
-            <span className="absolute -top-2 left-1/2 size-[9px] -translate-x-1/2 rounded-full bg-[#D9A97E]" />
+        <span className="relative mt-2 h-4.5 w-3 rounded-t-md rounded-b-[3px] border border-border-ui" style={{ background: color }}>
+            <span className="absolute -top-2 left-1/2 size-2.25 -translate-x-1/2 rounded-full bg-[#D9A97E]" />
         </span>
     )
 }
@@ -53,7 +53,7 @@ export function PlantSummaryPanel({ snapshot, slots, onSelect }: PlantSummaryPan
                                 <ClientSwatch name={c.nombre} color={color} className="row-span-2 size-8 rounded-[10px] text-xs" />
                                 <b className="truncate text-[13.5px] font-semibold text-text-main">{c.nombre}</b>
                                 <em className="text-xs not-italic text-text-muted tabular-nums">{nf0.format(bultosActivos(c))} bultos</em>
-                                <span className="col-span-2 grid grid-cols-4 gap-[3px]">
+                                <span className="col-span-2 grid grid-cols-4 gap-0.75">
                                     {ACTIVE_STAGES.map((etapa) => {
                                         const n = c.lotes.filter((l) => l.etapa === etapa).length
                                         return (
