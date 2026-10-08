@@ -4,18 +4,12 @@ import type { LucideIcon } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import {
-    Command,
-    CommandEmpty,
-    CommandGroup,
-    CommandInput,
-    CommandItem,
-    CommandList,
-} from '@/components/ui/command'
-import {
-    Popover,
-    PopoverContent,
-    PopoverTrigger,
-} from '@/components/ui/popover'
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 import type { Cliente } from '#/presentation/types/clientes/clientes.types'
 import { useNavigate } from '@tanstack/react-router'
 import { RejectClienteDialog } from '#/presentation/components/inspeccion-clientes/RejectClienteDialog'
@@ -30,6 +24,13 @@ interface RowAction {
     icon: LucideIcon
     run: () => void
     permission?: Permission
+    /** `destructive` la pinta en rojo. */
+    variant?: 'default' | 'destructive'
+    /**
+     * Abre un bloque nuevo con una línea encima. Va en el item y no aparte para
+     * que el `<Can>` que lo esconde se lleve también su línea.
+     */
+    separatorBefore?: boolean
 }
 
 type ItemActionSelected = 'RECHAZAR_CLIENTE' | 'EDITAR_CLIENTE' | 'VER_REPORTE_LOTES' | null;
@@ -71,6 +72,8 @@ export function ClientRowActions({ cliente }: ClientRowActionsProps) {
             icon: Trash,
             run: () => setselectedAction('RECHAZAR_CLIENTE'),
             permission: PERMISSIONS.RECHAZARCLIENTE,
+            variant: 'destructive',
+            separatorBefore: true,
 
         },
     ]
@@ -108,51 +111,43 @@ function RowActionsMenu({
     actions,
 }: RowActionsMenuProps) {
     return (
-        <Popover open={open} onOpenChange={onOpenChange}>
-            <PopoverTrigger
+        <DropdownMenu open={open} onOpenChange={onOpenChange}>
+            <DropdownMenuTrigger
                 render={
                     <Button
                         variant="ghost"
-                        size="icon"
-                        // 44 px en el teléfono: es el mínimo cómodo para un dedo.
-                        className="size-11 md:size-8"
+                        size="icon-sm"
                         aria-label={triggerLabel}
+                        // 44 px en el teléfono: es el mínimo cómodo para un dedo.
+                        className="size-11 md:size-7 text-text-muted transition-colors hover:text-text-main data-popup-open:bg-muted data-popup-open:text-text-main"
                     />
                 }
             >
                 <MoreHorizontal />
-            </PopoverTrigger>
+            </DropdownMenuTrigger>
 
-            <PopoverContent
-                align="start"
-                className="w-56 gap-0 p-0 duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] data-open:blur-in-2 data-closed:duration-100 data-closed:ease-in"
+            <DropdownMenuContent
+                align="end"
+                sideOffset={6}
+                className="w-auto min-w-48 rounded-xl border border-border-ui p-1.5 shadow-lg ring-0 duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] data-closed:duration-100 data-closed:ease-in"
             >
-                <Command>
-                    <CommandInput placeholder="Buscar acción..." />
+                {actions.map(({ label, icon: Icon, run, permission, variant, separatorBefore }) => (
+                    <Can key={label} permission={permission}>
+                        {separatorBefore && (
+                            <DropdownMenuSeparator className="-mx-1.5 bg-border-ui first:hidden" />
+                        )}
 
-                    <CommandList>
-                        <CommandEmpty className="text-text-muted">
-                            Sin acciones.
-                        </CommandEmpty>
-
-                        <CommandGroup>
-                            {actions.map(({ label, icon: Icon, run, permission }) => (
-                                <Can key={label} permission={permission}>
-                                    <CommandItem
-                                        onSelect={() => {
-                                            onOpenChange(false)
-                                            run()
-                                        }}
-                                    >
-                                        <Icon />
-                                        {label}
-                                    </CommandItem>
-                                </Can>
-                            ))}
-                        </CommandGroup>
-                    </CommandList>
-                </Command>
-            </PopoverContent>
-        </Popover>
+                        <DropdownMenuItem
+                            variant={variant}
+                            className="gap-2.5 rounded-lg px-2 py-2 font-medium"
+                            onClick={run}
+                        >
+                            <Icon className="text-text-muted transition-colors" />
+                            {label}
+                        </DropdownMenuItem>
+                    </Can>
+                ))}
+            </DropdownMenuContent>
+        </DropdownMenu>
     )
 }
