@@ -1,5 +1,5 @@
 import { Link, useLocation } from '@tanstack/react-router'
-import { ChevronRight, ClipboardCheck, LogOut, Scale, ShieldCheck, SlidersHorizontal, Telescope, UserCog, Users } from 'lucide-react'
+import { ChevronRight, ClipboardCheck, LogOut, Scale, ShieldCheck, SlidersHorizontal, Telescope, Users } from 'lucide-react'
 import { useState } from 'react'
 
 import { AgriAvatar } from '#/presentation/components/agri/AgriAvatar'
@@ -119,18 +119,6 @@ export function SidebarContent({ onNavigate }: SidebarContentProps) {
             to: '/inspeccion-clientes',
             permission: PERMISSIONS.MODULOCLIENTES,
             icon: <Users className="size-4.5" strokeWidth={2.1} />,
-        },
-        {
-            label: 'Personal',
-            permission: PERMISSIONS.MODULOCONTROLCALIDAD,
-            icon: <UserCog className="size-4.5" strokeWidth={2.1} />,
-            children: [
-                {
-                    label: 'Colaboradores',
-                    to: '/colaboradores',
-                    rutasActivas: ['/colaboradores'],
-                },
-            ],
         },
     ]
 
