@@ -57,7 +57,7 @@ const CLASES_MARCA_HIJO_INACTIVA = 'h-1.5 w-[3px] bg-text-muted/35 group-hover/h
 
 export function Sidebar() {
     return (
-        <aside className="hidden md:flex w-72 h-[calc(100vh-2rem)] my-4 ml-4 bg-surface border border-border-ui/60 rounded-[28px] p-4 shadow-clay-card flex-col justify-between transition-colors animate-in fade-in slide-in-from-left-6 duration-500 ease-out">
+        <aside className="hidden md:flex sticky top-4 self-start shrink-0 w-72 h-[calc(100vh-2rem)] my-4 ml-4 bg-surface border border-border-ui/60 rounded-[28px] p-4 shadow-clay-card flex-col justify-between transition-colors animate-in fade-in slide-in-from-left-6 duration-500 ease-out">
             <SidebarContent />
         </aside>
     )
