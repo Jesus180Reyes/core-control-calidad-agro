@@ -169,7 +169,7 @@ export function PlantTwinView({ twin }: { twin: PlantTwin }) {
                     entries={activity}
                     collapsed={actividadPlegada}
                     onToggle={() => setActividadPlegada(!actividadPlegada)}
-                    className="absolute bottom-3 left-3 z-10 w-[340px]"
+                    className="absolute bottom-3 left-3 z-10 w-85"
                 />
             )}
 
