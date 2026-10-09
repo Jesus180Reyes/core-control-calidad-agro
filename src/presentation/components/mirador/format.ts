@@ -16,5 +16,9 @@ export const QUALITY_TEXT = { ok: 'text-success', desviado: 'text-warning', fuer
 export const QUALITY_BG = { ok: 'bg-success', desviado: 'bg-warning', fuera: 'bg-destructive' } as const
 export const QUALITY_LABEL = { ok: 'En rango', desviado: 'Desviado', fuera: 'Fuera de rango' } as const
 
-/** La tarjeta de vidrio del HUD del Mirador. */
-export const GLASS = 'pointer-events-auto rounded-2xl border border-border-ui/70 bg-surface/80 shadow-clay-card backdrop-blur-xl'
+/**
+ * La tarjeta de vidrio del HUD del Mirador. En pantallas táctiles va sin
+ * `backdrop-blur`: el canvas de abajo se repinta en cada frame y una tablet
+ * tendría que volver a desenfocarlo 60 veces por segundo por cada tarjeta.
+ */
+export const GLASS = 'pointer-events-auto rounded-2xl border border-border-ui/70 bg-surface/80 shadow-clay-card backdrop-blur-xl pointer-coarse:bg-surface/95 pointer-coarse:backdrop-blur-none'

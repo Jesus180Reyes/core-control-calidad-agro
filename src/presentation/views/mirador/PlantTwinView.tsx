@@ -138,7 +138,7 @@ export function PlantTwinView({ twin }: { twin: PlantTwin }) {
             {lateral ? (
                 <aside
                     aria-live="polite"
-                    className="absolute top-3 right-3 bottom-3 z-20 flex flex-col overflow-hidden rounded-[22px] border border-border-ui/70 bg-surface/92 shadow-clay-card backdrop-blur-xl"
+                    className="absolute top-3 right-3 bottom-3 z-20 flex flex-col overflow-hidden rounded-[22px] border border-border-ui/70 bg-surface/92 shadow-clay-card backdrop-blur-xl pointer-coarse:bg-surface/97 pointer-coarse:backdrop-blur-none"
                     style={{ width: PANEL_W }}
                 >
                     <div key={`${level}-${selection.clientId}-${selection.lotId}-${selection.weighingId}`} className="min-h-0 flex-1 overflow-y-auto p-5 animate-in fade-in slide-in-from-right-2 duration-300 motion-reduce:animate-none">
@@ -148,7 +148,7 @@ export function PlantTwinView({ twin }: { twin: PlantTwin }) {
             ) : (
                 <aside
                     aria-live="polite"
-                    className="absolute inset-x-0 bottom-0 z-20 flex flex-col overflow-hidden rounded-t-[22px] border border-border-ui/70 bg-surface/95 shadow-clay-card backdrop-blur-xl transition-[height] duration-300 ease-out motion-reduce:transition-none"
+                    className="absolute inset-x-0 bottom-0 z-20 flex flex-col overflow-hidden rounded-t-[22px] border border-border-ui/70 bg-surface/95 shadow-clay-card backdrop-blur-xl pointer-coarse:bg-surface/97 pointer-coarse:backdrop-blur-none transition-[height] duration-300 ease-out motion-reduce:transition-none"
                     style={{ height: altoHoja }}
                 >
                     <button

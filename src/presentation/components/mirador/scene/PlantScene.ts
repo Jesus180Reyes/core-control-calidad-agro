@@ -50,8 +50,12 @@ export interface SceneInsets {
 
 interface Label {
     el: HTMLDivElement
-    pos: () => THREE.Vector3
+    /** Escribe la posición en `out` en vez de crear un vector: corre por etiqueta en cada frame. */
+    pos: (out: THREE.Vector3) => THREE.Vector3
     show: boolean
+    /** Lo último que se escribió en el DOM, para no tocar el estilo si no cambió. */
+    visible: boolean
+    transform: string
 }
 
 interface ClientVisual {
@@ -152,8 +156,24 @@ function espacioEntreVuelos(n: number) {
     return Math.min(ESPACIO_MAX_VUELOS, Math.max(ESPACIO_MIN_VUELOS, ((INTERVALO_POLLING_MS / 1000) * 0.8) / n))
 }
 
+/**
+ * Escalones de calidad, de mayor a menor. El gobernador baja de a uno cuando la
+ * escena no sostiene `FPS_MINIMO`; nunca vuelve a subir, para no oscilar.
+ */
+const CALIDADES = [
+    { dpr: 2, sombras: true },
+    { dpr: 1.5, sombras: true },
+    { dpr: 1.5, sombras: false },
+    { dpr: 1, sombras: false },
+] as const
+/** Una pantalla chica arranca, como mínimo, acá: sin sombras, que cuestan más de lo que aportan. */
+const CALIDAD_ANGOSTA = 2
+const FPS_MINIMO = 45
+const VENTANA_FPS_S = 2
+
 const CLASES = {
-    cliente: 'pointer-events-auto cursor-pointer flex items-center gap-2.5 rounded-2xl border border-border-ui/80 bg-surface/95 py-1.5 pl-1.5 pr-3 shadow-clay-card backdrop-blur transition-opacity duration-200',
+    // Sin `backdrop-blur`: la etiqueta se mueve en cada frame y el desenfoque se recalcularía con ella.
+    cliente: 'pointer-events-auto cursor-pointer flex items-center gap-2.5 rounded-2xl border border-border-ui/80 bg-surface/95 py-1.5 pl-1.5 pr-3 shadow-clay-card transition-opacity duration-200',
     lote: 'pointer-events-auto cursor-pointer flex items-center gap-1.5 rounded-full border border-border-ui/80 bg-surface/95 px-2 py-0.5 text-[11px] text-text-main shadow-sm transition-opacity duration-200',
     loteActivo: '!bg-primary !text-primary-foreground !border-transparent',
     exceso: 'pointer-events-none rounded-full bg-text-main/80 px-2 py-0.5 text-[10px] font-bold text-surface transition-opacity duration-200',
@@ -178,6 +198,11 @@ export class PlantScene {
     private readonly labelsLayer: HTMLElement
     private readonly callbacks: PlantSceneCallbacks
     private readonly reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    /** Tablets y teléfonos: GPU más chica para la misma resolución, así que arrancan un escalón abajo. */
+    private readonly tactil = window.matchMedia('(pointer: coarse)').matches
+    private calidad = this.tactil ? 1 : 0
+    /** `gracia`: segundos sin medir, para no contar la compilación de shaders como lentitud. */
+    private readonly medicion = { t: 0, frames: 0, gracia: 3 }
     private palette: ScenePalette = readPalette()
     private readonly themed = new Set<Themed>()
 
@@ -277,7 +302,7 @@ export class PlantScene {
 
         this.scene.add(this.hemi, this.sun, this.sun.target, this.rim, this.flyLight)
         this.sun.castShadow = true
-        this.sun.shadow.mapSize.set(2048, 2048)
+        this.sun.shadow.mapSize.setScalar(this.tactil ? 1024 : 2048)
         this.sun.shadow.radius = 4
         this.sun.shadow.bias = -0.0004
         this.sun.shadow.normalBias = 0.03
@@ -353,7 +378,7 @@ export class PlantScene {
         this.ayudante.root.rotation.y = Math.PI
         this.station.add(this.ayudante.root)
 
-        this.lcdLabel = this.addLabel(CLASES.visor, () => this.station.position.clone().add(new V3(-2.45, 4.0, -2.3)))
+        this.lcdLabel = this.addLabel(CLASES.visor, (o) => o.set(-2.45, 4.0, -2.3).add(this.station.position))
         this.renderLcd()
 
         this.scene.add(this.ambient)
@@ -754,7 +779,7 @@ export class PlantScene {
         })
 
         const iniciales = escapar(clientInitials(c.nombre))
-        const label = this.addLabel(CLASES.cliente, () => group.position.clone().add(new V3(STRIP_X0 + 1.2, TERR_TOP + 0.3, -3.5)), () => this.callbacks.onPick({ kind: 'cliente', clientId: c.id }))
+        const label = this.addLabel(CLASES.cliente, (o) => o.set(STRIP_X0 + 1.2, TERR_TOP + 0.3, -3.5).add(group.position),() => this.callbacks.onPick({ kind: 'cliente', clientId: c.id }))
         label.el.innerHTML = `<span class="grid size-7 shrink-0 place-items-center rounded-lg text-[11px] font-bold text-white shadow-[inset_0_-2px_0_rgba(0,0,0,0.18)]" style="background:${color}">${iniciales}</span>`
             + `<span class="leading-tight max-[699px]:hidden"><b class="block text-[13px] font-semibold tracking-tight text-text-main">${escapar(c.nombre)}</b>`
             + `<small class="block text-[11px] text-text-muted">${escapar(c.producto ?? '')}${c.codigo_exportacion ? ` · ${escapar(c.codigo_exportacion)}` : ''}</small></span>`
@@ -811,7 +836,7 @@ export class PlantScene {
             let label = cv.overflow.get(etapa)
             if (n > 0 && !label) {
                 const x = TILE_X[STAGE_INDEX[etapa]] + TILE_W / 2 - 0.6
-                label = this.addLabel(CLASES.exceso, () => cv.group.position.clone().add(new V3(x, TILE_TOP + 0.1, TILE_D / 2 - 0.5)))
+                label = this.addLabel(CLASES.exceso, (o) => o.set(x, TILE_TOP + 0.1, TILE_D / 2 - 0.5).add(cv.group.position))
                 cv.overflow.set(etapa, label)
             }
             if (label) {
@@ -857,7 +882,7 @@ export class PlantScene {
             picks: [base], tokens: new Map(), pulse: null, spin: null, people: [], truck: null, container: null,
             topY: 0.2, label: null as unknown as Label, pending: new Set(), moving: false,
         }
-        lv.label = this.addLabel(CLASES.lote, () => lv.group.position.clone().add(new V3(0, lv.topY + 0.45, 0)), () => this.callbacks.onPick({ kind: 'lote', clientId, lotId: lot.id }))
+        lv.label = this.addLabel(CLASES.lote, (o) => o.set(0, lv.topY + 0.45, 0).add(lv.group.position),() => this.callbacks.onPick({ kind: 'lote', clientId, lotId: lot.id }))
         this.lots.set(lot.id, lv)
         this.rebuildLot(lv)
         this.updateLotLabel(lv)
@@ -1306,20 +1331,47 @@ export class PlantScene {
         if (w === this.width && h === this.height) return
         this.width = w
         this.height = h
-        this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, this.narrow() ? 1.5 : 2))
-        // En pantallas chicas las sombras cuestan más de lo que aportan.
-        if (this.renderer.shadowMap.enabled === this.narrow()) {
-            this.renderer.shadowMap.enabled = !this.narrow()
-            this.scene.traverse((o) => {
-                const m = o as THREE.Mesh
-                if (m.isMesh) (Array.isArray(m.material) ? m.material : [m.material]).forEach((x) => { x.needsUpdate = true })
-            })
-        }
+        this.applyQuality()
         this.renderer.setSize(w, h)
         this.camera.aspect = w / h
         this.applyViewOffset()
         this.camera.updateProjectionMatrix()
         if (this.selection.clientId === null) this.focusCamera(false)
+    }
+
+    private qualityLevel() {
+        return Math.max(this.calidad, this.narrow() ? CALIDAD_ANGOSTA : 0)
+    }
+
+    private applyQuality() {
+        const q = CALIDADES[this.qualityLevel()]
+        this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, q.dpr))
+        if (this.renderer.shadowMap.enabled !== q.sombras) {
+            this.renderer.shadowMap.enabled = q.sombras
+            this.scene.traverse((o) => {
+                const m = o as THREE.Mesh
+                if (m.isMesh) (Array.isArray(m.material) ? m.material : [m.material]).forEach((x) => { x.needsUpdate = true })
+            })
+        }
+    }
+
+    /** Mide los cuadros por segundo reales y baja un escalón de calidad si no se sostienen. */
+    private governQuality(dt: number) {
+        const m = this.medicion
+        const nivel = this.qualityLevel()
+        if (nivel >= CALIDADES.length - 1) return
+        if (m.gracia > 0) { m.gracia -= dt; return }
+        // Una pausa del sistema (cambio de app, GC largo) no dice nada de la escena.
+        m.t += Math.min(dt, 0.25)
+        m.frames++
+        if (m.t < VENTANA_FPS_S) return
+        const fps = m.frames / m.t
+        m.t = 0
+        m.frames = 0
+        if (fps >= FPS_MINIMO) return
+        this.calidad = nivel + 1
+        this.applyQuality()
+        m.gracia = 1.5
     }
 
     private startIntro() {
@@ -1441,12 +1493,12 @@ export class PlantScene {
 
     // ================================================================ etiquetas
 
-    private addLabel(clases: string, pos: () => THREE.Vector3, onClick?: () => void): Label {
+    private addLabel(clases: string, pos: Label['pos'],onClick?: () => void): Label {
         const el = document.createElement('div')
         el.className = `absolute left-0 top-0 whitespace-nowrap will-change-transform ${clases}`
         this.labelsLayer.appendChild(el)
         if (onClick) el.addEventListener('click', (e) => { e.stopPropagation(); onClick() })
-        const label: Label = { el, pos, show: true }
+        const label: Label = { el, pos, show: true, visible: true, transform: '' }
         this.labels.push(label)
         return label
     }
@@ -1461,13 +1513,14 @@ export class PlantScene {
 
     private updateLabels() {
         for (const l of this.labels) {
-            if (!l.show) { l.el.style.visibility = 'hidden'; continue }
-            this.proyeccion.copy(l.pos()).project(this.camera)
-            if (this.proyeccion.z > 1) { l.el.style.visibility = 'hidden'; continue }
-            l.el.style.visibility = ''
+            let visible = l.show
+            if (visible) visible = l.pos(this.proyeccion).project(this.camera).z <= 1
+            if (visible !== l.visible) { l.visible = visible; l.el.style.visibility = visible ? '' : 'hidden' }
+            if (!visible) continue
             const x = ((this.proyeccion.x + 1) / 2) * this.width
             const y = ((1 - this.proyeccion.y) / 2) * this.height
-            l.el.style.transform = `translate(${x.toFixed(1)}px,${y.toFixed(1)}px) translate(-50%,-100%)`
+            const transform = `translate(${x.toFixed(1)}px,${y.toFixed(1)}px) translate(-50%,-100%)`
+            if (transform !== l.transform) { l.transform = transform; l.el.style.transform = transform }
         }
     }
 
@@ -1493,9 +1546,14 @@ export class PlantScene {
         if (this.running || this.disposed) return
         this.running = true
         this.last = performance.now()
+        this.medicion.t = 0
+        this.medicion.frames = 0
+        this.medicion.gracia = Math.max(this.medicion.gracia, 1)
         const frame = (now: number) => {
             if (!this.running) return
-            this.tick(Math.min(0.05, (now - this.last) / 1000))
+            const dt = (now - this.last) / 1000
+            this.tick(Math.min(0.05, dt))
+            this.governQuality(dt)
             this.last = now
             this.raf = requestAnimationFrame(frame)
         }
