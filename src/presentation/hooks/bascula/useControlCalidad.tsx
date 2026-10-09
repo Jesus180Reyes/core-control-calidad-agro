@@ -21,6 +21,13 @@ const BAUD_RATE = 9600
  */
 const AVISO_CONEXION_MS = 4000
 
+/**
+ * PIN del supervisor para autorizar un peso crítico. Vite lo inyecta en build
+ * time, así que viaja dentro del bundle: no es un secreto. Sin la variable no
+ * hay PIN que autorice —se falla cerrado, nunca con un valor por defecto—.
+ */
+const PIN_SUPERVISOR: string = import.meta.env.VITE_SUPERVISOR_PIN ?? ''
+
 export function useControlCalidad(cliente: Cliente | null, lote: Lote | null) {
     /**
      * La operación se deriva del cliente y del lote que llegan de
@@ -262,8 +269,7 @@ export function useControlCalidad(cliente: Cliente | null, lote: Lote | null) {
 
     /** El PIN sólo autoriza; el guardado ocurre al confirmar la tara. */
     const handleAutorizarConPin = (pinIngresado: string): boolean => {
-        const pinCorrecto = "1234"
-        if (pinIngresado !== pinCorrecto) return false
+        if (!PIN_SUPERVISOR || pinIngresado !== PIN_SUPERVISOR) return false
 
         setAutorizado(true)
         setTaraAbierta(true)
