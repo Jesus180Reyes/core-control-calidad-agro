@@ -5,7 +5,7 @@ import { useTheme } from "#/presentation/theme/ThemeProvider"
 
 const ESTILO_TOAST = [
   "relative! w-full! items-start! gap-3! overflow-hidden!",
-  "rounded-xl! border! border-border-ui! bg-surface! p-4! pl-5! text-text-main!",
+  "rounded-xl! border! border-border-ui! bg-surface! p-4! pr-11! pl-5! text-text-main!",
   "shadow-[0_12px_32px_-12px_rgba(15,23,42,0.35)]!",
   "before:absolute before:inset-y-0 before:left-0 before:w-1.5 before:content-['']",
 ].join(" ")
@@ -58,7 +58,7 @@ const Toaster = ({ ...props }: ToasterProps) => {
           content: "gap-0!",
           actionButton: "bg-brand! text-primary-foreground! font-medium!",
           cancelButton: "bg-muted! text-text-main! font-medium!",
-          closeButton: "border-border-ui! bg-surface! text-text-muted! hover:bg-muted! hover:text-text-main!",
+          closeButton: "top-3! right-3! left-auto! transform-none! size-6! rounded-md! border-0! bg-transparent! text-text-muted! hover:bg-muted! hover:text-text-main! [&_svg]:size-3.5!",
           success: "before:bg-success [&_[data-icon]]:text-success",
           error: "before:bg-destructive [&_[data-icon]]:text-destructive",
           warning: "before:bg-warning [&_[data-icon]]:text-warning",
