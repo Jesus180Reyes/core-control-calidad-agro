@@ -139,22 +139,22 @@ Se agrega un cuarto punto: el 400 de token.
 
 ## Criterios de aceptación
 
-- [ ] `VITE_SUPERVISOR_PIN` no aparece en `src/` ni en `.env.example`.
-- [ ] Con el peso estable sobre el máximo aparece el Bloqueo Crítico, igual que antes.
-- [ ] Un PIN válido llama a `POST /pesajes/validar-pin` con `{ pin }` y abre el diálogo de tara.
-- [ ] El diálogo de tara muestra "Autorizado por {supervisor}" con el `complete_name` que devolvió el backend.
-- [ ] Un PIN que no es de nadie pinta "El PIN ingresado es incorrecto." dentro del diálogo, vacía el campo, no lanza toast y no cierra la sesión.
-- [ ] Con el backend caído, el diálogo pinta "Error al validar el PIN. Intente de nuevo." y sigue abierto.
-- [ ] El guardado tras el PIN manda `autorizacion_token` en el body de `POST /pesajes`, y la fila queda con `aprobado_con_excepcion_por` igual al supervisor.
-- [ ] Un pesaje dentro del rango no manda `autorizacion_token` (la clave no está en el body).
-- [ ] Un pesaje bajo el mínimo se guarda sin bloqueo y sin token, como antes.
-- [ ] Si `POST /pesajes` responde 400 `La autorizacion ya fue utilizada`, se ve el toast rojo, se cierra la tara y vuelve el Bloqueo Crítico sin volver a pesar.
-- [ ] Un 400 de `POST /pesajes` por otro motivo (por ejemplo, un lote cerrado) deja la tara abierta como hoy y no vuelve a pedir el PIN.
-- [ ] Si la muestra se invalida con la tara abierta, la autorización se descarta y el siguiente peso estable sobre el máximo vuelve a pedir el PIN.
-- [ ] Cancelar la tara de un peso autorizado descarta la autorización.
-- [ ] Después de guardar, el pesaje siguiente sobre el máximo vuelve a pedir el PIN: el token no se reutiliza.
-- [ ] Un PIN pedido para un bruto sobre el máximo cuya tara deja el neto dentro del rango se guarda con 201, y la autorización queda sin usar en MySQL.
-- [ ] `npx tsc --noEmit` y `npm run test` pasan.
+- [X] `VITE_SUPERVISOR_PIN` no aparece en `src/` ni en `.env.example`.
+- [X] Con el peso estable sobre el máximo aparece el Bloqueo Crítico, igual que antes.
+- [X] Un PIN válido llama a `POST /pesajes/validar-pin` con `{ pin }` y abre el diálogo de tara.
+- [X] El diálogo de tara muestra "Autorizado por {supervisor}" con el `complete_name` que devolvió el backend.
+- [X] Un PIN que no es de nadie pinta "El PIN ingresado es incorrecto." dentro del diálogo, vacía el campo, no lanza toast y no cierra la sesión.
+- [X] Con el backend caído, el diálogo pinta "Error al validar el PIN. Intente de nuevo." y sigue abierto.
+- [X] El guardado tras el PIN manda `autorizacion_token` en el body de `POST /pesajes`, y la fila queda con `aprobado_con_excepcion_por` igual al supervisor.
+- [X] Un pesaje dentro del rango no manda `autorizacion_token` (la clave no está en el body).
+- [X] Un pesaje bajo el mínimo se guarda sin bloqueo y sin token, como antes.
+- [X] Si `POST /pesajes` responde 400 `La autorizacion ya fue utilizada`, se ve el toast rojo, se cierra la tara y vuelve el Bloqueo Crítico sin volver a pesar.
+- [X] Un 400 de `POST /pesajes` por otro motivo (por ejemplo, un lote cerrado) deja la tara abierta como hoy y no vuelve a pedir el PIN.
+- [X] Si la muestra se invalida con la tara abierta, la autorización se descarta y el siguiente peso estable sobre el máximo vuelve a pedir el PIN.
+- [X] Cancelar la tara de un peso autorizado descarta la autorización.
+- [X] Después de guardar, el pesaje siguiente sobre el máximo vuelve a pedir el PIN: el token no se reutiliza.
+- [X] Un PIN pedido para un bruto sobre el máximo cuya tara deja el neto dentro del rango se guarda con 201, y la autorización queda sin usar en MySQL.
+- [X] `npx tsc --noEmit` y `npm run test` pasan.
 
 ---
 
