@@ -97,7 +97,7 @@ Ocultar UI por permisos es comodidad, no control de acceso: `localStorage` es ed
 
 Dónde se aplican hoy:
 
-- **Navegación.** El `Sidebar` esconde cada item de `menuItems` (y cada hijo) cuyo `permission` no está en la sesión, y los items de Agri y del Mirador van envueltos en un `<Can>` (`USARCHATIA` y `VERMIRADOR3D`). La portada (`HomeView`) repite **los mismos destinos con los mismos permisos** en sus accesos rápidos y en las tarjetas de Agri y del Mirador: la portada no abre puertas que la barra lateral no muestra. Al agregar o mover un módulo, tocar los dos.
+- **Navegación.** El `Sidebar` esconde cada item de `menuItems` (y cada hijo) cuyo `permission` no está en la sesión, y los items de Agri y del Mirador van envueltos en un `<Can>` (`USARCHATIA` y `VERMIRADOR3D`). La portada (`HomeView`) repite **los mismos destinos con los mismos permisos** en sus accesos rápidos y en las tarjetas de Agri y del Mirador: la portada no abre puertas que la barra lateral no muestra. Al agregar o mover un módulo, tocar los dos. La excepción es Métricas (`VER-METRICAS`), que está en el `Sidebar` y a propósito no en la portada (SPEC 15).
 - **Acciones.** Los botones de crear, aprobar y rechazar, y los menús de fila (`ClientRowActions`, `PesajeRowActions`, `DocumentoFiscalRowActions`), van detrás de un `<Can>`.
 - **Rutas, no.** No hay guard de permisos en ninguna ruta: quien escribe la URL a mano entra a la pantalla, y lo frena el backend.
 
@@ -193,6 +193,18 @@ El indicador "en vivo" (`FOTO_VIEJA_MS`, 4 min) mira el `dataUpdatedAt` de la qu
 **Los pesajes vuelan repartidos en el intervalo.** Con `n` pesajes nuevos en una foto (como mucho `MAX_VUELOS`, 6), el espacio entre vuelos es `clamp(intervalo × 0,8 / n, 1,15 s, 12 s)`. Lo que quedó en cola al llegar la foto siguiente aterriza sin vuelo: la escena nunca se atrasa respecto del dato.
 
 **El detalle del lote sale de `GET /pesajes/byLote/:loteId`** (`useLotWeighings`, sobre `useGetInspeccionPesajes`), ordenado por `created_at` DESC, no por `id`. Lo pide `LotWeighingsLoader`, que se monta sólo con un lote seleccionado y tiene su propio `<Suspense>` y `ErrorBoundary`: suspender la vista desmontaría la escena 3D cada vez que se elige un lote. Le pasa los pesajes a la vista por `onLoad`, que los reparte entre el panel y la diana de la escena. `usePlantTwin` invalida esa query cuando una foto trae un `weighing-added` o `weighing-voided` del lote abierto.
+
+### Métricas de calidad (SPEC 15)
+
+`/metricas` es el tablero de calidad: `routes/(portal)/_portal.metricas.tsx` → `views/metricas/QualityMetricsDashboard.tsx` → `useQualityMetrics` sobre `GET /metricas/calidad` (SPEC 35 del backend). Filtra por período, cliente y operador.
+
+- **El permiso esconde un endpoint abierto.** `GET /metricas/calidad` responde a cualquier usuario autenticado. El item "Métricas" de `menuItems` (debajo de "Clientes") pide `VER-METRICAS` sólo para que un operario de báscula no tenga a la vista el rendimiento de los demás. El seed del permiso se corre a mano en la base del backend, y hay que volver a ingresar para verlo (SPEC 07). La portada no tiene acceso a Métricas.
+- **El front no calcula nada.** Porcentajes y desviaciones llegan con 2 decimales, y `null` sin datos, que se pinta "—" y nunca `0`. La desviación tiene signo: positiva es por encima del ideal (`warning`), negativa por debajo (`destructive`).
+- **El período del encabezado sale de la respuesta** (`metricas.periodo`), nunca del navegador, y el `YYYY-MM-DD` se parsea como fecha local con `parse` de `date-fns`.
+- **Los presets no mandan `hasta`.** `buildQualityMetricsParams` (`hooks/metricas/qualityMetricsParams.ts`, con tests): "30 días" no manda fechas (es el default del backend); 7d, 90d y "Este mes" mandan sólo `desde`, y el backend completa `hasta` con su `CURDATE()` en UTC. Si el navegador mandara su "hoy", de noche el rango terminaría un día antes que los datos. Nunca se manda un param vacío: el endpoint responde 400.
+- **Los filtros cambian en transición.** La ruta guarda dos copias: la de la barra cambia en el momento, y la del tablero en `startTransition`, así el tablero anterior queda atenuado (`opacity-60`, `aria-busy`) y no se cambia por un spinner. La primera carga sí suspende con `LoadingState`.
+- **La barra de filtros sobrevive al error.** Se pinta entre el header y las tarjetas (slot `filterBar`), y el fallback del `ErrorBoundary` del tablero la vuelve a pintar: cambiar un filtro desde ahí limpia el error. Tiene su propio `<Suspense>`, porque sus selectores (`useClientInspection()` sin página y `useGetCatalogosUsuarios()`) también suspenden. Aplica al cambiar, sin botón Buscar. El click en una fila de la tabla por cliente filtra el tablero por ese cliente.
+- **Los gráficos están hechos a mano**, con SVG y CSS en `components/metricas/`, sin librería de gráficos. Las pistas hundidas de anillos, barras y medidores usan el token `shadow-clay-inset`, cuyo inset claro sale de `--clay-inset-light` para que en oscuro no se vea como un halo. Los tonos y el formato numérico viven en `metricsStyles.ts` y `metricsFormat.ts`. Los estados de calidad se colorean por `codigo` (`IDEAL`/`MAXIMO`/`MINIMO`), nunca por id, y uno desconocido sale neutro. La escala de desviación tiene tope en ±50: un `peso_ideal` mal cargado aplastaría al resto contra el centro.
 
 ## Estilos
 
