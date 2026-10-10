@@ -372,27 +372,27 @@ Sin el seed, nadie ve el item, pero `/metricas` sigue funcionando para quien ent
 
 ## Criterios de aceptación
 
-- [ ] `npx tsc --noEmit` y `npm run test` pasan.
-- [ ] Con `VER-METRICAS`, el `Sidebar` (y el drawer móvil) muestra "Métricas" justo debajo de "Clientes", y queda marcado como activo en `/metricas`.
-- [ ] Sin `VER-METRICAS`, el item no aparece, pero `/metricas` escrito a mano carga igual.
-- [ ] Al entrar, el chip "30 días" está activo, la petición sale **sin** `desde` ni `hasta`, y el encabezado muestra el período que devolvió el backend.
-- [ ] "7 días", "90 días" y "Este mes" mandan solo `desde`, con la fecha local correcta, y nunca `hasta`.
-- [ ] "Personalizado" muestra los dos date pickers. Elegir fechas manda `desde`/`hasta` en `YYYY-MM-DD`.
-- [ ] Elegir un cliente o un operador manda `cliente_id` o `usuario_id`, y aparece su chip removible. Al quitar el chip, el filtro se borra.
-- [ ] Ninguna petición lleva un param vacío (`cliente_id=`, `desde=`).
-- [ ] Al cambiar un filtro, el tablero anterior queda visible y atenuado hasta que llega el nuevo, sin spinner. La primera carga sí muestra el `LoadingState`.
-- [ ] Las cuatro tarjetas muestran los valores del `resumen`. Los porcentajes llevan 2 decimales con coma, y un `null` se ve como "—", nunca como "0 %".
-- [ ] La desviación se muestra con signo, en `warning` si es positiva y en `destructive` si es negativa, con su frase debajo. El marcador del medidor coincide con el valor y la banda con ± σ.
-- [ ] Un valor de desviación mayor que 50 (como el cliente 9 en datos de prueba) deja el marcador en el borde y no rompe el layout.
-- [ ] La barra de estados muestra un segmento por estado con `total > 0`, y la leyenda lista **todos** los estados del catálogo, también los que están en cero.
-- [ ] La tabla por cliente muestra un cliente por fila, ordenada por pesajes de mayor a menor, y se puede reordenar por cada columna.
-- [ ] Al hacer click en una fila, todo el tablero se filtra por ese cliente y aparece el chip "Cliente: X ×".
-- [ ] Un período sin pesajes muestra el `EmptyState` y no muestra anillos en cero.
-- [ ] Un error del endpoint muestra el fallback del `ErrorBoundary` con "Reintentar", y la barra de filtros sigue funcionando.
-- [ ] En modo oscuro, ninguna tarjeta ni pista tiene un color fuera de los tokens, y el inset no se ve como un halo blanco.
-- [ ] Con `prefers-reduced-motion`, los anillos y las barras aparecen sin animar.
-- [ ] En un ancho de 375 px todo queda en una columna, los chips hacen scroll horizontal y la tabla scrollea dentro de su tarjeta.
-- [ ] No se agregó ninguna dependencia a `package.json`.
+- [X] `npx tsc --noEmit` y `npm run test` pasan.
+- [X] Con `VER-METRICAS`, el `Sidebar` (y el drawer móvil) muestra "Métricas" justo debajo de "Clientes", y queda marcado como activo en `/metricas`.
+- [X] Sin `VER-METRICAS`, el item no aparece, pero `/metricas` escrito a mano carga igual.
+- [X] Al entrar, el chip "30 días" está activo, la petición sale **sin** `desde` ni `hasta`, y el encabezado muestra el período que devolvió el backend.
+- [X] "7 días", "90 días" y "Este mes" mandan solo `desde`, con la fecha local correcta, y nunca `hasta`.
+- [X] "Personalizado" muestra los dos date pickers. Elegir fechas manda `desde`/`hasta` en `YYYY-MM-DD`.
+- [X] Elegir un cliente o un operador manda `cliente_id` o `usuario_id`, y aparece su chip removible. Al quitar el chip, el filtro se borra.
+- [X] Ninguna petición lleva un param vacío (`cliente_id=`, `desde=`).
+- [X] Al cambiar un filtro, el tablero anterior queda visible y atenuado hasta que llega el nuevo, sin spinner. La primera carga sí muestra el `LoadingState`.
+- [X] Las cuatro tarjetas muestran los valores del `resumen`. Los porcentajes llevan 2 decimales con coma, y un `null` se ve como "—", nunca como "0 %".
+- [X] La desviación se muestra con signo, en `warning` si es positiva y en `destructive` si es negativa, con su frase debajo. El marcador del medidor coincide con el valor y la banda con ± σ.
+- [X] Un valor de desviación mayor que 50 (como el cliente 9 en datos de prueba) deja el marcador en el borde y no rompe el layout.
+- [X] La barra de estados muestra un segmento por estado con `total > 0`, y la leyenda lista **todos** los estados del catálogo, también los que están en cero.
+- [X] La tabla por cliente muestra un cliente por fila, ordenada por pesajes de mayor a menor, y se puede reordenar por cada columna.
+- [X] Al hacer click en una fila, todo el tablero se filtra por ese cliente y aparece el chip "Cliente: X ×".
+- [X] Un período sin pesajes muestra el `EmptyState` y no muestra anillos en cero.
+- [X] Un error del endpoint muestra el fallback del `ErrorBoundary` con "Reintentar", y la barra de filtros sigue funcionando.
+- [X] En modo oscuro, ninguna tarjeta ni pista tiene un color fuera de los tokens, y el inset no se ve como un halo blanco.
+- [X] Con `prefers-reduced-motion`, los anillos y las barras aparecen sin animar.
+- [X] En un ancho de 375 px todo queda en una columna, los chips hacen scroll horizontal y la tabla scrollea dentro de su tarjeta.
+- [X] No se agregó ninguna dependencia a `package.json`.
 
 ---
 
