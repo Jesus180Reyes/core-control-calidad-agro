@@ -316,6 +316,8 @@ export function useControlCalidad(cliente: Cliente | null, lote: Lote | null) {
             pesoBruto: scale.pesoEstable,
             reestabilizando: scale.pesoEstable === null,
             tiempoRestante: scale.tiempoRestante,
+            /** Quién autorizó con PIN; `null` en un pesaje que no pasó por el bloqueo. */
+            supervisor: autorizacion?.supervisor ?? null,
             solicitar: solicitarTara,
             cancelar: cancelarTara,
             confirmar: confirmarTara,
