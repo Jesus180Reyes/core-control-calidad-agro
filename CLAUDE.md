@@ -127,6 +127,14 @@ Los tipos de la Web Serial API están declarados a mano en `src/global.d.ts` (no
 
 `useControlCalidad` envuelve a `useSerialScale` y añade las reglas de negocio (rango min/ideal/max, bloqueo crítico con PIN de supervisor).
 
+**El PIN lo valida el backend (SPEC 16).** El `BloqueoCriticoDialog` no compara contra nada local —ya no existe `VITE_SUPERVISOR_PIN`—: `handleAutorizarConPin` llama a `POST /pesajes/validar-pin` con `{ pin }` (`useValidateSupervisorPin`, con `onError` propio: el error se pinta en el diálogo, sin toast). Un 200 devuelve `{ token, supervisor }`, que queda en el estado `autorizacion` y abre la tara con la línea "Autorizado por {supervisor}"; un **400** es PIN incorrecto (`esSolicitudInvalida`, no `esValidacion`, que es 422) y a propósito no es un 401, para no cerrar la sesión del operario; cualquier otro error se relanza y el diálogo pinta "Error al validar el PIN".
+
+- **El token viaja en el guardado.** `guardarPesaje(pesoBruto, tara, autorizacionToken?)` manda `autorizacion_token` sólo si hay token; sin PIN la clave no está en el body. El backend lo registra en `aprobado_con_excepcion_por`. `POST /pesajes` **no exige** el token: si el front no lo manda, el pesaje se guarda igual sin supervisor y nadie se entera.
+- **La autorización es de un solo uso y vive en memoria.** Se descarta cuando la muestra se invalida, al guardar, al cancelar la tara y ante el 400 de token. Nunca a `localStorage`: el token sirve para cualquier lote y cualquier peso.
+- **Un 400 de token reabre el bloqueo.** `isInvalidAuthorizationError` (`hooks/pesajes/autorizacionPin.ts`) lo reconoce por el status **y** el texto exacto del backend (`La autorizacion no existe` / `La autorizacion ya fue utilizada`); `guardarPesaje` devuelve entonces `'autorizacion-invalida'` y `confirmarTara` cierra la tara sin `reiniciarPesaje()`, así la misma muestra vuelve a pedir el PIN. Cualquier otro 400 deja la tara abierta. Si el backend cambia esos textos, el caso cae al de cualquier 400.
+- **El bloqueo es por peso bruto; la regla del backend, por neto.** Si la tara deja el neto dentro del rango, el backend ignora el token sin gastarlo y el pesaje queda sin supervisor. Es correcto: ese pesaje no necesitaba autorización.
+- Los PINs los asigna un `ADMIN` con `PATCH /auth/usuarios/:id/pin` (por Swagger, no hay pantalla), sólo a usuarios `SUPERVISOR`.
+
 ### El ticket cierra el pesaje
 
 Todo `POST /pesajes` exitoso abre el `PrintTicketDialog` (`components/control-calidad/`), y la impresión del ticket **no es opcional**: un bulto sin etiqueta después no se identifica en planta. El modal es bloqueante de verdad —`showCloseButton={false}`, `onOpenChange` vacío y el `open` controlado por `impresion.pesaje`— así que no se cierra con la X, ni con Esc, ni con un click afuera. Su única acción es "Imprimir ticket", que llama a `usePrintEtiqueta` con el `id` que devolvió el guardado.
