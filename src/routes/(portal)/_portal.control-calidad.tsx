@@ -119,6 +119,7 @@ function ControlCalidadPage() {
                 pesoBruto={tara.pesoBruto}
                 tiempoRestante={tara.tiempoRestante}
                 unidad={parametros.unidad}
+                supervisor={tara.supervisor}
                 guardando={guardando}
                 onConfirm={(valor) => void tara.confirmar(valor)}
             />

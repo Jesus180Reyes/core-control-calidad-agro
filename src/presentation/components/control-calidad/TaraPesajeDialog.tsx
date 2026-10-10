@@ -20,6 +20,8 @@ interface TaraPesajeDialogProps {
     tiempoRestante: number
     /** `unidad_medida` del lote; llega del API en mayúsculas ("LIBRAS"). */
     unidad: string
+    /** `complete_name` del supervisor que autorizó con PIN; `null` sin bloqueo. */
+    supervisor?: string | null
     /** Hay un `POST /pesajes` en vuelo. */
     guardando: boolean
     onConfirm: (tara: number) => void
@@ -40,6 +42,7 @@ export function TaraPesajeDialog({
     pesoBruto,
     tiempoRestante,
     unidad,
+    supervisor = null,
     guardando,
     onConfirm,
 }: TaraPesajeDialogProps) {
@@ -137,6 +140,11 @@ export function TaraPesajeDialog({
                             {pesoNeto === null ? '—' : `${pesoNeto.toFixed(2)} ${unidad}`}
                         </dd>
                     </div>
+                    {supervisor !== null && (
+                        <p className="pt-2 text-xs font-semibold text-text-muted">
+                            Autorizado por {supervisor}
+                        </p>
+                    )}
                 </dl>
             </form>
         </CustomDialog>

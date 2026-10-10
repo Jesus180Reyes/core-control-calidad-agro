@@ -2,9 +2,11 @@ import type { InfoDesconexion } from "#/presentation/types/control-calidad/bascu
 import type { OperacionData, ParametrosData } from "#/presentation/types/control-calidad/control-calidad.types"
 import type { Cliente } from "#/presentation/types/clientes/clientes.types"
 import type { Lote } from "#/presentation/types/lotes/lotes.types"
-import type { PesajeCreado } from "#/presentation/types/pesajes/pesajes.types"
+import type { AutorizacionSupervisor, PesajeCreado } from "#/presentation/types/pesajes/pesajes.types"
 import { useEffect, useMemo, useRef, useState } from "react"
+import { esSolicitudInvalida } from "#/infrastructure/http/http-client"
 import { usePesajes } from "#/presentation/hooks/pesajes/usePesajes"
+import { useValidateSupervisorPin } from "#/presentation/hooks/pesajes/useValidateSupervisorPin"
 import { usePrintEtiqueta } from "#/presentation/hooks/pesajes/usePrintEtiqueta"
 import { useSerialScale } from "./useSerialScale"
 import { useSelectorBascula } from "./useSelectorBascula"
@@ -20,13 +22,6 @@ const BAUD_RATE = 9600
  * de estabilización (5 s): se va antes de que el primer peso quede confirmado.
  */
 const AVISO_CONEXION_MS = 4000
-
-/**
- * PIN del supervisor para autorizar un peso crítico. Vite lo inyecta en build
- * time, así que viaja dentro del bundle: no es un secreto. Sin la variable no
- * hay PIN que autorice —se falla cerrado, nunca con un valor por defecto—.
- */
-const PIN_SUPERVISOR: string = import.meta.env.VITE_SUPERVISOR_PIN ?? ''
 
 export function useControlCalidad(cliente: Cliente | null, lote: Lote | null) {
     /**
@@ -132,8 +127,9 @@ export function useControlCalidad(cliente: Cliente | null, lote: Lote | null) {
     /**
      * Un peso crítico ya autorizado con PIN no vuelve a bloquear mientras se
      * pide la tara: la lectura viva sigue llegando y reevaluaría el rango.
+     * Vive solo en memoria: el token sirve para cualquier lote y cualquier peso.
      */
-    const [autorizado, setAutorizado] = useState<boolean>(false)
+    const [autorizacion, setAutorizacion] = useState<AutorizacionSupervisor | null>(null)
 
     /**
      * El pesaje que espera su ticket. Mientras no sea `null`, el modal de
@@ -156,7 +152,7 @@ export function useControlCalidad(cliente: Cliente | null, lote: Lote | null) {
      * el PIN anterior ya no cubre el peso nuevo y hay que volver a pedirlo.
      */
     useEffect(() => {
-        if (scale.pesoEstable === null) setAutorizado(false)
+        if (scale.pesoEstable === null) setAutorizacion(null)
     }, [scale.pesoEstable])
 
     useEffect(() => {
@@ -166,16 +162,17 @@ export function useControlCalidad(cliente: Cliente | null, lote: Lote | null) {
         // Con el ticket pendiente tampoco: el producto que no se retiró puede
         // reestabilizar y el bloqueo aparecería encima del modal de impresión.
         setMostrarBloqueo(
-            !autorizado &&
+            autorizacion === null &&
             pesajeRegistrado === null &&
             esAltoRango &&
             scale.hayFlujoDatos &&
             !scale.isStabilizing &&
             scale.pesoEstable !== null,
         )
-    }, [autorizado, pesajeRegistrado, esAltoRango, scale.hayFlujoDatos, scale.isStabilizing, scale.pesoEstable])
+    }, [autorizacion,pesajeRegistrado, esAltoRango, scale.hayFlujoDatos, scale.isStabilizing, scale.pesoEstable])
 
     const pesajes = usePesajes(lote)
+    const { validarPin } = useValidateSupervisorPin()
     const { imprimirEtiqueta, imprimiendo } = usePrintEtiqueta()
 
     /** El dialog de tara es la única puerta al `POST /pesajes`. */
@@ -191,11 +188,22 @@ export function useControlCalidad(cliente: Cliente | null, lote: Lote | null) {
      * servidor la aceptó prepara la siguiente. Si falla, el dialog se queda
      * abierto con el peso en pantalla: el producto sigue sobre la plataforma y
      * se puede reintentar sin volver a pesar.
+     *
+     * La excepción es un token de supervisor rechazado: reintentar con el mismo
+     * fallaría igual. Se descarta la autorización y se cierra la tara sin
+     * reiniciar la muestra, así el mismo peso vuelve a disparar el bloqueo.
      */
     const confirmarTara = async (tara: number): Promise<void> => {
         if (scale.pesoEstable === null) return
 
-        const creado = await pesajes.guardarPesaje(scale.pesoEstable, tara)
+        const creado = await pesajes.guardarPesaje(scale.pesoEstable, tara, autorizacion?.token)
+
+        if (creado === 'autorizacion-invalida') {
+            setAutorizacion(null)
+            setTaraAbierta(false)
+            return
+        }
+
         if (!creado) return
 
         // El pesaje guardado abre el ticket: la impresión es el paso que lo cierra.
@@ -205,7 +213,7 @@ export function useControlCalidad(cliente: Cliente | null, lote: Lote | null) {
 
         scale.reiniciarPesaje()
         setTaraAbierta(false)
-        setAutorizado(false)
+        setAutorizacion(null)
     }
 
     /**
@@ -256,7 +264,7 @@ export function useControlCalidad(cliente: Cliente | null, lote: Lote | null) {
         setTaraAbierta(false)
         // Cancelar la tara de un peso crítico devuelve el bloqueo: el pesaje
         // sigue fuera de rango y no puede quedar sin autorizar.
-        setAutorizado(false)
+        setAutorizacion(null)
         // La muestra descartada no se reusa: la báscula vuelve a estabilizar.
         scale.reiniciarPesaje()
     }
@@ -267,14 +275,22 @@ export function useControlCalidad(cliente: Cliente | null, lote: Lote | null) {
         scale.reiniciarPesaje()
     }
 
-    /** El PIN sólo autoriza; el guardado ocurre al confirmar la tara. */
-    const handleAutorizarConPin = (pinIngresado: string): boolean => {
-        if (!PIN_SUPERVISOR || pinIngresado !== PIN_SUPERVISOR) return false
-
-        setAutorizado(true)
-        setTaraAbierta(true)
-
-        return true
+    /**
+     * El PIN lo valida `POST /pesajes/validar-pin` y sólo autoriza: el guardado
+     * ocurre al confirmar la tara, con el token que devolvió. Un 400 es un PIN
+     * incorrecto; cualquier otro error se relanza y el diálogo lo pinta como
+     * un fallo al validar.
+     */
+    const handleAutorizarConPin = async (pinIngresado: string): Promise<boolean> => {
+        try {
+            const nuevaAutorizacion = await validarPin(pinIngresado)
+            setAutorizacion(nuevaAutorizacion)
+            setTaraAbierta(true)
+            return true
+        } catch (error) {
+            if (esSolicitudInvalida(error)) return false
+            throw error
+        }
     }
 
     return {
@@ -300,6 +316,8 @@ export function useControlCalidad(cliente: Cliente | null, lote: Lote | null) {
             pesoBruto: scale.pesoEstable,
             reestabilizando: scale.pesoEstable === null,
             tiempoRestante: scale.tiempoRestante,
+            /** Quién autorizó con PIN; `null` en un pesaje que no pasó por el bloqueo. */
+            supervisor: autorizacion?.supervisor ?? null,
             solicitar: solicitarTara,
             cancelar: cancelarTara,
             confirmar: confirmarTara,
