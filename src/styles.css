@@ -288,6 +288,14 @@
     inset -1px -1px 2px rgba(0, 0, 0, 0.06),
     0px 6px 16px -2px rgba(46, 107, 69, 0.12);
 
+  /* La pista hundida de los gráficos de `/metricas` (anillos, barras,
+     medidores): el único relieve "hacia adentro" de esa pantalla. El inset
+     claro sale de `--clay-inset-light`, porque el blanco al 70% en oscuro se
+     ve como un halo. */
+  --shadow-clay-inset:
+    inset 2px 2px 5px rgba(46, 107, 69, 0.08),
+    inset -2px -2px 5px var(--clay-inset-light);
+
   /* Varias pantallas escriben el color de marca a mano (`bg-indigo-600`,
      `text-indigo-500`, el degradado del login con `violet`) en vez de usar
      `brand`. Redefinir esas dos escalas con el verde de marca es lo que hace
@@ -337,6 +345,8 @@
   --text-main: #0f172a;
   --text-muted: #64748b;
 
+  --clay-inset-light: rgba(255, 255, 255, 0.7);
+
   --agri-from: var(--brand);
   --agri-to: var(--color-indigo-500);
 
@@ -357,6 +367,8 @@
   --border-ui: #1f2937;
   --text-main: #f8fafc;
   --text-muted: #94a3b8;
+
+  --clay-inset-light: rgba(255, 255, 255, 0.03);
 
   /* Un paso más claro que en el tema claro: sobre `#090d16` el verde de marca
      claro se apaga. No termina en un verde más claro que `--brand` porque el
