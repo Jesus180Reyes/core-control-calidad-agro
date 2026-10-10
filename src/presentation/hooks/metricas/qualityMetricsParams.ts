@@ -10,7 +10,8 @@ export interface QualityMetricsFilters {
     usuario_id?: number
 }
 
-export interface QualityMetricsParams {
+// `type` y no `interface`: tiene que poder asignarse a `QueryParams`, que es un Record.
+export type QualityMetricsParams = {
     desde?: string
     hasta?: string
     cliente_id?: number
