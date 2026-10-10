@@ -78,7 +78,7 @@ export function PeriodChips({ value, onChange }: PeriodChipsProps) {
                             onClick={() => onChange(opcion.value)}
                             onKeyDown={(event) => handleKeyDown(event, indice)}
                             className={cn(
-                                'shrink-0 whitespace-nowrap rounded-full px-4 py-1.5 text-xs font-bold transition-colors',
+                                'shrink-0 cursor-pointer whitespace-nowrap rounded-full px-4 py-1.5 text-xs font-bold transition-colors',
                                 'outline-none focus-visible:ring-2 focus-visible:ring-brand/60',
                                 activo
                                     ? 'bg-surface text-brand shadow-clay-btn'

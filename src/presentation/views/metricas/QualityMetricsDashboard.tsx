@@ -4,6 +4,7 @@ import { es } from 'date-fns/locale'
 import { cn } from '#/lib/utils'
 import { ClientesHeader } from '#/presentation/components/clientes/ClientesHeader'
 import { DeviationGauge } from '#/presentation/components/metricas/DeviationGauge'
+import { DeviationHelpDialog } from '#/presentation/components/metricas/DeviationHelpDialog'
 import { IndicatorCard } from '#/presentation/components/metricas/IndicatorCard'
 import {
     EMPTY_VALUE,
@@ -136,7 +137,10 @@ export function QualityMetricsDashboard({
                                 className={cn(METRIC_CARD_CLASS, 'lg:col-span-3')}
                                 style={metricCardDelay(4)}
                             >
-                                <h3 className={METRIC_LABEL_CLASS}>Desviación frente al ideal</h3>
+                                <div className="flex items-center justify-between gap-3">
+                                    <h3 className={METRIC_LABEL_CLASS}>Desviación frente al ideal</h3>
+                                    <DeviationHelpDialog />
+                                </div>
 
                                 <div className="mt-4 flex flex-wrap items-baseline gap-x-4 gap-y-1">
                                     <p
