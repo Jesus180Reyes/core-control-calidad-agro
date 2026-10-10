@@ -188,11 +188,22 @@ export function useControlCalidad(cliente: Cliente | null, lote: Lote | null) {
      * servidor la aceptó prepara la siguiente. Si falla, el dialog se queda
      * abierto con el peso en pantalla: el producto sigue sobre la plataforma y
      * se puede reintentar sin volver a pesar.
+     *
+     * La excepción es un token de supervisor rechazado: reintentar con el mismo
+     * fallaría igual. Se descarta la autorización y se cierra la tara sin
+     * reiniciar la muestra, así el mismo peso vuelve a disparar el bloqueo.
      */
     const confirmarTara = async (tara: number): Promise<void> => {
         if (scale.pesoEstable === null) return
 
-        const creado = await pesajes.guardarPesaje(scale.pesoEstable, tara)
+        const creado = await pesajes.guardarPesaje(scale.pesoEstable, tara, autorizacion?.token)
+
+        if (creado === 'autorizacion-invalida') {
+            setAutorizacion(null)
+            setTaraAbierta(false)
+            return
+        }
+
         if (!creado) return
 
         // El pesaje guardado abre el ticket: la impresión es el paso que lo cierra.

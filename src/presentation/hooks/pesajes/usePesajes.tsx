@@ -1,6 +1,7 @@
 import { useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { useExecuteMutation } from '#/presentation/hooks/shared/useExecuteMutation'
+import { isInvalidAuthorizationError } from '#/presentation/hooks/pesajes/autorizacionPin'
 import type { Lote } from '#/presentation/types/lotes/lotes.types'
 import type { CrearPesajeBody, CrearPesajeResponse, PesajeCreado } from '#/presentation/types/pesajes/pesajes.types'
 
@@ -16,8 +17,16 @@ export function usePesajes(lote: Lote | null) {
         onError: (error) => toast.error(error.message),
     });
 
-    /** El pesaje creado —su `id` es lo que necesita la etiqueta— o `null` si no se guardó. */
-    const guardarPesaje = (pesoBruto: number, tara: number): Promise<PesajeCreado | null> => {
+    /**
+     * El pesaje creado —su `id` es lo que necesita la etiqueta—, `null` si no
+     * se guardó, o `'autorizacion-invalida'` si el backend rechazó el token del
+     * supervisor y hay que volver a pedir el PIN.
+     */
+    const guardarPesaje = (
+        pesoBruto: number,
+        tara: number,
+        autorizacionToken?: string,
+    ): Promise<PesajeCreado | 'autorizacion-invalida' | null> => {
         if (!lote) return Promise.resolve(null)
 
         return mutation
@@ -25,8 +34,13 @@ export function usePesajes(lote: Lote | null) {
                 lote_id: lote.id,
                 peso_bruto: pesoBruto,
                 tara,
+                // Sin PIN la clave no viaja.
+                ...(autorizacionToken ? { autorizacion_token: autorizacionToken } : {}),
             })
-            .then(({ pesaje }) => pesaje, () => null)
+            .then(
+                ({ pesaje }) => pesaje,
+                (error: unknown) => (isInvalidAuthorizationError(error) ? 'autorizacion-invalida' : null),
+            )
     }
 
     return { guardarPesaje, guardando: mutation.isPending }

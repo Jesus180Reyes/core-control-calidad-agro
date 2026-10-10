@@ -32,7 +32,7 @@ El SPEC 38 del backend resuelve las tres cosas:
 - `useValidateSupervisorPin` (`presentation/hooks/pesajes/`): mutación contra `POST /pesajes/validar-pin` con `{ pin }`. Trae `onError` propio, así que no lanza toast.
 - `useControlCalidad.handleAutorizarConPin` pasa a ser async:
   - llama al hook y guarda `{ token, supervisor }` en un estado `autorizacion`;
-  - devuelve `true` con un 200 y `false` con un 400;
+  - devuelve `true` con un 200 y `false` con un 400 (reconocido con `esSolicitudInvalida`, helper nuevo en `core/http-errors.ts`);
   - con cualquier otro error, relanza.
 - Se borra la constante `PIN_SUPERVISOR` y se quita `VITE_SUPERVISOR_PIN` de `.env.example`.
 - `usePesajes.guardarPesaje(pesoBruto, tara, autorizacionToken?)` manda `autorizacion_token` solo cuando hay token.
@@ -111,7 +111,7 @@ Un 400 de `validar-pin` **no es un 401**, a propósito: el backend lo eligió pa
 
 Se agrega un cuarto punto: el 400 de token.
 
-`guardarPesaje` devuelve `PesajeCreado | 'autorizacion-invalida' | null`. El literal es lo único que distingue el 400 de token de cualquier otro fallo, como un lote cerrado o la falta de vínculo. La distinción se hace con `isInvalidAuthorizationError(error)` (`hooks/pesajes/autorizacionPin.ts`), que pide `esValidacion(error)` y además que el `message` sea uno de los dos textos del backend.
+`guardarPesaje` devuelve `PesajeCreado | 'autorizacion-invalida' | null`. El literal es lo único que distingue el 400 de token de cualquier otro fallo, como un lote cerrado o la falta de vínculo. La distinción se hace con `isInvalidAuthorizationError(error)` (`hooks/pesajes/autorizacionPin.ts`), que pide `esSolicitudInvalida(error)` (status 400, helper nuevo en `core/http-errors.ts`; `esValidacion` es 422 y no sirve acá) y además que el `message` sea uno de los dos textos del backend.
 
 ---
 
