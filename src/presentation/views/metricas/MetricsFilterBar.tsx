@@ -94,13 +94,13 @@ export function MetricsFilterBar({ filters, onChange }: MetricsFilterBarProps) {
         filters.cliente_id === undefined
             ? undefined
             : clientes.find((cliente) => cliente.id === filters.cliente_id)?.nombre ??
-              `Cliente #${filters.cliente_id}`
+            `Cliente #${filters.cliente_id}`
 
     const operadorActivo =
         filters.usuario_id === undefined
             ? undefined
             : usuarios.find((usuario) => usuario.id === filters.usuario_id)?.nombre ??
-              `Operador #${filters.usuario_id}`
+            `Operador #${filters.usuario_id}`
 
     return (
         <section
@@ -110,7 +110,7 @@ export function MetricsFilterBar({ filters, onChange }: MetricsFilterBarProps) {
             <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
                 <PeriodChips value={filters.preset} onChange={handlePresetChange} />
 
-                <div className="grid gap-4 sm:grid-cols-2 xl:w-[30rem] xl:shrink-0">
+                <div className="grid gap-4 sm:grid-cols-2 xl:w-120 xl:shrink-0">
                     <ControlledSelector
                         control={form.control}
                         name="cliente_id"
