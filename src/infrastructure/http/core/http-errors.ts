@@ -91,6 +91,10 @@ export function esNoEncontrado(error: unknown): boolean {
   return esHttpError(error) && error.status === 404
 }
 
+export function esSolicitudInvalida(error: unknown): boolean {
+  return esHttpError(error) && error.status === 400
+}
+
 export function esValidacion(error: unknown): boolean {
   return esHttpError(error) && error.status === 422
 }

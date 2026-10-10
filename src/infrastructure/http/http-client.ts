@@ -138,6 +138,7 @@ export {
   esNoEncontrado,
   esProhibido,
   esReintentable,
+  esSolicitudInvalida,
   esTimeout,
   esValidacion,
   mensajeDeError,
