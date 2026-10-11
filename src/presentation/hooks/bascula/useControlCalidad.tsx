@@ -61,7 +61,7 @@ export function useControlCalidad(cliente: Cliente | null, lote: Lote | null) {
 
     const scale = useSerialScale({
         baudRate: BAUD_RATE,
-        umbralCero: 5,
+        umbralCero: 2,
         segundosEstabilizacion: 5,
         // Tolerancia de ruido durante la ventana de estabilización.
         toleranciaEstabilidad: 5,
@@ -169,7 +169,7 @@ export function useControlCalidad(cliente: Cliente | null, lote: Lote | null) {
             !scale.isStabilizing &&
             scale.pesoEstable !== null,
         )
-    }, [autorizacion,pesajeRegistrado, esAltoRango, scale.hayFlujoDatos, scale.isStabilizing, scale.pesoEstable])
+    }, [autorizacion, pesajeRegistrado, esAltoRango, scale.hayFlujoDatos, scale.isStabilizing, scale.pesoEstable])
 
     const pesajes = usePesajes(lote)
     const { validarPin } = useValidateSupervisorPin()
