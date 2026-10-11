@@ -6,7 +6,7 @@ import {
     type CreateClienteSchema,
 } from '#/presentation/schema/crear-cliente/crearClienteSchema'
 import { useGetCatalogosProductos } from '#/presentation/hooks/catalogos/useGetCatalogosProductos'
-import { useGetCatalogosUsuarios } from '#/presentation/hooks/catalogos/useGetCatalogosUsuarios'
+import { useGetCatalogosOperadores } from '#/presentation/hooks/catalogos/useGetCatalogosOperadores'
 
 export const CREATE_CLIENTE_FORM_ID = 'form-crear-cliente'
 
@@ -15,7 +15,7 @@ export const CREATE_CLIENTE_FORM_ID = 'form-crear-cliente'
 export function CreateClienteForm() {
     const { control } = useFormContext<CreateClienteSchema>()
     const { productos } = useGetCatalogosProductos();
-    const { usuarios } = useGetCatalogosUsuarios();
+    const { operadores } = useGetCatalogosOperadores();
 
     return (
         <>
@@ -72,11 +72,11 @@ export function CreateClienteForm() {
             <ControlledMultiSelector
                 control={control}
                 name="usuario_ids"
-                label="Usuarios vinculados a este cliente"
-                placeholder="Elegí uno o más usuarios"
-                searchPlaceholder="Buscar usuario..."
-                emptyMessage="Sin usuarios"
-                options={usuarios.map(item => ({ value: item.id, label: item.nombre }))}
+                label="Operadores que estaran vinculados a este cliente"
+                placeholder="Elegí uno o más operadores"
+                searchPlaceholder="Buscar operador..."
+                emptyMessage="Sin operadores"
+                options={operadores.map(item => ({ value: item.id, label: item.nombre }))}
             />
         </>
     )
