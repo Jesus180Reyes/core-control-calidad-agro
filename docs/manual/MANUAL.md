@@ -48,6 +48,13 @@ Control de calidad de pesajes en planta
    3. [Agri, el asistente con IA](#cap-5-3)
    4. [Mirador: la planta en vivo](#cap-5-4)
    5. [Métricas de calidad](#cap-5-5)
+6. [Administrador](#cap-6)
+   1. [Qué ve el administrador](#cap-6-1)
+   2. [Rechazar un cliente](#cap-6-2)
+   3. [Tareas fuera de la pantalla](#cap-6-3)
+7. [Aprobador](#cap-7)
+   1. [Dónde entra en el ciclo del lote](#cap-7-1)
+   2. [La aplicación móvil](#cap-7-2)
 
 <div style="page-break-after: always"></div>
 
@@ -68,7 +75,6 @@ Con METRIKA 360 usted puede:
 - Exigir la autorización de un supervisor cuando un peso supera el máximo.
 - Imprimir el ticket que identifica cada bulto.
 - Consultar el historial de pesajes y el estado de cada cliente y cada lote.
-- Administrar los documentos fiscales de los lotes finalizados.
 - Seguir la planta en vivo, consultar métricas de calidad y hacer preguntas a un asistente con inteligencia artificial.
 
 <a id="cap-1-2"></a>
@@ -82,8 +88,7 @@ Cada usuario tiene un rol. El rol decide qué módulos ve en el menú lateral y 
 | **Operador** | Registra los pesajes en la báscula, crea clientes y lotes, y revisa el historial. | [4](#cap-4) |
 | **Supervisor** | Autoriza con su PIN los pesos que superan el máximo, inspecciona lotes y pesajes, y consulta el Mirador, las métricas y el asistente Agri. | [5](#cap-5) |
 | **Administrador** | Tiene acceso a todos los módulos del sistema. | [6](#cap-6) |
-| **Contador** | Administra los documentos fiscales. | [7](#cap-7) |
-| **Aprobador** | Aprueba los lotes y sus pesajes desde la aplicación móvil. | [8](#cap-8) |
+| **Aprobador** | Aprueba los lotes y sus pesajes desde la aplicación móvil. | [7](#cap-7) |
 
 El detalle de qué pantallas ve cada rol está en el [Anexo A](#cap-anexo-a).
 
@@ -95,7 +100,7 @@ Un lote es un conjunto de bultos de un mismo producto para un cliente. Cada lote
 
 1. **En proceso.** El lote está abierto y recibe pesajes en la báscula.
 2. **Cliente final.** Se terminó de pesar y alguien con permiso aprobó el lote. El lote ya no recibe pesajes y queda esperando la revisión del aprobador.
-3. **Finalizado.** El aprobador revisó los pesajes desde la aplicación móvil y dio el lote por terminado. Solo un lote finalizado puede incluirse en un documento fiscal.
+3. **Finalizado.** El aprobador revisó los pesajes desde la aplicación móvil y dio el lote por terminado.
 
 En las etapas **En proceso** y **Cliente final**, un lote también puede **rechazarse**. Un lote rechazado sale del ciclo y no recibe más pesajes.
 
@@ -238,7 +243,7 @@ Cambiar la contraseña **no** lo hace ingresar solo: hay que ingresar con la nue
 La **portada** es lo primero que ve al ingresar. Tiene:
 
 - Un saludo con su nombre, la fecha y su rol.
-- **Accesos rápidos** a los módulos que su rol tiene habilitados: **Registrar pesaje**, **Historial de pesajes**, **Clientes** y **Documentos fiscales**.
+- **Accesos rápidos** a los módulos que su rol tiene habilitados: **Registrar pesaje**, **Historial de pesajes** y **Clientes**.
 - La tarjeta del **Mirador** y la de **Agri**, si su rol las tiene.
 - **Cómo funciona**, el recorrido de cada bulto en tres pasos: seleccionar, pesar y etiquetar.
 
@@ -250,11 +255,10 @@ El **menú lateral**, a la izquierda, está siempre a la vista. Muestra solo lo 
 | **Mirador** · Planta en vivo · 3D | Ver la planta en vivo. | [5.4](#cap-5-4) |
 | **Control de Calidad** → **Registrar Pesaje** | Pesar con la báscula. | [4.1](#cap-4-1) |
 | **Control de Calidad** → **Historial Pesajes** | Consultar lo pesado. | [4.8](#cap-4-8) |
-| **Administración** → **Documentos Fiscales** | Administrar los documentos fiscales. | [7](#cap-7) |
 | **Clientes** | Inspeccionar clientes, lotes y pesajes. | [4.6](#cap-4-6) |
 | **Métricas** | Ver los indicadores de calidad. | [5.5](#cap-5-5) |
 
-**Control de Calidad** y **Administración** son grupos: púlselos para abrir o cerrar sus opciones.
+**Control de Calidad** es un grupo: púlselo para abrir o cerrar sus opciones.
 
 Al pie del menú están su nombre y su rol, **Ajustes** y **Cerrar Sesión**.
 
@@ -751,5 +755,82 @@ Un valor **—** significa que no hay datos para calcularlo. No es lo mismo que 
 
 - **Aparece "Sin pesajes en este período".** Elija un período más largo o quite algún filtro.
 - **Aparece "No se pudieron cargar las métricas".** Pulse **Reintentar**. Los filtros siguen disponibles.
+
+<div style="page-break-after: always"></div>
+
+<a id="cap-6"></a>
+
+## 6. Administrador
+
+<a id="cap-6-1"></a>
+
+### 6.1 Qué ve el administrador
+
+El administrador tiene acceso a todos los módulos del sistema. Para cada uno, siga el capítulo que lo explica:
+
+| Tarea | Capítulo |
+| --- | --- |
+| Registrar pesajes, imprimir tickets y consultar el historial | [4.1](#cap-4-1) a [4.4](#cap-4-4) y [4.8](#cap-4-8) |
+| Crear clientes y lotes | [4.5](#cap-4-5) |
+| Inspeccionar clientes, lotes y pesajes | [4.6](#cap-4-6) |
+| Aprobar o rechazar lotes | [4.7](#cap-4-7) |
+| Rechazar pesajes | [5.2](#cap-5-2) |
+| Agri, Mirador y Métricas | [5.3](#cap-5-3) a [5.5](#cap-5-5) |
+
+El administrador no puede autorizar un peso sobre el máximo: el PIN es solo de los supervisores (vea el [capítulo 5.1](#cap-5-1)).
+
+El menú lateral del administrador también muestra **Administración**. Ese módulo no está cubierto por este manual.
+
+<a id="cap-6-2"></a>
+
+### 6.2 Rechazar un cliente
+
+Rechazar un cliente lo saca de la inspección. Es una acción que solo tiene el administrador.
+
+1. En el menú lateral, pulse **Clientes**.
+2. Busque al cliente con los filtros, si hace falta.
+3. En la fila del cliente, pulse **⋯** y elija **Rechazar Cliente**.
+4. En **Motivo del rechazo**, explique por qué. Debe tener al menos 5 caracteres.
+5. Pulse **Rechazar cliente** para confirmar.
+
+**El rechazo no se puede deshacer.** Revise bien el cliente antes de confirmar.
+
+<a id="cap-6-3"></a>
+
+### 6.3 Tareas fuera de la pantalla
+
+Algunas tareas de administración todavía no tienen pantalla en METRIKA 360. Las realiza el administrador del sistema, por fuera de las pantallas que describe este manual:
+
+- Crear usuarios y asignarles su rol.
+- Restablecer la contraseña de un usuario.
+- Asignar el PIN a cada supervisor.
+- Cambiar qué módulos ve cada rol.
+
+Si necesita alguna de estas tareas, pídasela al administrador del sistema de su empresa.
+
+<div style="page-break-after: always"></div>
+
+<a id="cap-7"></a>
+
+## 7. Aprobador
+
+<a id="cap-7-1"></a>
+
+### 7.1 Dónde entra en el ciclo del lote
+
+El aprobador revisa los lotes que la planta ya terminó de pesar. Su trabajo empieza cuando un lote pasa a **cliente final** (vea el [capítulo 1.3](#cap-1-3)):
+
+1. En la planta se pesa el lote, que está **en proceso**.
+2. Alguien con permiso aprueba el lote en METRIKA 360, y el lote pasa a **cliente final** (vea el [capítulo 4.7](#cap-4-7)).
+3. El aprobador revisa el lote y cada uno de sus pesajes. Puede aprobarlos o rechazarlos.
+4. Si todo está en orden, el aprobador **finaliza** el lote. Si no, lo **rechaza** indicando el motivo.
+
+Los lotes finalizados se pueden consultar desde **Clientes**, con **Ver lotes finalizados por aprobador** (vea el [capítulo 4.6](#cap-4-6)). Ahí se ve quién aprobó y quién finalizó cada lote.
+
+<a id="cap-7-2"></a>
+
+### 7.2 La aplicación móvil
+
+El aprobador no trabaja en las pantallas que describe este manual, sino en la **aplicación móvil de METRIKA 360**. Su uso se explica en el manual de esa aplicación.
 
 <div style="page-break-after: always"></div>

@@ -91,9 +91,6 @@ Esta lista es el checklist de quien toma las capturas. Si un cambio modifica una
 | `5-3-agri.png` | Agri con una pregunta y su respuesta. | Pendiente |
 | `5-4-mirador.png` | El Mirador con un lote seleccionado. | Pendiente |
 | `5-5-metricas.png` | El tablero de métricas. | Pendiente |
-| `7-1-documentos-fiscales.png` | La lista de documentos fiscales. | Pendiente |
-| `7-2-crear-documento-fiscal.png` | El formulario de documento fiscal. | Pendiente |
-| `7-3-detalle-documento-fiscal.png` | El detalle de un documento. | Pendiente |
 
 ## Versiones
 
