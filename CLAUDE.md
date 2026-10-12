@@ -248,3 +248,15 @@ Dos tablas paginan de a `TAMANO_PAGINA` (20, en `presentation/types/shared/pagin
 - **`PaginationBar`** (`components/shared/table/`, junto al `DataTable`) pinta "Página X de Y · N clientes", Anterior y Siguiente. Con `total === 0` no se renderiza: el estado vacío del `DataTable` ya lo dice.
 - **El orden de columna ordena sólo la página visible.** El `DataTable` sigue ordenando en el cliente y el backend no acepta un param de orden. En `/inspeccion-clientes` el `defaultSorting` por nombre ordena las 20 filas de la página, que son las primeras por `created_at`, no las primeras del alfabeto. Es una decisión aceptada; arreglarlo es un param de orden en el backend.
 - **`useClientInspection()` sin página es lo que mantiene completos los selectores.** El mismo hook alimenta la tabla, con `pagina`, y los tres selectores de cliente (`HistorialFiltersBar`, `DocumentosFiscalesFiltersBar`, `CreateDocumentoFiscalForm`), sin ella. Pasarle una página a un selector "para optimizar" lo deja mostrando 20 clientes sin avisar.
+
+## Manual de usuario (SPEC 17)
+
+El manual que se entrega al cliente vive en `docs/manual/MANUAL.md`, un único archivo que se exporta a PDF a mano con la extensión Markdown PDF de VS Code. `docs/manual/README.md` es la guía del equipo: exportar, capturar, versionar y redactar. El PDF no se versiona.
+
+- **Todo cambio visible para el usuario actualiza el manual en el mismo cambio.** Eso incluye una pantalla, un botón, un texto citado, un permiso o un flujo nuevo. Además se agrega una línea en el bloque **Sin publicar** del "Historial de versiones", al final del manual.
+- **Si cambia una pantalla capturada**, su fila en la lista de capturas del README pasa a **Rehacer**, en el mismo cambio.
+- **El manual cita la UI tal cual.** Los botones van en negrita con su texto exacto, y si un texto de la app cambia, se cambia la cita. Si la app y el manual difieren, manda la app.
+- **Sin jerga técnica.** Nada de "endpoint", "token", "localStorage", códigos HTTP ni códigos de permiso. El lector es un operario de planta, tratado de usted.
+- **Las secciones enlazadas llevan un ancla explícita** (`<a id="cap-4-1"></a>`) en la línea anterior al título. No se usan las anclas que arma cada visor.
+- **Los capítulos son por rol** (operador, supervisor, administrador, aprobador), según la asignación de `db/seed.sql` del backend. El anexo A es esa matriz en lenguaje de pantallas: si cambian los permisos de un rol, se actualizan el anexo y el capítulo del rol.
+- **Fuera del manual, a propósito:** el módulo Documentos Fiscales y el rol `CONTADOR`, las pantallas de la app móvil del aprobador, y las tareas que hoy se hacen por Swagger o SQL (usuarios, PINs, permisos). Agregar cualquiera de ellas es un spec.
