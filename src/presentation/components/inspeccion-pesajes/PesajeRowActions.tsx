@@ -3,22 +3,16 @@ import { DownloadCloud, MoreHorizontal, Trash, type LucideIcon } from 'lucide-re
 
 import { Button } from '@/components/ui/button'
 import {
-    Command,
-    CommandEmpty,
-    CommandGroup,
-    CommandInput,
-    CommandItem,
-    CommandList,
-} from '@/components/ui/command'
-import {
-    Popover,
-    PopoverContent,
-    PopoverTrigger,
-} from '@/components/ui/popover'
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 import { RejectPesajeDialog } from '#/presentation/components/inspeccion-pesajes/RejectPesajeDialog'
 import { useDownloadEtiqueta } from '#/presentation/hooks/pesajes/useDownloadEtiqueta'
 import type { PesajeData } from '#/presentation/types/pesajes/pesajesResponse'
 import { Can } from '../shared/Can'
+import { cn } from '#/lib/utils'
 import { PERMISSIONS, type Permission } from '#/presentation/types/auth/permissions'
 
 interface PesajeRowActionsProps {
@@ -36,6 +30,10 @@ interface ActionsMenuItem {
     permission?: Permission
     /** Evita disparar de nuevo una acción que ya está en curso. */
     disabled?: boolean
+    /** Se suma a las clases del item; pisa las de por defecto (p. ej. el color). */
+    className?: string
+    /** Lo mismo para el ícono, que trae su propio color y no hereda el del item. */
+    iconClassName?: string
 }
 
 interface ActionsMenuProps {
@@ -59,6 +57,8 @@ export function PesajeRowActions({ pesaje }: PesajeRowActionsProps) {
         {
             action: 'RECHAZAR_PESAJE',
             label: 'Rechazar Pesaje',
+            className: 'text-destructive focus:bg-destructive/10 focus:text-destructive dark:focus:bg-destructive/20',
+            iconClassName: 'text-destructive',
             icon: Trash,
             run: () => setSelected('RECHAZAR_PESAJE'),
             permission: PERMISSIONS.RECHAZARPESAJELOTE,
@@ -85,52 +85,42 @@ function ActionsMenu({ items, triggerLabel }: ActionsMenuProps) {
     const [abierto, setAbierto] = useState(false)
 
     return (
-        <Popover open={abierto} onOpenChange={setAbierto}>
-            <PopoverTrigger
+        <DropdownMenu open={abierto} onOpenChange={setAbierto}>
+            <DropdownMenuTrigger
                 render={
                     <Button
                         variant="ghost"
                         size="icon"
                         // 44 px en el teléfono: es el mínimo cómodo para un dedo.
-                        className="size-11 md:size-8"
+                        className="size-11 md:size-8 text-text-muted transition-colors hover:text-text-main data-popup-open:bg-muted data-popup-open:text-text-main"
                         aria-label={triggerLabel}
                     />
                 }
             >
                 <MoreHorizontal />
-            </PopoverTrigger>
+            </DropdownMenuTrigger>
 
-            <PopoverContent
+            <DropdownMenuContent
                 align="start"
-                className="w-56 gap-0 p-0 duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] data-open:blur-in-2 data-closed:duration-100 data-closed:ease-in"
+                sideOffset={6}
+                className="w-auto min-w-48 rounded-xl border border-border-ui p-1.5 shadow-lg ring-0 duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] data-closed:duration-100 data-closed:ease-in"
             >
-                <Command>
-                    <CommandInput placeholder="Buscar acción..." />
-
-                    <CommandList>
-                        <CommandEmpty className="text-text-muted">
-                            Sin acciones.
-                        </CommandEmpty>
-
-                        <CommandGroup>
-                            {items.map(({ action, label, icon: Icon, run, permission, disabled }) => (
-                                <Can key={action} permission={permission}>
-                                    <CommandItem
-                                        disabled={disabled}
-                                        onSelect={() => {
-                                            setAbierto(false)
-                                            run()
-                                        }}
-                                    >
-                                        <Icon />
-                                        {label}
-                                    </CommandItem>
-                                </Can>
-                            ))}
-                        </CommandGroup>
-                    </CommandList>
-                </Command>
-            </PopoverContent>
-        </Popover>
+                {items.map(({ action, label, icon: Icon, run, permission, disabled, className, iconClassName }) => (
+                    <Can key={action} permission={permission}>
+                        <DropdownMenuItem
+                            disabled={disabled}
+                            className={cn('gap-2.5 rounded-lg px-2 py-2 font-medium', className)}
+                            onClick={() => {
+                                setAbierto(false)
+                                run()
+                            }}
+                        >
+                            <Icon className={cn('text-text-muted transition-colors', iconClassName)} />
+                            {label}
+                        </DropdownMenuItem>
+                    </Can>
+                ))}
+            </DropdownMenuContent>
+        </DropdownMenu>
     )
 }
