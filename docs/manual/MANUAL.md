@@ -350,7 +350,7 @@ La pantalla de pesaje tiene tres partes:
 
 *Un peso estable dentro del rango, listo para registrar.*
 
-![Diálogo de tara](capturas/4-1-tara.png)
+![Diálogo de tara](capturas/4-3-tara-autorizada.png)
 
 *El diálogo Tara del envase, con el peso bruto y el neto.*
 
