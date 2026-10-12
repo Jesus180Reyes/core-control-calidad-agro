@@ -29,7 +29,7 @@ TanStack Start (SSR) + TanStack Router (file-based) + TanStack Query + React 19 
 Capas bajo `src/`, con alias `#/*` y `@/*` apuntando ambos a `src/` (`#/` es el estándar del código propio; `@/` lo usan los componentes generados por shadcn):
 
 - `infrastructure/` — `http/` (el cliente HTTP, ver más abajo) y `query-client/query-client.ts` (instancia única de `QueryClient`, donde vive la política de reintentos).
-- `presentation/hooks/` — hooks genéricos en `shared/`, hooks de dominio por módulo (`bascula/`, `parametros/`). Los hooks de dominio concentran el estado y la lógica; las rutas y las vistas solo pintan.
+- `presentation/hooks/` — hooks genéricos en `shared/`, hooks de dominio por módulo (`bascula/`, `pesajes/`, `agri/`…). Los hooks de dominio concentran el estado y la lógica; las rutas y las vistas solo pintan.
 - `presentation/views/<módulo>/` — cards/tablas grandes de una pantalla. `presentation/components/` — piezas reutilizables (`shared/`) o específicas de un módulo.
 - `presentation/types/<módulo>/` — tipos de dominio.
 - `components/ui/` — primitivas shadcn; no reescribirlas a mano, agregar con el CLI de shadcn.
@@ -38,8 +38,6 @@ Capas bajo `src/`, con alias `#/*` y `@/*` apuntando ambos a `src/` (`#/` es el 
 ### Datos: siempre por los hooks genéricos
 
 `useExecuteQuery(queryKey, endpoint, options)` usa `useSuspenseQuery` — nunca hay `isLoading`/`isError` manual. Todo componente que lo llame debe estar envuelto en `<Suspense>` y en el `ErrorBoundary` de `#/presentation/components/shared/ErrorBoundary` (recibe `fallback: (error, reset) => ReactNode`). `useExecuteMutation(endpoint, { method })` cubre el resto; `endpoint` puede ser una función de las variables para URLs con id.
-
-Varios hooks de dominio (`useControlCalidad`, `useParametros`) todavía devuelven datos mock en `useState`; al conectarlos al backend, reemplazar solo el interior del hook.
 
 Las notificaciones van por `sonner` (`toast.success` / `toast.error`), con el `<Toaster />` montado en `__root.tsx` dentro del `ThemeProvider`. Una mutación reporta su resultado por el toast, no por el `ErrorBoundary`.
 
@@ -125,7 +123,7 @@ Grupos `(auth)` y `(portal)` con layouts pathless: `(portal)/_portal.tsx` monta 
 
 Los tipos de la Web Serial API están declarados a mano en `src/global.d.ts` (no hay `@types/w3c-web-serial`). Sólo funciona en Chrome/Edge de escritorio; `estado === 'no-soportada'` cubre el resto.
 
-`useControlCalidad` envuelve a `useSerialScale` y añade las reglas de negocio (rango min/ideal/max, bloqueo crítico con PIN de supervisor).
+`useControlCalidad` envuelve a `useSerialScale` y añade las reglas de negocio (rango min/ideal/max, bloqueo crítico con PIN de supervisor). El rango sale del lote que devuelve el backend (`peso_minimo` / `peso_ideal` / `peso_maximo`); no hay parámetros cargados en el front.
 
 **El PIN lo valida el backend (SPEC 16).** El `BloqueoCriticoDialog` no compara contra nada local —ya no existe `VITE_SUPERVISOR_PIN`—: `handleAutorizarConPin` llama a `POST /pesajes/validar-pin` con `{ pin }` (`useValidateSupervisorPin`, con `onError` propio: el error se pinta en el diálogo, sin toast). Un 200 devuelve `{ token, supervisor }`, que queda en el estado `autorizacion` y abre la tara con la línea "Autorizado por {supervisor}"; un **400** es PIN incorrecto (`esSolicitudInvalida`, no `esValidacion`, que es 422) y a propósito no es un 401, para no cerrar la sesión del operario; cualquier otro error se relanza y el diálogo pinta "Error al validar el PIN".
 
