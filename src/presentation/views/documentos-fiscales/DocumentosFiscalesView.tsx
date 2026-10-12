@@ -7,7 +7,7 @@ import {
     STICKY_ACTIONS_HEADER,
     type DataTableColumns,
 } from '#/presentation/components/shared/table/DataTable'
-import { formatDate } from '#/presentation/helpers/date/formatDate'
+import { formatDateOnly } from '#/presentation/helpers/date/formatDateOnly'
 import { formatDecimal } from '#/presentation/helpers/number/formatDecimal'
 import { formatMoney } from '#/presentation/helpers/number/formatMoney'
 import { useGetDocumentosFiscales } from '#/presentation/hooks/documentos-fiscales/useGetDocumentosFiscales'
@@ -48,7 +48,7 @@ function crearColumnas(): DataTableColumns<Documento> {
             header: 'Emisión',
             enableSorting: true,
             meta: { cellClassName: 'whitespace-nowrap' },
-            cell: ({ row }) => formatDate(row.original.fecha_emision),
+            cell: ({ row }) => formatDateOnly(row.original.fecha_emision),
         },
         {
             accessorKey: 'cliente',

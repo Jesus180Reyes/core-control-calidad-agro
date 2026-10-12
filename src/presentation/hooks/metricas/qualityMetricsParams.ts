@@ -30,8 +30,8 @@ const DIAS_ATRAS: Partial<Record<PeriodPreset, number>> = {
  * Arma los query params de `GET /metricas/calidad`.
  *
  * Los presets nunca mandan `hasta`: lo completa el backend con su `CURDATE()`, y
- * así el rango termina en el "hoy" del mismo reloj (UTC) con el que se escribió
- * `created_at`. `30d` no manda fechas: es el default del backend.
+ * así el rango termina en el "hoy" del mismo reloj (hora de Honduras) con el que
+ * se escribió `created_at`. `30d` no manda fechas: es el default del backend.
  *
  * Sólo se agregan las claves definidas. `query-params.ts` manda los `''`, y el
  * endpoint responde 400 ante un valor vacío.

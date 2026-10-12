@@ -9,7 +9,8 @@ export interface Documento {
     tipo_documento: string;
     numero_completo: string;
     autorizacion: string;
-    fecha_emision: Date;
+    // Columna DATE: llega como 'YYYY-MM-DD', sin hora ni zona.
+    fecha_emision: string;
     moneda: string;
     tipo_cambio: string;
     importe_exento: string;
