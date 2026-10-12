@@ -75,7 +75,7 @@ export function LotPanel({ client, lot, color, weighings, onSelect }: LotPanelPr
             <SectionHeading>Diana de calidad</SectionHeading>
             {weighings.length ? (
                 <>
-                    <QualityTarget range={lot} lotName={lot.nombre_lote} weighings={weighings} />
+                    <QualityTarget range={lot} lotName={lot.nombre_lote} weighings={weighings} unidad={lot.unidad_medida} />
                     <p className="mt-1 text-center text-[12px] leading-relaxed text-text-muted">
                         Desvío medio {desvioMedio >= 0 ? '+' : '−'}{nf2.format(Math.abs(desvioMedio))} {lot.unidad_medida} respecto del ideal.
                         El anillo verde marca el último pesaje.

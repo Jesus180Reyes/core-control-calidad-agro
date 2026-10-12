@@ -54,7 +54,7 @@ export function WeighingPanel({ client, lot, color, weighing, weighings, onSelec
             </dl>
 
             <SectionHeading>Dónde cae en la diana</SectionHeading>
-            <QualityTarget range={lot} lotName={lot.nombre_lote} weighings={weighings} highlightId={weighing.id} />
+            <QualityTarget range={lot} lotName={lot.nombre_lote} weighings={weighings} unidad={lot.unidad_medida} highlightId={weighing.id} />
         </>
     )
 }
