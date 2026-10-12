@@ -43,7 +43,7 @@ export function QualityTarget({ range, lotName, weighings, unidad, highlightId =
             viewBox="-118 -112 236 224"
             role="img"
             aria-label={`Diana de calidad del lote ${lotName}: ${weighings.length} pesajes; el centro es el peso ideal`}
-            className={`mx-auto block h-auto w-full max-w-[300px] ${className}`}
+            className={`mx-auto block h-auto w-full max-w-75 ${className}`}
             onMouseLeave={() => setHoverId(null)}
         >
             <circle r={R} fill="color-mix(in srgb, var(--text-muted) 8%, transparent)" stroke="var(--border-ui)" />

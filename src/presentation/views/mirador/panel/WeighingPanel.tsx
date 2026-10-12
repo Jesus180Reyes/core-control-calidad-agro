@@ -48,7 +48,7 @@ export function WeighingPanel({ client, lot, color, weighing, weighings, onSelec
                 ].map((d) => (
                     <div key={d.label} className="min-w-0">
                         <dt className="text-[11px] text-text-muted">{d.label}</dt>
-                        <dd className="mt-0.5 text-[13.5px] font-semibold text-text-main [overflow-wrap:anywhere]">{d.value}</dd>
+                        <dd className="mt-0.5 text-[13.5px] font-semibold text-text-main wrap-anywhere">{d.value}</dd>
                     </div>
                 ))}
             </dl>

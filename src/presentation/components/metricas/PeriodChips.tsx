@@ -56,7 +56,7 @@ export function PeriodChips({ value, onChange }: PeriodChipsProps) {
     }
 
     return (
-        <div className="-mx-1 max-w-full overflow-x-auto px-1 py-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        <div className="-mx-1 max-w-full overflow-x-auto px-1 py-1 scrollbar-none [&::-webkit-scrollbar]:hidden">
             <div
                 role="radiogroup"
                 aria-label="Período"
