@@ -26,6 +26,35 @@
   }
 }
 @layer components {
+  /* Entrada en cascada de los hijos de una grilla o lista: la clase va en el
+     contenedor y las cards no se enteran. A partir del décimo hijo el retraso
+     no crece más, para que una lista larga no tarde en terminar de aparecer.
+     `backwards` y no `both`: alcanza para tenerlos ocultos durante el retraso,
+     y al terminar la animación deja de pisar el `transform` del hover. */
+  .stagger-in > * {
+    @apply animate-in fade-in slide-in-from-bottom-3 fill-mode-backwards;
+    animation-duration: 420ms;
+    animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+    animation-delay: calc(var(--stagger, 0) * 50ms);
+  }
+  .stagger-in > :nth-child(2) { --stagger: 1; }
+  .stagger-in > :nth-child(3) { --stagger: 2; }
+  .stagger-in > :nth-child(4) { --stagger: 3; }
+  .stagger-in > :nth-child(5) { --stagger: 4; }
+  .stagger-in > :nth-child(6) { --stagger: 5; }
+  .stagger-in > :nth-child(7) { --stagger: 6; }
+  .stagger-in > :nth-child(8) { --stagger: 7; }
+  .stagger-in > :nth-child(9) { --stagger: 8; }
+  .stagger-in > :nth-child(n + 10) { --stagger: 9; }
+
+  /* La regla global de reduced-motion acorta la duración pero no el retraso:
+     sin esto las últimas cards quedarían medio segundo invisibles. */
+  @media (prefers-reduced-motion: reduce) {
+    .stagger-in > * {
+      animation-delay: 0ms !important;
+    }
+  }
+
   /* Cada palabra del markdown animado (`MarkdownContent animated`) sale con su
      propio `animation-delay`, que el plugin de `MarkdownContent` escribe en el
      `style` del span. El `inline-block` no es decorativo: sobre un elemento

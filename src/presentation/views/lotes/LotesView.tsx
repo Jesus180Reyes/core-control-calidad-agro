@@ -20,7 +20,7 @@ export function LotesView({ cliente }: LotesViewProps) {
     }
 
     return (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="stagger-in grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {lotes.map((lote) => (
                 <LoteCard
                     key={lote.id}
