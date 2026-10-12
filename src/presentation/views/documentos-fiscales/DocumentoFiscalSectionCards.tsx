@@ -61,7 +61,7 @@ export function DocumentoFiscalSectionCards({
     ]
 
     return (
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="stagger-in grid gap-4 sm:grid-cols-2">
             {cards.map((card) => {
                 const isSelected = card.section === selected
 

@@ -20,7 +20,7 @@ export function NotFound() {
             <BackdropDecoration />
 
             <div className="w-full max-w-xl">
-                <div className="rounded-4xl border border-border-ui bg-surface p-6 shadow-clay-card sm:p-10">
+                <div className="rounded-4xl border border-border-ui bg-surface p-6 shadow-clay-card sm:p-10 animate-in fade-in zoom-in-95 duration-500">
                     <div className="flex justify-center">
                         <span className="inline-flex items-center gap-2 rounded-full border border-border-ui bg-bg-app px-3 py-1.5 text-[11px] font-bold tracking-widest text-text-muted uppercase">
                             <span className="relative flex size-2">

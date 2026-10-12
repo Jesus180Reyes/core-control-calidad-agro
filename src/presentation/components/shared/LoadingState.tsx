@@ -19,8 +19,11 @@ export function LoadingState({
             aria-live="polite"
             aria-busy
             aria-label="Cargando"
+            // El spinner aparece recién a los 200 ms: una carga que resuelve
+            // antes no llega a mostrarlo y la pantalla no parpadea.
             className={cn(
                 'flex flex-col items-center justify-center gap-5',
+                'animate-in fade-in duration-300 delay-200 fill-mode-backwards',
                 className,
             )}
         >
