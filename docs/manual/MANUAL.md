@@ -55,6 +55,12 @@ Control de calidad de pesajes en planta
 7. [Aprobador](#cap-7)
    1. [Dónde entra en el ciclo del lote](#cap-7-1)
    2. [La aplicación móvil](#cap-7-2)
+8. [Solución de problemas](#cap-8)
+9. [Glosario](#cap-9)
+
+[Anexo A. Qué ve cada rol](#cap-anexo-a)
+
+[Historial de versiones](#cap-historial)
 
 <div style="page-break-after: always"></div>
 
@@ -834,3 +840,120 @@ Los lotes finalizados se pueden consultar desde **Clientes**, con **Ver lotes fi
 El aprobador no trabaja en las pantallas que describe este manual, sino en la **aplicación móvil de METRIKA 360**. Su uso se explica en el manual de esa aplicación.
 
 <div style="page-break-after: always"></div>
+
+<a id="cap-8"></a>
+
+## 8. Solución de problemas
+
+**La báscula no aparece, o el sistema dice "Navegador no compatible".**
+
+- Verifique que está usando **Google Chrome** o **Microsoft Edge** en una computadora. Otros navegadores y los celulares no pueden leer la báscula.
+- Verifique que el cable del indicador esté conectado a la computadora y que el indicador esté encendido.
+- Si es la primera vez en ese equipo o en ese navegador, autorice la báscula con **Autorizar báscula nueva** (vea el [capítulo 2.2](#cap-2-2)).
+- Si el diálogo **Seleccionar báscula** dice *"Aún no hay básculas registradas"*, todavía no se autorizó ninguna en ese equipo. Use **Autorizar báscula nueva**.
+
+**La báscula dice "Sin señal" o "Reconectando…".**
+
+- **Sin señal**: la conexión está abierta, pero el indicador no envía el peso. Verifique que esté encendido y que el cable esté firme. Si la señal vuelve, el estado se recupera solo. Si no, pulse **Reintentar**.
+- **Reconectando…**: el sistema perdió la conexión y la intenta recuperar solo, hasta 6 veces. Revise el cable mientras tanto.
+- Si después de los reintentos la báscula queda **Desconectada**, desconecte y vuelva a conectar el cable, y pulse **Conectar Báscula**.
+- Si había un pesaje en curso cuando se cortó, ese pesaje no se guardó. Retire el producto y vuelva a pesarlo.
+
+Vea el detalle de cada estado en el [capítulo 2.3](#cap-2-3).
+
+**Al ingresar, el sistema dice que la contraseña venció.**
+
+Es normal la primera vez que ingresa un usuario nuevo, y cada vez que la contraseña vence. Elija una contraseña nueva en el diálogo **Tu contraseña venció** y luego ingrese con ella (vea el [capítulo 3.2](#cap-3-2)).
+
+**El sistema dice "El PIN ingresado es incorrecto."**
+
+- El supervisor tiene que escribir **su propio** PIN, de 4 dígitos.
+- Si el supervisor no recuerda su PIN, o nunca recibió uno, el administrador del sistema tiene que asignarle uno nuevo.
+- Si el mensaje es *"Error al validar el PIN. Intente de nuevo."*, el PIN no es el problema: el sistema no pudo comprobarlo. Espere unos segundos y vuelva a intentar.
+
+**El ticket no se imprime.**
+
+1. Verifique que la impresora de etiquetas esté encendida, con papel y conectada.
+2. Pulse **Reintentar impresión**.
+3. En el diálogo de impresión del navegador, verifique que esté elegida la impresora de etiquetas.
+4. Si falla dos veces seguidas, aparece **Continuar sin imprimir**. Úselo solo si no hay forma de imprimir, y avísele a su supervisor: el bulto queda sin etiqueta.
+
+El ticket de un pesaje ya guardado se puede descargar más tarde desde los pesajes de su lote (vea el [capítulo 4.6](#cap-4-6)).
+
+**No veo un menú, un botón o un módulo que otro compañero sí ve.**
+
+Cada rol ve solo los módulos y las acciones que tiene habilitados (vea el [Anexo A](#cap-anexo-a)).
+
+- Si su trabajo necesita ese módulo, pídale al administrador del sistema que revise su rol.
+- Si le acaban de habilitar algo nuevo, **cierre sesión y vuelva a ingresar**: los permisos se cargan al ingresar.
+
+**La pantalla dice "No se pudo cargar la información", o aparece un aviso de que no se pudo contactar al servidor.**
+
+El sistema no pudo comunicarse con el servidor.
+
+1. Verifique que la computadora tenga conexión a internet o a la red de la planta.
+2. Pulse **Reintentar**.
+3. Si el problema sigue, espere unos minutos y vuelva a intentar. Si persiste, avísele a soporte técnico.
+
+Mientras no hay conexión **no se pueden guardar pesajes**. No anote pesos a mano para cargarlos después sin consultarlo con su supervisor.
+
+**El sistema me devolvió a la pantalla de ingreso.**
+
+Su sesión terminó. Vuelva a ingresar con su usuario y su contraseña. Los pesajes que ya había guardado no se pierden.
+
+<div style="page-break-after: always"></div>
+
+<a id="cap-9"></a>
+
+## 9. Glosario
+
+| Término | Significado |
+| --- | --- |
+| **Aprobador** | Rol que revisa los lotes en **cliente final** y los finaliza o rechaza, desde la aplicación móvil. |
+| **Bloqueo Crítico** | Diálogo que detiene el pesaje cuando un peso estable supera el máximo del lote. Para continuar hace falta el PIN de un supervisor, o corregir el peso. |
+| **Bulto** | Cada unidad de producto que se pesa y se etiqueta. |
+| **Estado de calidad** | Clasificación de cada pesaje guardado según su peso neto: **peso ideal** (dentro del rango), **peso máximo** (por encima) o **peso mínimo** (por debajo). |
+| **Etapa** | Momento del ciclo en que está un lote: **en proceso**, **cliente final**, **finalizado** o **rechazado**. |
+| **Indicador** | El equipo de la báscula que muestra el peso y lo envía a la computadora. |
+| **Lote** | Conjunto de bultos de un mismo producto para un cliente, con su propio rango de peso. |
+| **Pesaje** | El registro de un bulto: su peso bruto, su tara, su peso neto, quién lo pesó y cuándo. |
+| **Peso bruto** | El peso que lee la báscula: producto más envase. |
+| **Peso neto** | El peso del producto solo: peso bruto menos tara. |
+| **PIN de supervisor** | Clave personal de 4 dígitos con la que un supervisor autoriza un peso sobre el máximo. |
+| **Rango** | Los tres pesos de referencia de un lote: **mínimo**, **ideal** y **máximo**. Un peso entre el mínimo y el máximo está dentro del rango. |
+| **Tara** | El peso del envase, que se descuenta del peso bruto. |
+| **Ticket** | La etiqueta impresa que identifica cada bulto. Su impresión es obligatoria después de cada pesaje. |
+
+<div style="page-break-after: always"></div>
+
+<a id="cap-anexo-a"></a>
+
+## Anexo A. Qué ve cada rol
+
+Esta tabla muestra qué pantallas y acciones tiene cada rol en esta versión del manual. Los permisos de cada rol los define el administrador del sistema, así que en su empresa pueden variar.
+
+| Pantalla o acción | Operador | Supervisor | Administrador | Aprobador |
+| --- | --- | --- | --- | --- |
+| Registrar pesaje e historial | Sí | — | Sí | — |
+| Clientes: inspección de clientes, lotes y pesajes | Sí | Sí | Sí | — |
+| Crear clientes y lotes | Sí | — | Sí | — |
+| Aprobar y rechazar lotes | Sí | Sí | Sí | — |
+| Rechazar pesajes | — | Sí | Sí | — |
+| Rechazar clientes | — | — | Sí | — |
+| Agri | — | Sí | Sí | — |
+| Mirador | — | Sí | Sí | — |
+| Métricas | — | Sí | Sí | — |
+| Autorizar con PIN un peso sobre el máximo | — | Sí (*) | — | — |
+| Finalizar o rechazar lotes en cliente final | — | — | — | App móvil |
+
+(*) El supervisor escribe su PIN en la pantalla de pesaje del operador. No necesita ingresar con su propio usuario.
+
+<div style="page-break-after: always"></div>
+
+<a id="cap-historial"></a>
+
+## Historial de versiones
+
+**Sin publicar**
+
+- Primera versión del manual: introducción, requisitos y báscula, primeros pasos, y capítulos de operador, supervisor, administrador y aprobador, más solución de problemas, glosario y anexo A.
