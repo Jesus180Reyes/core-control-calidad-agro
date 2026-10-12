@@ -1,0 +1,2 @@
+# El PDF se genera al entregar y no se versiona (SPEC 17).
+*.pdf

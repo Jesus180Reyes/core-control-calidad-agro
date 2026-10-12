@@ -32,7 +32,7 @@ Hay tres cosas que conviene saber antes de leer el resto.
 - `docs/manual/capturas/`: las capturas de pantalla, en PNG, referenciadas desde el manual con rutas relativas.
 - `docs/manual/README.md`: cómo exportar el manual a PDF, cómo tomar las capturas, la lista de capturas y cómo subir la versión.
 - `docs/manual/.gitignore` con `*.pdf`: el PDF no se versiona.
-- Una portada con el nombre del producto (METRIKA 360), el logo de la app, la versión y la fecha. **Sin el nombre del cliente.**
+- Una portada con el nombre del producto (METRIKA 360), la versión y la fecha, sin logo. **Sin el nombre del cliente.**
 - Capítulos por rol: `OPERADOR`, `SUPERVISOR`, `ADMIN` y `CONTADOR`, más una sección breve sobre el `APROBADOR`.
 - Un tronco común para todos los roles: ingresar, contraseña vencida, la portada, el menú lateral y Ajustes.
 - Requisitos y báscula: el navegador, cómo conectar el indicador, el permiso del puerto serial y qué significa cada estado de la báscula.
@@ -217,11 +217,11 @@ El README también dice qué revisar en el PDF antes de mandarlo:
 Los pasos 1 a 6 y el 8 los puede escribir `/spec-impl` leyendo el código y la app. El paso 7 lo hace una persona. Cada paso deja un manual coherente: lo que todavía no se escribió no aparece en el índice.
 
 1. **Esqueleto.** Crear `docs/manual/` con:
-   - `MANUAL.md`, con la portada (versión `1.0`, la fecha de la entrega a completar en el paso 9, logo `public/logo192.png` por ruta relativa) y el índice con las secciones del capítulo 1;
+   - `MANUAL.md`, con la portada (versión `1.0`, la fecha de la entrega a completar en el paso 9, sin logo) y el índice con las secciones del capítulo 1;
    - `README.md`, con la exportación, las reglas de captura, la lista de capturas y la regla de versiones;
    - `.gitignore`, con `*.pdf`.
 
-   Prueba: exportar a PDF y que la portada salga con el logo.
+   Prueba: exportar a PDF y que la portada salga en su propia página.
 2. **Capítulos 1 a 3.** Introducción, requisitos, báscula y primeros pasos. Antes de redactar los estados de la báscula, leerlos en `useSerialScale.tsx` y verificarlos en la app. Las referencias a capturas que todavía no existen se escriben con el nombre final de la lista.
 3. **Capítulo 4 (Operador).** Recorrer el flujo completo en la app con un usuario `OPERADOR` y datos de demo, incluidos el Bloqueo Crítico, el ticket que falla dos veces y la salida de emergencia.
 4. **Capítulo 5 (Supervisor).** Recorrerlo con un usuario `SUPERVISOR` que tenga un PIN asignado.
@@ -291,6 +291,7 @@ Los pasos 1 a 6 y el 8 los puede escribir `/spec-impl` leyendo el código y la a
 - **Sí:** se incluyen requisitos y báscula, FAQ y glosario. Decisión del usuario.
 - **No:** documentar las tareas de Swagger (PINs, usuarios, permisos). Decisión del usuario. Son tareas internas, sin pantalla.
 - **Sí:** la marca del producto sin el nombre del cliente. Decisión del usuario. El mismo manual sirve para cualquier entrega.
+- **No:** logo en la portada. Decisión del usuario, tomada al implementar. `public/logo192.png` es el logo de React que dejó la plantilla de TanStack, y la app no tiene un archivo de logo propio. Se agrega cuando exista uno oficial.
 - **Sí:** versión e historial de cambios, sin contacto de soporte. Decisión del usuario. El contacto cambia por entrega.
 - **Sí:** una regla en `CLAUDE.md` para actualizar el manual en el mismo cambio. Decisión del usuario. Sin la regla, el manual envejece en silencio.
 - **Sí:** tratar al lector de usted. Es el registro esperable en un entregable formal para un cliente en Honduras.
