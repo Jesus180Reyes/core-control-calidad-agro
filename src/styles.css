@@ -47,6 +47,13 @@
   .stagger-in > :nth-child(9) { --stagger: 8; }
   .stagger-in > :nth-child(n + 10) { --stagger: 9; }
 
+  /* En una tabla las filas sólo se funden, sin subir: con los bordes
+     colapsados del preflight la línea entre filas la pinta la tabla y no la
+     fila, y se quedaría quieta mientras la fila se desliza. */
+  .stagger-in > tr {
+    --tw-enter-translate-y: 0;
+  }
+
   /* La regla global de reduced-motion acorta la duración pero no el retraso:
      sin esto las últimas cards quedarían medio segundo invisibles. */
   @media (prefers-reduced-motion: reduce) {

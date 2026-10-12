@@ -266,7 +266,10 @@ export function DataTable<TData extends RowData>({
 
                 {/* La última fila no lleva línea: el borde de la card ya cierra
                     la tabla, y dos líneas juntas se ven como un error. */}
-                <TableBody className="divide-y divide-border-ui/70">
+                {/* Las filas entran en cascada al montarse: al cargar y al
+                    cambiar de página, que son `key` nuevas. Ordenar sólo las
+                    mueve, así que no las vuelve a animar. */}
+                <TableBody className="stagger-in divide-y divide-border-ui/70">
                     {rows.length === 0 && (
                         <TableRow className="border-0 hover:bg-transparent">
                             {/* El header se sigue pintando: sin encabezados,
