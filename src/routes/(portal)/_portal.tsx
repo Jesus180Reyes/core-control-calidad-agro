@@ -58,7 +58,9 @@ function PortalLayout() {
                 )}
             >
                 <Suspense fallback={<LoadingState size="lg" />}>
-                    <Outlet />
+                    <div className="animate-in fade-in slide-in-from-bottom-2 duration-300 ease-out">
+                        <Outlet />
+                    </div>
                 </Suspense>
             </ErrorBoundary>
         </main>
