@@ -42,6 +42,12 @@ Control de calidad de pesajes en planta
    6. [Inspección de clientes, lotes y pesajes](#cap-4-6)
    7. [Aprobar o rechazar un lote](#cap-4-7)
    8. [Historial de pesajes](#cap-4-8)
+5. [Supervisor](#cap-5)
+   1. [Autorizar un peso con el PIN](#cap-5-1)
+   2. [Inspección y rechazo de pesajes](#cap-5-2)
+   3. [Agri, el asistente con IA](#cap-5-3)
+   4. [Mirador: la planta en vivo](#cap-5-4)
+   5. [Métricas de calidad](#cap-5-5)
 
 <div style="page-break-after: always"></div>
 
@@ -298,7 +304,7 @@ Registrar un pesaje tiene cuatro pasos, que la pantalla muestra arriba: **Client
 1. En el menú lateral, abra **Control de Calidad** y pulse **Registrar Pesaje**.
 2. Aparecen los clientes que tiene asignados. Pulse la tarjeta del cliente para el que va a pesar.
 
-Si la pantalla dice *"No hay clientes asignados"*, su usuario no está vinculado a ningún cliente. Pídale a un supervisor que lo vincule.
+Si la pantalla dice *"No hay clientes asignados"*, su usuario no está vinculado a ningún cliente. Los operadores se vinculan al crear el cliente (vea el [capítulo 4.5](#cap-4-5)). Pídale al administrador del sistema que revise el vínculo.
 
 **Paso 2. Elegir el lote**
 
@@ -309,7 +315,7 @@ Si la pantalla dice *"No hay clientes asignados"*, su usuario no está vinculado
 1. Aparecen los lotes del cliente. Cada tarjeta muestra el producto, la variedad o talla y el rango del lote: **Mínimo**, **Ideal** y **Máximo**.
 2. Pulse la tarjeta del lote que va a pesar. Se abre la pantalla de pesaje.
 
-Si la pantalla dice *"Este cliente no tiene lotes"*, pídale a un supervisor que cree uno.
+Si la pantalla dice *"Este cliente no tiene lotes"*, hay que crear uno primero (vea el [capítulo 4.5](#cap-4-5)).
 
 **Paso 3. Pesar**
 
@@ -573,5 +579,177 @@ El lote pasa a **cliente final** y ya no recibe pesajes. El sistema vuelve a la 
 - Se muestran 20 pesajes por página. Use **Anterior** y **Siguiente** para pasar de página.
 
 Para volver a descargar el ticket de un pesaje, búsquelo desde **Clientes**, en los pesajes de su lote (vea el [capítulo 4.6](#cap-4-6)).
+
+<div style="page-break-after: always"></div>
+
+<a id="cap-5"></a>
+
+## 5. Supervisor
+
+El supervisor autoriza los pesos fuera de rango, revisa lotes y pesajes, y sigue la operación con el Mirador, las métricas y el asistente Agri.
+
+Desde **Clientes** también puede inspeccionar y aprobar o rechazar lotes, igual que el operador (vea los capítulos [4.6](#cap-4-6) y [4.7](#cap-4-7)).
+
+<a id="cap-5-1"></a>
+
+### 5.1 Autorizar un peso con el PIN
+
+Cuando un peso supera el máximo del lote, la pantalla de pesaje del operador se bloquea hasta que un supervisor lo autoriza. El procedimiento completo está en el [capítulo 4.3](#cap-4-3).
+
+Lo que el supervisor tiene que saber:
+
+- **El PIN se escribe en la pantalla del operador**, en el campo **PIN de supervisor**, y se confirma con **Autorizar Lote**. No hace falta ingresar al sistema con su propio usuario.
+- **El PIN es personal y tiene 4 dígitos.** Identifica al supervisor que autoriza: el pesaje queda registrado a su nombre, y su nombre aparece en el diálogo de tara como *"Autorizado por"*.
+- **No comparta su PIN.** Quien lo conozca puede autorizar pesajes en su nombre.
+- **Cada autorización vale para un solo pesaje.** El bulto siguiente que supere el máximo vuelve a pedir el PIN.
+- **Antes de autorizar, mire el peso.** Si sobra producto, lo correcto es pedirle al operador que lo corrija con **Rechazar Pesaje**, no autorizarlo.
+
+El PIN lo asigna el administrador del sistema. Si no tiene uno, o si lo olvidó, pídale uno nuevo.
+
+<a id="cap-5-2"></a>
+
+### 5.2 Inspección y rechazo de pesajes
+
+Desde los pesajes de un lote (vea el [capítulo 4.6](#cap-4-6)), el supervisor puede rechazar un pesaje ya guardado, por ejemplo si se registró en el lote equivocado.
+
+1. En el menú lateral, pulse **Clientes**.
+2. En la fila del cliente, pulse **⋯** y elija **Ver lotes pendientes de inspección**.
+3. Pulse la tarjeta del lote.
+4. En la fila del pesaje, pulse **⋯** y elija **Rechazar Pesaje**.
+5. En **Motivo del rechazo**, explique por qué. Debe tener al menos 5 caracteres.
+6. Pulse **Rechazar pesaje** para confirmar.
+
+**El rechazo no se puede deshacer.** El pesaje queda fuera de la inspección del lote.
+
+<a id="cap-5-3"></a>
+
+### 5.3 Agri, el asistente con IA
+
+**Agri** responde preguntas sobre lotes, pesajes y calidad, escritas en lenguaje natural. Por ejemplo: *"¿Cuántos pesajes fuera de rango hubo hoy?"*
+
+![Agri](capturas/5-3-agri.png)
+
+*Agri respondiendo una pregunta.*
+
+1. En el menú lateral, pulse **Agri**.
+2. Escriba su pregunta en el recuadro de abajo.
+   - También puede pulsar una de las tres sugerencias que aparecen al empezar: se envía sola.
+3. Pulse la flecha, o la tecla **Enter**, para enviarla. Para escribir en otra línea sin enviar, use **Shift + Enter**.
+4. Mientras Agri prepara la respuesta, aparecen tres puntos animados. La respuesta puede incluir listas y tablas.
+
+Bajo la última respuesta hay dos botones:
+
+- **Copiar**: copia la respuesta para pegarla en otro lado.
+- **Regenerar**: pide otra respuesta a la misma pregunta.
+
+Para empezar de cero, pulse **Nueva conversación**.
+
+Tenga en cuenta:
+
+- **Agri solo consulta.** No aprueba, no rechaza ni modifica nada.
+- **Agri puede equivocarse.** Verifique en las pantallas del sistema cualquier dato importante antes de tomar una decisión.
+- **Cada pregunta tiene un máximo de 500 caracteres.** Si se pasa, aparece *"El mensaje no puede pasar de 500 caracteres."* y el mensaje no se envía.
+- **Hay un límite de preguntas por día.** Si lo alcanza, Agri se lo dice en su respuesta.
+- **La conversación no se guarda.** Si recarga la página o sale de Agri, se pierde.
+
+<a id="cap-5-4"></a>
+
+### 5.4 Mirador: la planta en vivo
+
+El **Mirador** muestra toda la planta en un tablero en tres dimensiones:
+
+- cada cliente es un territorio;
+- sus lotes avanzan por las etapas **En pesaje**, **Por aprobar** y **Finalizado**;
+- cada pesaje nuevo vuela desde la báscula hasta su lote.
+
+![Mirador](capturas/5-4-mirador.png)
+
+*El Mirador con un lote seleccionado.*
+
+**Los indicadores del día**
+
+Arriba a la izquierda están **Pesajes hoy**, **Peso neto hoy**, **En rango** (el porcentaje de pesajes dentro del rango) y **Lotes activos**.
+
+Al lado del título, el indicador **En vivo** muestra la hora de la última actualización. El tablero se actualiza solo, aproximadamente cada uno o dos minutos, mientras la pestaña está a la vista. Si pasan más de 4 minutos sin poder actualizar, el indicador cambia a *"Sin actualizar hace…"* y el tablero muestra los últimos datos que recibió.
+
+**Moverse por el tablero**
+
+- **Girar**: arrastre con el mouse.
+- **Desplazar**: arrastre con el botón derecho, o con **Shift** presionado.
+- **Acercar y alejar**: la rueda del mouse, o los botones **+** y **−**.
+- **Volver a la vista de toda la planta**: el botón de la mira.
+- **Pantalla completa**: el botón de las esquinas.
+
+**Ver el detalle**
+
+Pulse un cliente, un lote o la ficha de un pesaje para ver su detalle en el panel de la derecha.
+
+- **Cliente**: sus lotes activos, sus bultos, el porcentaje en rango y sus lotes agrupados por etapa.
+- **Lote**: el rango, los bultos, el peso neto, la **Diana de calidad** y los **Últimos pesajes**.
+- **Pesaje**: el peso, si quedó en rango, cuánto se alejó del ideal, el operario y la hora.
+
+Para volver un nivel atrás, use la ruta de arriba (**Planta › cliente › lote**), pulse un espacio vacío del tablero o la tecla **Esc**.
+
+**Cómo leer las fichas y la diana**
+
+- **Ficha verde**: pesaje en rango.
+- **Ficha ámbar**: en rango, pero cerca de un límite (a más del 60 % del camino hacia el mínimo o el máximo).
+- **Ficha roja**: fuera de rango.
+
+La **Diana de calidad** de un lote pone el peso ideal en el centro. Los pesajes más pesados quedan a la derecha y los más livianos a la izquierda. El anillo rojo marca los límites mínimo y máximo.
+
+El panel **Cómo leer el tablero**, en la vista de la planta, explica el resto de los elementos. La gente en los pasillos y los carritos son ambientación, no datos.
+
+**Qué pasa si…**
+
+- **Aparece "Este equipo no puede dibujar el tablero 3D".** La computadora o el navegador no permiten dibujar en 3D. Los indicadores y el panel siguen funcionando. Pruebe con otro equipo, o pídale a soporte técnico que active la aceleración por hardware del navegador.
+
+<a id="cap-5-5"></a>
+
+### 5.5 Métricas de calidad
+
+**Métricas** resume la calidad de lo pesado en un período: cuánto quedó fuera de rango, cuánto se alejó del ideal y cómo se reparte por cliente.
+
+![Métricas de calidad](capturas/5-5-metricas.png)
+
+*El tablero de métricas de calidad.*
+
+**Elegir el período y los filtros**
+
+Los filtros se aplican al momento, sin botón de buscar.
+
+- **Período**: **7 días**, **30 días** (el que se ve al entrar), **90 días**, **Este mes** o **Personalizado**. Con **Personalizado** aparecen **Desde** y **Hasta** para elegir las fechas.
+- **Cliente** y **Operador**: para ver solo un cliente o solo un operador.
+  - Cada filtro activo aparece como una etiqueta, por ejemplo *Cliente: …*. Pulse su **×** para quitarlo.
+
+Debajo del título se lee el período exacto que se está mostrando, por ejemplo *"Del 11 sep al 10 oct de 2026"*.
+
+**Los indicadores**
+
+| Indicador | Qué muestra |
+| --- | --- |
+| **Pesajes** | Cuántos pesajes hubo, cuántos se anularon y cuántos están sin revisar. |
+| **Fuera de rango** | El porcentaje de pesajes con el peso neto fuera del rango del lote. |
+| **Rechazo del aprobador** | De los pesajes que revisó el aprobador, qué porcentaje rechazó. |
+| **Anulación** | El porcentaje de pesajes anulados. |
+
+**Desviación frente al ideal** indica cuánto se alejan, en promedio, los pesajes del peso ideal:
+
+- un valor **positivo** (en ámbar) significa que se pesa **por encima** del ideal: se entrega producto de más;
+- un valor **negativo** (en rojo) significa que se pesa **por debajo**: hay riesgo de reclamo;
+- un valor cerca de 0 significa que se pesa **en el ideal**.
+
+La **dispersión (±)** indica cuánto varían los pesajes entre sí. El botón **?** de la tarjeta lo explica con ejemplos.
+
+**Estados de calidad** reparte los pesajes entre peso ideal, máximo y mínimo.
+
+**Por cliente** muestra los mismos indicadores para cada cliente. Pulse los títulos de las columnas para ordenar la tabla. Pulse la fila de un cliente para filtrar todo el tablero por ese cliente.
+
+Un valor **—** significa que no hay datos para calcularlo. No es lo mismo que 0.
+
+**Qué pasa si…**
+
+- **Aparece "Sin pesajes en este período".** Elija un período más largo o quite algún filtro.
+- **Aparece "No se pudieron cargar las métricas".** Pulse **Reintentar**. Los filtros siguen disponibles.
 
 <div style="page-break-after: always"></div>
