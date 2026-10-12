@@ -33,6 +33,15 @@ Control de calidad de pesajes en planta
    2. [Contraseña vencida](#cap-3-2)
    3. [La portada y el menú lateral](#cap-3-3)
    4. [Ajustes](#cap-3-4)
+4. [Operador](#cap-4)
+   1. [Registrar un pesaje](#cap-4-1)
+   2. [El rango de peso y los estados de calidad](#cap-4-2)
+   3. [Peso sobre el máximo: el Bloqueo Crítico](#cap-4-3)
+   4. [Imprimir el ticket](#cap-4-4)
+   5. [Crear un cliente y crear un lote](#cap-4-5)
+   6. [Inspección de clientes, lotes y pesajes](#cap-4-6)
+   7. [Aprobar o rechazar un lote](#cap-4-7)
+   8. [Historial de pesajes](#cap-4-8)
 
 <div style="page-break-after: always"></div>
 
@@ -234,7 +243,7 @@ El **menú lateral**, a la izquierda, está siempre a la vista. Muestra solo lo 
 | **Agri** · Asistente IA | Hacer preguntas sobre lotes, pesajes y calidad. | [5.3](#cap-5-3) |
 | **Mirador** · Planta en vivo · 3D | Ver la planta en vivo. | [5.4](#cap-5-4) |
 | **Control de Calidad** → **Registrar Pesaje** | Pesar con la báscula. | [4.1](#cap-4-1) |
-| **Control de Calidad** → **Historial Pesajes** | Consultar lo pesado y descargar tickets. | [4.8](#cap-4-8) |
+| **Control de Calidad** → **Historial Pesajes** | Consultar lo pesado. | [4.8](#cap-4-8) |
 | **Administración** → **Documentos Fiscales** | Administrar los documentos fiscales. | [7](#cap-7) |
 | **Clientes** | Inspeccionar clientes, lotes y pesajes. | [4.6](#cap-4-6) |
 | **Métricas** | Ver los indicadores de calidad. | [5.5](#cap-5-5) |
@@ -265,5 +274,304 @@ En **Ajustes**, al pie del menú lateral, encontrará:
 **Cerrar sesión.** Pulse **Cerrar sesión** en Ajustes, o **Cerrar Sesión** al pie del menú lateral. El sistema vuelve a la pantalla de ingreso. Los pesajes ya registrados no se pierden.
 
 Cierre la sesión siempre que deje un equipo compartido. Mientras siga abierta, cualquiera que use ese equipo trabaja con su usuario.
+
+<div style="page-break-after: always"></div>
+
+<a id="cap-4"></a>
+
+## 4. Operador
+
+Este capítulo explica el trabajo diario en la báscula. Antes de pesar por primera vez en un equipo, lea el [capítulo 2](#cap-2) para conectar la báscula.
+
+<a id="cap-4-1"></a>
+
+### 4.1 Registrar un pesaje
+
+Registrar un pesaje tiene cuatro pasos, que la pantalla muestra arriba: **Cliente**, **Lote**, **Pesar** y **Etiqueta**. Los pasos ya completados muestran lo que eligió, y puede pulsarlos para volver a ese paso.
+
+**Paso 1. Elegir el cliente**
+
+![Selección de cliente](capturas/4-1-seleccion-cliente.png)
+
+*La pantalla Seleccioná un cliente.*
+
+1. En el menú lateral, abra **Control de Calidad** y pulse **Registrar Pesaje**.
+2. Aparecen los clientes que tiene asignados. Pulse la tarjeta del cliente para el que va a pesar.
+
+Si la pantalla dice *"No hay clientes asignados"*, su usuario no está vinculado a ningún cliente. Pídale a un supervisor que lo vincule.
+
+**Paso 2. Elegir el lote**
+
+![Selección de lote](capturas/4-1-seleccion-lote.png)
+
+*Los lotes del cliente, con su rango de peso.*
+
+1. Aparecen los lotes del cliente. Cada tarjeta muestra el producto, la variedad o talla y el rango del lote: **Mínimo**, **Ideal** y **Máximo**.
+2. Pulse la tarjeta del lote que va a pesar. Se abre la pantalla de pesaje.
+
+Si la pantalla dice *"Este cliente no tiene lotes"*, pídale a un supervisor que cree uno.
+
+**Paso 3. Pesar**
+
+![Báscula antes de conectar](capturas/4-1-bascula-conectar.png)
+
+*La pantalla de pesaje con la báscula todavía desconectada.*
+
+La pantalla de pesaje tiene tres partes:
+
+- **La lectura de la báscula**, en el centro, con el botón **Registrar pesaje**.
+- **Detalles de Operación**, con el cliente y el lote que eligió.
+- **Parámetros de Referencia**, con el rango del lote y dónde cae el peso actual.
+
+1. Verifique que la etiqueta de arriba a la derecha diga **Báscula en línea**. Si no, conéctela como se explica en el [capítulo 2.2](#cap-2-2).
+2. Coloque el producto sobre la plataforma.
+3. Espere a que el peso se estabilice. Mientras tanto aparece una cuenta regresiva de **5 segundos** con el aviso *"No retire ni mueva el producto de la plataforma."*
+   - Si el peso se mueve, la cuenta vuelve a empezar y aparece *"El peso se movió: el conteo volvió a empezar."*
+4. Cuando el peso está estable y dentro del rango, la lectura dice **Aprobado** y debajo aparece *"Peso estable y dentro de rango: listo para registrar."*
+5. Pulse **Registrar pesaje**. Se abre el diálogo **Tara del envase**.
+
+![Peso estable dentro del rango](capturas/4-1-bascula-estable.png)
+
+*Un peso estable dentro del rango, listo para registrar.*
+
+![Diálogo de tara](capturas/4-1-tara.png)
+
+*El diálogo Tara del envase, con el peso bruto y el neto.*
+
+6. En **Tara**, escriba el peso del envase, en la unidad del lote.
+7. Revise el **Peso bruto** (el que leyó la báscula) y el **Peso neto** (el bruto menos la tara).
+8. Pulse **Guardar pesaje**.
+
+Cuando el pesaje se guarda, aparece un aviso en verde y se abre el diálogo del ticket. Siga el [capítulo 4.4](#cap-4-4).
+
+**Qué pasa si…**
+
+- **El botón Registrar pesaje no se puede pulsar.** El peso todavía no está estable, la plataforma está vacía o el peso está fuera del rango. El texto debajo del botón le dice cuál de los tres casos es.
+- **El peso está por debajo del mínimo.** La lectura dice **Desviado** y aparece *"Falta producto: el peso está por debajo del mínimo del lote."* Agregue producto hasta entrar en el rango.
+- **El peso está por encima del máximo.** Se abre el **Bloqueo Crítico**. Siga el [capítulo 4.3](#cap-4-3).
+- **La tara no es válida.** El diálogo lo indica: *"Tara requerida"*, *"La tara no puede ser negativa"* o *"La tara debe ser menor al peso bruto"*.
+- **El peso cambia con el diálogo de tara abierto.** El diálogo muestra *"El peso cambió — reestabilizando…"* y no permite guardar hasta que el peso vuelva a quedar estable.
+- **Quiere descartar la muestra.** Pulse **Cancelar** en el diálogo de tara. No se guarda nada y la báscula vuelve a estabilizar.
+- **No se pudo guardar.** Aparece un aviso en rojo con el motivo. El diálogo de tara sigue abierto para que pueda reintentar.
+
+Para cambiar de cliente o de lote, use la flecha de arriba a la izquierda, que vuelve a la lista de clientes, o pulse los pasos **Cliente** o **Lote**.
+
+<a id="cap-4-2"></a>
+
+### 4.2 El rango de peso y los estados de calidad
+
+Cada lote tiene tres pesos de referencia:
+
+- **Mínimo**: el peso más bajo aceptado.
+- **Ideal**: el peso buscado.
+- **Máximo**: el peso más alto aceptado.
+
+Todo peso entre el mínimo y el máximo está **dentro del rango**.
+
+La tarjeta **Parámetros de Referencia** indica en todo momento dónde cae el peso que está sobre la báscula:
+
+| Indicador | Qué significa |
+| --- | --- |
+| **Sin producto** | La plataforma está vacía. |
+| **Bajo el mínimo** | Falta producto. La tarjeta indica cuánto falta para llegar al mínimo. |
+| **En rango** | El peso está dentro del rango del lote. |
+| **En el ideal** | El peso está dentro del rango y muy cerca del ideal. |
+| **Sobre el máximo** | Sobra producto. La tarjeta indica cuánto sobra. |
+
+Lecturas de 2 o menos se consideran plataforma vacía y se muestran como 0.
+
+Cada pesaje guardado queda con un **estado de calidad**, que se ve en el historial y en la inspección. El sistema lo calcula sobre el **peso neto**, es decir, después de descontar la tara:
+
+- **Peso ideal**: el neto quedó dentro del rango.
+- **Peso máximo**: el neto quedó por encima del máximo.
+- **Peso mínimo**: el neto quedó por debajo del mínimo.
+
+La báscula controla el peso **bruto**. Por eso un pesaje aprobado en la báscula puede quedar como **Peso mínimo** si la tara es grande.
+
+<a id="cap-4-3"></a>
+
+### 4.3 Peso sobre el máximo: el Bloqueo Crítico
+
+Cuando un peso estable supera el máximo del lote, el sistema no deja seguir sin la autorización de un supervisor. Se abre el diálogo **Bloqueo Crítico**.
+
+![Bloqueo Crítico](capturas/4-3-bloqueo-critico.png)
+
+*El Bloqueo Crítico pidiendo el PIN del supervisor.*
+
+Hay dos caminos:
+
+**A. Corregir el peso.** Es lo habitual cuando sobra producto:
+
+1. Pulse **Rechazar Pesaje**. La muestra se descarta, sin guardar nada.
+2. Quite producto de la plataforma.
+3. Espere a que el peso se estabilice dentro del rango y continúe como siempre.
+
+Si el peso vuelve a estabilizarse por encima del máximo, el bloqueo aparece de nuevo.
+
+**B. Guardar el peso con autorización.** Cuando el peso es correcto aunque supere el máximo:
+
+1. Llame a un supervisor.
+2. El supervisor escribe su **PIN de supervisor**, de 4 dígitos, en el diálogo y pulsa **Autorizar Lote**.
+3. El bloqueo se cierra y se abre solo el diálogo **Tara del envase**, con la línea *"Autorizado por"* y el nombre del supervisor.
+4. Complete la tara y pulse **Guardar pesaje**, como en el [capítulo 4.1](#cap-4-1).
+
+![Tara autorizada](capturas/4-3-tara-autorizada.png)
+
+*El diálogo de tara después del PIN, con el nombre del supervisor.*
+
+El sistema registra qué supervisor autorizó el pesaje. Cada PIN es personal: el supervisor no debe compartirlo.
+
+La autorización vale para **un solo pesaje**. Se descarta al guardar, al cancelar la tara o si el peso cambia antes de guardar. El bulto siguiente que supere el máximo vuelve a pedir el PIN.
+
+**Qué pasa si…**
+
+- **El PIN es incorrecto.** El diálogo muestra *"El PIN ingresado es incorrecto."* y vacía el campo. Vuelva a escribirlo.
+- **Aparece "Error al validar el PIN. Intente de nuevo."** El sistema no pudo comprobar el PIN, por ejemplo por un problema de conexión. Espere unos segundos y vuelva a intentar.
+- **Al guardar aparece un aviso de autorización inválida.** La tara se cierra y el bloqueo vuelve a aparecer sobre la misma muestra. El supervisor tiene que escribir su PIN de nuevo.
+- **La tara deja el peso neto dentro del rango.** El pesaje se guarda normalmente. No necesitaba autorización, así que no queda registrado ningún supervisor.
+
+<a id="cap-4-4"></a>
+
+### 4.4 Imprimir el ticket
+
+Todo pesaje guardado se cierra imprimiendo su ticket. **El ticket es obligatorio**: un bulto sin etiqueta después no se puede identificar en la planta. Por eso el diálogo **Pesaje registrado exitosamente** no se puede cerrar con la X, con la tecla Esc ni haciendo clic afuera.
+
+![Diálogo del ticket](capturas/4-4-ticket.png)
+
+*El diálogo del ticket, que se abre después de cada pesaje.*
+
+1. Pulse **Imprimir ticket**. El botón dice *"Abriendo impresión…"* mientras se prepara el ticket.
+2. Se abre el diálogo de impresión del navegador. Elija la impresora de etiquetas y pulse **Imprimir**.
+3. Verifique que el ticket salió de la impresora y péguelo en el bulto.
+4. Pulse **Ya lo imprimí**.
+
+El diálogo se cierra y la pantalla queda lista para el bulto siguiente, con el mismo cliente y el mismo lote. Si todavía hay producto sobre la plataforma, la cuenta regresiva empieza de nuevo.
+
+Si el ticket no salió bien, pulse **Volver a imprimir** antes de **Ya lo imprimí**.
+
+**Qué pasa si…**
+
+- **La impresión falla.** Aparece un aviso en rojo y el diálogo muestra *"No se pudo abrir la impresión de la etiqueta. Reintentá."* Pulse **Reintentar impresión**.
+- **La impresión falla dos veces seguidas.** Aparece el botón **Continuar sin imprimir**. Úselo solo si no hay forma de imprimir, por ejemplo si el servicio de tickets está caído. El pesaje ya quedó guardado, pero el bulto queda sin etiqueta: avísele a su supervisor.
+
+<a id="cap-4-5"></a>
+
+### 4.5 Crear un cliente y crear un lote
+
+Los clientes y los lotes se crean desde **Clientes**, en el menú lateral. No todos los usuarios tienen estos botones: depende de su rol.
+
+**Crear un cliente**
+
+![Formulario de cliente nuevo](capturas/4-5-crear-cliente.png)
+
+*El formulario Nuevo cliente.*
+
+1. En el menú lateral, pulse **Clientes**.
+2. Pulse **Crear Nuevo cliente**. Se abre el formulario **Nuevo cliente**.
+3. Complete los datos: **Nombre**, **RTN**, **Código de exportación**, **Correo de contacto**, **Teléfono**, **Dirección de planta** y **Producto**.
+4. En **Operadores que estaran vinculados a este cliente**, elija uno o más operadores. Solo los operadores vinculados pueden pesar para este cliente.
+5. Pulse **Crear cliente**.
+
+El nombre, el RTN, el código de exportación, el producto y al menos un operador son obligatorios.
+
+**Crear un lote**
+
+![Formulario de lote nuevo](capturas/4-5-crear-lote.png)
+
+*El formulario Nuevo lote, con el rango de peso.*
+
+1. En el menú lateral, pulse **Clientes**.
+2. En la fila del cliente, pulse el botón **⋯** y elija **Ver lotes pendientes de inspección**.
+3. Pulse **Crear nuevo lote**. Se abre el formulario **Nuevo lote**.
+4. Complete **Nombre del lote**, **Variedad o talla**, **Unidad de medida** y **Producto**.
+5. Complete el rango: **Peso mínimo**, **Peso ideal** y **Peso máximo**, en la unidad de medida que eligió.
+6. Pulse **Crear lote**.
+
+Los tres pesos tienen que ser mayores que 0, y el mínimo no puede ser mayor que el ideal ni el ideal mayor que el máximo. **Revise el rango con cuidado**: es el que la báscula usa para aprobar o bloquear cada pesaje del lote.
+
+<a id="cap-4-6"></a>
+
+### 4.6 Inspección de clientes, lotes y pesajes
+
+**Clientes**, en el menú lateral, permite revisar todos los clientes, sus lotes y cada pesaje.
+
+![Inspección de clientes](capturas/4-6-inspeccion-clientes.png)
+
+*La inspección de clientes, con los filtros y la tabla.*
+
+**La lista de clientes**
+
+- Para buscar un cliente, use los filtros **Nombre del cliente**, **Producto**, **Código de exportación** o **RTN**, y pulse **Buscar**. **Limpiar Filtros** vuelve a mostrar todos.
+- La tabla muestra 20 clientes por página. Use **Anterior** y **Siguiente** para pasar de página.
+- Cada fila tiene un botón **⋯** con las acciones sobre ese cliente:
+  - **Ver lotes pendientes de inspección**: todos los lotes del cliente.
+  - **Ver lotes finalizados por aprobador**: los lotes que el aprobador ya dio por terminados.
+
+**Los lotes de un cliente**
+
+**Ver lotes pendientes de inspección** muestra una tarjeta por lote, activos e inactivos. Pulse una tarjeta para ver sus pesajes.
+
+**Los pesajes de un lote**
+
+![Pesajes de un lote](capturas/4-6-inspeccion-pesajes.png)
+
+*Los pesajes de un lote, con los botones para aprobarlo o rechazarlo.*
+
+La pantalla **Pesajes registrados** muestra:
+
+- Los datos del lote.
+- Los botones **Aprobar lote** y **Rechazar lote** (vea el [capítulo 4.7](#cap-4-7)).
+- Una tabla con todos los pesajes del lote: fecha, peso bruto, tara, peso neto, estado de calidad, si está fuera de rango y quién lo registró.
+
+Puede filtrar los pesajes por **Usuario**, por fecha (**Desde** y **Hasta**) o por **Fuera de rango**.
+
+**Volver a descargar un ticket.** En la fila del pesaje, pulse **⋯** y elija **Descargar etiqueta**. El ticket se descarga como PDF, para imprimirlo de nuevo.
+
+**Los lotes finalizados**
+
+**Ver lotes finalizados por aprobador** muestra los lotes que el aprobador ya terminó, con quién lo aprobó y quién lo finalizó. Desde ahí puede:
+
+- **Descargar Reporte de lotes finalizados**, en PDF o en Excel, opcionalmente entre dos fechas de finalización.
+- **Ver resumen del lote**: un resumen del lote escrito por inteligencia artificial.
+
+<a id="cap-4-7"></a>
+
+### 4.7 Aprobar o rechazar un lote
+
+Cuando se terminó de pesar un lote, hay que aprobarlo para que pase a la revisión del aprobador (vea el [capítulo 1.3](#cap-1-3)).
+
+**Aprobar un lote**
+
+1. Abra los pesajes del lote, como en el [capítulo 4.6](#cap-4-6).
+2. Revise los pesajes.
+3. Pulse **Aprobar lote**. El sistema pide confirmación.
+4. Pulse **Aprobar lote** de nuevo para confirmar.
+
+El lote pasa a **cliente final** y ya no recibe pesajes. El sistema vuelve a la lista de clientes. Un lote sin pesajes no se puede aprobar.
+
+**Rechazar un lote**
+
+1. Abra los pesajes del lote.
+2. Pulse **Rechazar lote**.
+3. En **Motivo del rechazo**, explique por qué se rechaza. Debe tener al menos 5 caracteres.
+4. Pulse **Rechazar lote** para confirmar.
+
+**Aprobar y rechazar no se pueden deshacer.** Revise bien el lote antes de confirmar.
+
+<a id="cap-4-8"></a>
+
+### 4.8 Historial de pesajes
+
+**Historial Pesajes**, dentro de **Control de Calidad** en el menú lateral, muestra los pesajes que usted registró.
+
+![Historial de pesajes](capturas/4-8-historial.png)
+
+*El historial de pesajes, con los filtros.*
+
+- Para buscar, use los filtros **Nombre de lote**, **Cliente**, fechas **Desde** y **Hasta**, y **Fuera de rango**. Luego pulse **Buscar**. **Limpiar Filtros** vuelve a mostrar todo.
+- La tabla muestra, por cada pesaje: fecha, lote, unidad, peso bruto, tara, peso neto, estado de calidad y si quedó fuera de rango.
+- Se muestran 20 pesajes por página. Use **Anterior** y **Siguiente** para pasar de página.
+
+Para volver a descargar el ticket de un pesaje, búsquelo desde **Clientes**, en los pesajes de su lote (vea el [capítulo 4.6](#cap-4-6)).
 
 <div style="page-break-after: always"></div>
