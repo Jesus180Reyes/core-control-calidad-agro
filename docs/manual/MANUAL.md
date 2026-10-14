@@ -49,6 +49,7 @@ Control de calidad de pesajes en planta
    4. [Mirador: la planta en vivo](#cap-5-4)
    5. [Métricas de calidad](#cap-5-5)
    6. [Editar un cliente](#cap-5-6)
+   7. [Cambiar los operadores de un cliente](#cap-5-7)
 6. [Administrador](#cap-6)
    1. [Qué ve el administrador](#cap-6-1)
    2. [Rechazar un cliente](#cap-6-2)
@@ -791,6 +792,34 @@ Lo que tiene que saber:
 - **Aparece un aviso en rojo al guardar**, por ejemplo porque otra persona rechazó al cliente mientras usted lo editaba. El diálogo sigue abierto y no se guardó nada. Lea el aviso, cierre el diálogo con **Cancelar** y revise el cliente.
 - **Aparece "No se pudo cargar el catálogo de productos."** Pulse **Reintentar**. Si sigue sin cargar, pulse **Cerrar** e intente más tarde.
 
+<a id="cap-5-7"></a>
+
+### 5.7 Cambiar los operadores de un cliente
+
+Cada cliente tiene operadores vinculados: son los que lo ven en su lista de **Registrar Pesaje** y pueden pesar para él. El supervisor puede agregar o quitar operadores desde **Clientes**.
+
+1. En el menú lateral, pulse **Clientes**.
+2. Busque al cliente con los filtros, si hace falta.
+3. En la fila del cliente, pulse **⋯** y elija **Editar Operadores Vinculados**.
+4. En el diálogo **Editar operadores vinculados**, abra la lista **Operadores vinculados**. Los operadores que ya tiene el cliente aparecen marcados.
+5. Marque los operadores que quiere agregar y desmarque los que quiere quitar. Puede escribir un nombre para buscarlo.
+6. Pulse **Guardar cambios**.
+
+Al guardar aparece el aviso *"Operadores del cliente actualizados correctamente"* y el diálogo se cierra.
+
+Lo que tiene que saber:
+
+- **Un operador que quita deja de ver al cliente en su lista de clientes.** Ya no puede pesar para él. Si el operador tenía la pantalla abierta, deja de verlo cuando la vuelve a cargar.
+- **El cliente tiene que quedar con al menos un operador.** Si desmarca a todos, **Guardar cambios** no se puede pulsar.
+- **Mientras no cambie nada, Guardar cambios no se puede pulsar.** Si desmarca un operador y lo vuelve a marcar, cuenta como sin cambios.
+- **En la lista solo aparecen los operadores activos.** Un operador recién creado puede tardar unos minutos en aparecer; si no lo ve, vuelva a cargar la página.
+- Para descartar lo que marcó, pulse **Cancelar**. La próxima vez que abra el diálogo verá los operadores guardados.
+
+**Qué pasa si…**
+
+- **Aparece un aviso en rojo al guardar**, por ejemplo porque otra persona rechazó al cliente mientras usted lo editaba. El diálogo sigue abierto y no se guardó nada. Lea el aviso, cierre el diálogo con **Cancelar** y revise el cliente.
+- **Aparece "No se pudieron cargar los operadores del cliente."** Pulse **Reintentar**. Si sigue sin cargar, pulse **Cerrar** e intente más tarde.
+
 <div style="page-break-after: always"></div>
 
 <a id="cap-6"></a>
@@ -812,6 +841,7 @@ El administrador tiene acceso a todos los módulos del sistema. Para cada uno, s
 | Rechazar pesajes | [5.2](#cap-5-2) |
 | Agri, Mirador y Métricas | [5.3](#cap-5-3) a [5.5](#cap-5-5) |
 | Editar clientes | [5.6](#cap-5-6) |
+| Cambiar los operadores de un cliente | [5.7](#cap-5-7) |
 
 El administrador no puede autorizar un peso sobre el máximo: el PIN es solo de los supervisores (vea el [capítulo 5.1](#cap-5-1)).
 
@@ -970,6 +1000,7 @@ Esta tabla muestra qué pantallas y acciones tiene cada rol en esta versión del
 | Aprobar y rechazar lotes | Sí | Sí | Sí | — |
 | Rechazar pesajes | — | Sí | Sí | — |
 | Editar clientes | — | Sí | Sí | — |
+| Cambiar los operadores de un cliente | — | Sí | Sí | — |
 | Rechazar clientes | — | — | Sí | — |
 | Agri | — | Sí | Sí | — |
 | Mirador | — | Sí | Sí | — |
@@ -990,3 +1021,4 @@ Esta tabla muestra qué pantallas y acciones tiene cada rol en esta versión del
 - Primera versión del manual: introducción, requisitos y báscula, primeros pasos, y capítulos de operador, supervisor, administrador y aprobador, más solución de problemas, glosario y anexo A.
 - Los filtros de **Pesajes registrados** y del historial de pesajes eligen el **Estado de calidad** de una lista, en vez de escribir un número.
 - Nueva sección 5.6: el supervisor y el administrador pueden editar el nombre, el teléfono, la dirección de planta y el producto de un cliente desde **Clientes**, con **Editar Cliente**.
+- Nueva sección 5.7: el supervisor y el administrador pueden agregar o quitar los operadores de un cliente desde **Clientes**, con **Editar Operadores Vinculados**.
