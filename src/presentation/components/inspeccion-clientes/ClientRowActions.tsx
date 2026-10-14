@@ -14,6 +14,7 @@ import type { Cliente } from '#/presentation/types/clientes/clientes.types'
 import { useNavigate } from '@tanstack/react-router'
 import { RejectClienteDialog } from '#/presentation/components/inspeccion-clientes/RejectClienteDialog'
 import { EditClienteDialog } from '#/presentation/components/inspeccion-clientes/EditClienteDialog'
+import { EditOperadoresClienteDialog } from '#/presentation/components/inspeccion-clientes/EditOperadoresClienteDialog'
 import { PERMISSIONS, type Permission } from '#/presentation/types/auth/permissions'
 import { Can } from '../shared/Can'
 
@@ -50,6 +51,7 @@ export function ClientRowActions({ cliente }: ClientRowActionsProps) {
         {
             label: 'Editar Operadores Vinculados',
             icon: Edit,
+            permission: PERMISSIONS.EDITAROPERADORESCLIENTE,
             run: () => setselectedAction('EDITAR_OPERADORES_VINCULADOS_CLIENTE'),
         },
         {
@@ -103,6 +105,12 @@ export function ClientRowActions({ cliente }: ClientRowActionsProps) {
             <EditClienteDialog
                 cliente={cliente}
                 open={selectedAction === 'EDITAR_CLIENTE'}
+                onOpenChange={(open) => !open && setselectedAction(null)}
+            />
+
+            <EditOperadoresClienteDialog
+                cliente={cliente}
+                open={selectedAction === 'EDITAR_OPERADORES_VINCULADOS_CLIENTE'}
                 onOpenChange={(open) => !open && setselectedAction(null)}
             />
         </>
