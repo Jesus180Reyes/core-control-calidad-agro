@@ -1,6 +1,6 @@
 # SPEC 18 — Selector de estado de calidad en los filtros de pesajes
 
-> **Estado:** Draft
+> **Estado:** Approved
 > **Depende de:** SPEC 40 del backend (`core-control-calidad-agro-backend/specs/40-catalogo-de-estados-de-calidad.md`), implementado en la rama `spec-40-catalogo-de-estados-de-calidad` del backend y **todavía sin mergear**
 > **Fecha:** 2026-10-14
 > **Objetivo:** Consumir `GET /catalogos/estados-calidad` con un hook nuevo y cambiar el campo numérico "ID de estado de calidad" de `PesajesFiltersBar` y `HistorialFiltersBar` por un selector con los estados que devuelve el backend.
