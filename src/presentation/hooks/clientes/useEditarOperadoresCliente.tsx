@@ -9,9 +9,10 @@ export function useEditarOperadoresCliente({ clienteId }: { clienteId: number })
 
     return useExecuteMutation<{ ok: boolean, msg: string }, EditarOperadoresClienteBody>(`/clientes/${clienteId}/operadores`, {
         method: 'PATCH',
-        onSuccess: (data) => {
+        onSuccess: async (data) => {
             toast.success(data.msg)
             void queryClient.invalidateQueries({ queryKey: ['clientes'] })
+            await queryClient.invalidateQueries({ queryKey: ['clientes', clienteId, 'operadores'] });
         },
     })
 }
