@@ -114,8 +114,6 @@ function EditClienteForm({
         resolver: zodResolver(createEditarClienteSchema(cliente)),
         defaultValues: {
             nombre: cliente.nombre,
-            // La fila trae el nombre del producto, no su id: si no coincide con
-            // el catálogo, el selector arranca vacío y el producto no se envía.
             producto_id: productos.find((p) => p.nombre === cliente.producto)?.id,
             telefono: cliente.telefono ?? '',
             direccion_planta: cliente.direccion_planta ?? '',
@@ -173,12 +171,6 @@ function EditClienteForm({
                             name="nombre"
                             label="Nombre"
                             placeholder="Agroexportadora S.A."
-                        />
-                        <ControlledInput
-                            control={form.control}
-                            name="codigo_exportacion"
-                            label="Código de exportación"
-                            disabled
                         />
                         <ControlledInput
                             control={form.control}
