@@ -5,8 +5,8 @@ import { RotateCcw, Search, SlidersHorizontal } from 'lucide-react'
 import { SectionCardHeader } from '#/presentation/components/shared/SectionCardHeader'
 import { CustomButton } from '#/presentation/components/shared/button/CustomButton'
 import { ControlledDatePicker } from '#/presentation/components/shared/inputs/ControlledDatePicker'
-import { ControlledInput } from '#/presentation/components/shared/inputs/ControlledInput'
 import { ControlledSelector } from '#/presentation/components/shared/inputs/ControlledSelector'
+import { useGetCatalogosEstadosCalidad } from '#/presentation/hooks/catalogos/useGetCatalogosEstadosCalidad'
 import { useGetCatalogosUsuarios } from '#/presentation/hooks/catalogos/useGetCatalogosUsuarios'
 import {
     filtrosPesajesSchema,
@@ -30,6 +30,7 @@ interface PesajesFiltersBarProps {
 
 export function PesajesFiltersBar({ filtros, onApply }: PesajesFiltersBarProps) {
     const { usuarios } = useGetCatalogosUsuarios()
+    const { estadosCalidad } = useGetCatalogosEstadosCalidad()
     const form = useForm<FiltrosPesajes>({ defaultValues: filtros })
     useEffect(() => {
         form.reset(filtros)
@@ -99,13 +100,16 @@ export function PesajesFiltersBar({ filtros, onApply }: PesajesFiltersBarProps) 
                     placeholder="Todos"
                     options={FUERA_DE_RANGO_OPTIONS}
                 />
-                <ControlledInput
+                <ControlledSelector
                     control={form.control}
                     name="estado_calidad_id"
-                    label="ID de estado de calidad"
-                    type="number"
-                    placeholder="Ej. 1"
+                    label="Estado de calidad"
+                    placeholder="Todos los estados"
                     valueAsNumber
+                    options={estadosCalidad.map((estado) => ({
+                        value: estado.id,
+                        label: estado.nombre,
+                    }))}
                 />
             </div>
 
