@@ -16,6 +16,15 @@ export interface ClientesResponse {
     paginacion?: Paginacion // solo cuando se pidió página
 }
 
+/** SPEC 41 del backend. Solo los campos que cambiaron; nunca vacío. */
+export type EditarClienteBody = Partial<{
+    nombre: string
+    producto_id: number
+    correo_contacto: string
+    telefono: string
+    direccion_planta: string
+}>
+
 
 declare module '@tanstack/react-router' {
     interface HistoryState {
