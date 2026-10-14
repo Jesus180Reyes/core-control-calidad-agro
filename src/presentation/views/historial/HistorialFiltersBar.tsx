@@ -7,6 +7,7 @@ import { CustomButton } from '#/presentation/components/shared/button/CustomButt
 import { ControlledDatePicker } from '#/presentation/components/shared/inputs/ControlledDatePicker'
 import { ControlledInput } from '#/presentation/components/shared/inputs/ControlledInput'
 import { ControlledSelector } from '#/presentation/components/shared/inputs/ControlledSelector'
+import { useGetCatalogosEstadosCalidad } from '#/presentation/hooks/catalogos/useGetCatalogosEstadosCalidad'
 import {
     filtrosHistorialSchema,
     type FiltrosHistorial,
@@ -30,6 +31,7 @@ interface HistorialFiltersBarProps {
 
 export function HistorialFiltersBar({ filtros, onApply }: HistorialFiltersBarProps) {
     const { clientes } = useClientInspection();
+    const { estadosCalidad } = useGetCatalogosEstadosCalidad()
     const form = useForm<FiltrosHistorial>({ defaultValues: filtros })
     useEffect(() => {
         form.reset(filtros)
@@ -103,13 +105,16 @@ export function HistorialFiltersBar({ filtros, onApply }: HistorialFiltersBarPro
                     placeholder="Todos"
                     options={FUERA_DE_RANGO_OPTIONS}
                 />
-                <ControlledInput
+                <ControlledSelector
                     control={form.control}
                     name="estado_calidad_id"
-                    label="ID de estado de calidad"
-                    type="number"
-                    placeholder="Ej. 1"
+                    label="Estado de calidad"
+                    placeholder="Todos los estados"
                     valueAsNumber
+                    options={estadosCalidad.map((estado) => ({
+                        value: estado.id,
+                        label: estado.nombre,
+                    }))}
                 />
             </div>
 

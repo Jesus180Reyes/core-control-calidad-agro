@@ -17,9 +17,9 @@ Hay tres cosas que conviene saber antes de leer el resto.
 
 **La segunda: los capítulos son por rol, pero lo que ve cada rol lo decide la base de datos.** Los permisos se asignan por rol en la tabla `permisos` del backend, y el front solo los consulta (SPEC 07). El manual describe la asignación vigente en `db/seed.sql` del backend a la fecha de este spec. Si el cliente cambia los permisos de un rol, el capítulo de ese rol queda desactualizado. Ver Riesgos.
 
-**La tercera: dos roles no tienen hoy el acceso que el manual les describe.**
+**La tercera: hay un módulo y dos roles que este manual no describe.**
 
-- El `CONTADOR` no tiene ninguna fila en `permisos`. "Documentos Fiscales" pide `MODULO-ADMINISTRACION`, así que hoy no ve el módulo. El manual describe el flujo previsto, y asignarle el permiso en la base es un prerrequisito de la entrega, fuera de este spec.
+- El módulo **Documentos Fiscales** queda fuera del manual. Decisión del usuario, tomada al implementar. Con él queda fuera el `CONTADOR`, que solo usa ese módulo.
 - El `APROBADOR` trabaja en la app móvil, que es otro producto. Este manual explica dónde entra en el ciclo del lote y remite al manual de esa app.
 
 ---
@@ -32,8 +32,8 @@ Hay tres cosas que conviene saber antes de leer el resto.
 - `docs/manual/capturas/`: las capturas de pantalla, en PNG, referenciadas desde el manual con rutas relativas.
 - `docs/manual/README.md`: cómo exportar el manual a PDF, cómo tomar las capturas, la lista de capturas y cómo subir la versión.
 - `docs/manual/.gitignore` con `*.pdf`: el PDF no se versiona.
-- Una portada con el nombre del producto (METRIKA 360), el logo de la app, la versión y la fecha. **Sin el nombre del cliente.**
-- Capítulos por rol: `OPERADOR`, `SUPERVISOR`, `ADMIN` y `CONTADOR`, más una sección breve sobre el `APROBADOR`.
+- Una portada con el nombre del producto (METRIKA 360), la versión y la fecha, sin logo. **Sin el nombre del cliente.**
+- Capítulos por rol: `OPERADOR`, `SUPERVISOR` y `ADMIN`, más una sección breve sobre el `APROBADOR`.
 - Un tronco común para todos los roles: ingresar, contraseña vencida, la portada, el menú lateral y Ajustes.
 - Requisitos y báscula: el navegador, cómo conectar el indicador, el permiso del puerto serial y qué significa cada estado de la báscula.
 - Solución de problemas (FAQ).
@@ -45,7 +45,7 @@ Hay tres cosas que conviene saber antes de leer el resto.
 **Fuera (para specs futuros):**
 
 - Las pantallas de la app móvil del `APROBADOR`. Tienen su propio manual.
-- Corregir la asignación de permisos en la base (`CONTADOR` sin `MODULO-ADMINISTRACION`). Es un prerrequisito de la entrega, pero va aparte.
+- El módulo **Documentos Fiscales** (`/administracion-documentos-fiscales` y su detalle) y el rol `CONTADOR`. Decisión del usuario, tomada al implementar.
 - Los permisos del aprobador con guion bajo (`VER_CLIENTES_APROBADOR`, `FINALIZAR_LOTE_APROBADOR`…), que no están en `PERMISSIONS`. Los usa la app móvil.
 - Las tareas que hoy se hacen por Swagger o SQL: asignar PINs de supervisor, registrar usuarios, resetear contraseñas y sembrar permisos. El manual dice que las hace el administrador del sistema, pero no explica cómo.
 - Las pantallas móviles de la web. Una nota aclara que, salvo la báscula, el sistema se puede abrir desde el celular.
@@ -106,18 +106,14 @@ Portada — METRIKA 360 · Manual de usuario · Versión 1.0 · <fecha>
    5.4 Mirador: la planta en vivo
    5.5 Métricas de calidad
 6. Administrador
-   6.1 Qué ve el administrador (todos los módulos; remite a los capítulos 4, 5 y 7)
+   6.1 Qué ve el administrador (todos los módulos; remite a los capítulos 4 y 5)
    6.2 Lo que solo hace el administrador: rechazar un cliente
    6.3 Tareas fuera de la pantalla (PINs, usuarios, permisos): solo se mencionan
-7. Contador
-   7.1 Documentos fiscales: listar y filtrar
-   7.2 Crear un documento fiscal
-   7.3 Ver el detalle de un documento fiscal
-8. Aprobador
-   8.1 Dónde entra en el ciclo del lote (aprueba en CLIENTE FINAL desde la app móvil)
-   8.2 Remisión al manual de la app móvil
-9. Solución de problemas
-10. Glosario
+7. Aprobador
+   7.1 Dónde entra en el ciclo del lote (aprueba en CLIENTE FINAL desde la app móvil)
+   7.2 Remisión al manual de la app móvil
+8. Solución de problemas
+9. Glosario
 Anexo A. Matriz rol → pantallas
 Historial de versiones
 ```
@@ -126,23 +122,23 @@ Historial de versiones
 
 Sale de `db/seed.sql` del backend a la fecha de este spec, traducida a pantallas. El manual habla de pantallas y acciones, y no muestra los códigos de permiso.
 
-| Pantalla / acción | OPERADOR | SUPERVISOR | ADMIN | CONTADOR | APROBADOR |
-| --- | --- | --- | --- | --- | --- |
-| Registrar pesaje e historial (`MODULO-CONTROL-CALIDAD`) | Sí | — | Sí | — | — |
-| Clientes / inspección (`MODULO-CLIENTES`, `VER-CLIENTE-LOTES`) | Sí | Sí | Sí | — | — |
-| Crear cliente y crear lote | Sí | — | Sí | — | — |
-| Aprobar y rechazar lote | Sí | Sí | Sí | — | — |
-| Rechazar pesaje | — | Sí | Sí | — | — |
-| Rechazar cliente | — | — | Sí | — | — |
-| Agri | — | Sí | Sí | — | — |
-| Mirador | — | Sí | Sí | — | — |
-| Métricas | — | Sí | Sí | — | — |
-| Documentos fiscales (`MODULO-ADMINISTRACION`) | — | — | Sí | Sí (*) | — |
-| Autorizar con PIN (Bloqueo Crítico) | — | Sí (**) | — | — | — |
-| Aprobación en CLIENTE FINAL | — | — | — | — | App móvil |
+| Pantalla / acción | OPERADOR | SUPERVISOR | ADMIN | APROBADOR |
+| --- | --- | --- | --- | --- |
+| Registrar pesaje e historial (`MODULO-CONTROL-CALIDAD`) | Sí | — | Sí | — |
+| Clientes / inspección (`MODULO-CLIENTES`, `VER-CLIENTE-LOTES`) | Sí | Sí | Sí | — |
+| Crear cliente y crear lote | Sí | — | Sí | — |
+| Aprobar y rechazar lote | Sí | Sí | Sí | — |
+| Rechazar pesaje | — | Sí | Sí | — |
+| Rechazar cliente | — | — | Sí | — |
+| Agri | — | Sí | Sí | — |
+| Mirador | — | Sí | Sí | — |
+| Métricas | — | Sí | Sí | — |
+| Autorizar con PIN (Bloqueo Crítico) | — | Sí (*) | — | — |
+| Aprobación en CLIENTE FINAL | — | — | — | App móvil |
 
-(*) Previsto: requiere asignar `MODULO-ADMINISTRACION` al `CONTADOR` en la base antes de entregar.
-(**) El PIN se tipea en la pantalla del operario. No hace falta que el supervisor tenga sesión abierta.
+(*) El PIN se tipea en la pantalla del operario. No hace falta que el supervisor tenga sesión abierta.
+
+Documentos Fiscales (`MODULO-ADMINISTRACION`) no aparece en la matriz porque queda fuera del manual.
 
 El día de la entrega, esta tabla se compara con la tabla `permisos` de la base **de producción** y se corrige si difiere (ver Plan, paso 9).
 
@@ -187,9 +183,6 @@ Lista mínima:
 | `5-3-agri.png` | Agri con una pregunta y su respuesta. |
 | `5-4-mirador.png` | El Mirador con un lote seleccionado. |
 | `5-5-metricas.png` | El tablero de métricas. |
-| `7-1-documentos-fiscales.png` | La lista de documentos fiscales. |
-| `7-2-crear-documento-fiscal.png` | El formulario de documento fiscal. |
-| `7-3-detalle-documento-fiscal.png` | El detalle de un documento. |
 
 ### Versión del manual
 
@@ -217,16 +210,16 @@ El README también dice qué revisar en el PDF antes de mandarlo:
 Los pasos 1 a 6 y el 8 los puede escribir `/spec-impl` leyendo el código y la app. El paso 7 lo hace una persona. Cada paso deja un manual coherente: lo que todavía no se escribió no aparece en el índice.
 
 1. **Esqueleto.** Crear `docs/manual/` con:
-   - `MANUAL.md`, con la portada (versión `1.0`, la fecha de la entrega a completar en el paso 9, logo `public/logo192.png` por ruta relativa) y el índice con las secciones del capítulo 1;
+   - `MANUAL.md`, con la portada (versión `1.0`, la fecha de la entrega a completar en el paso 9, sin logo) y el índice con las secciones del capítulo 1;
    - `README.md`, con la exportación, las reglas de captura, la lista de capturas y la regla de versiones;
    - `.gitignore`, con `*.pdf`.
 
-   Prueba: exportar a PDF y que la portada salga con el logo.
+   Prueba: exportar a PDF y que la portada salga en su propia página.
 2. **Capítulos 1 a 3.** Introducción, requisitos, báscula y primeros pasos. Antes de redactar los estados de la báscula, leerlos en `useSerialScale.tsx` y verificarlos en la app. Las referencias a capturas que todavía no existen se escriben con el nombre final de la lista.
 3. **Capítulo 4 (Operador).** Recorrer el flujo completo en la app con un usuario `OPERADOR` y datos de demo, incluidos el Bloqueo Crítico, el ticket que falla dos veces y la salida de emergencia.
 4. **Capítulo 5 (Supervisor).** Recorrerlo con un usuario `SUPERVISOR` que tenga un PIN asignado.
-5. **Capítulos 6 a 8 (Administrador, Contador, Aprobador).** El de Contador se recorre con un usuario `ADMIN`, porque hoy es el único que ve Documentos Fiscales. El de Aprobador no tiene pantallas.
-6. **Capítulo 9, glosario, anexo A e historial de versiones.** La FAQ cubre como mínimo:
+5. **Capítulos 6 y 7 (Administrador, Aprobador).** El de Aprobador no tiene pantallas.
+6. **Capítulo 8 (solución de problemas), capítulo 9 (glosario), anexo A e historial de versiones.** La FAQ cubre como mínimo:
    - la báscula no aparece o el navegador no es compatible;
    - la báscula dice "sin señal" o está reconectando;
    - la contraseña vencida;
@@ -235,7 +228,7 @@ Los pasos 1 a 6 y el 8 los puede escribir `/spec-impl` leyendo el código y la a
    - "no veo un menú";
    - "la pantalla dice que no hay conexión".
 
-   El glosario cubre como mínimo: lote, pesaje, peso bruto, tara, peso neto, rango (mínimo, ideal, máximo), estado de calidad, etapa, Bloqueo Crítico, ticket y documento fiscal.
+   El glosario cubre como mínimo: lote, pesaje, peso bruto, tara, peso neto, rango (mínimo, ideal, máximo), estado de calidad, etapa, Bloqueo Crítico y ticket.
 7. **Capturas (manual, lo hace una persona).** Levantar un entorno con datos de demo, tomar cada captura de la lista y guardarla en `docs/manual/capturas/` con su nombre. Prueba: ninguna imagen rota en la vista previa de VS Code.
 8. **`CLAUDE.md`.** Agregar la sección "Manual de usuario":
    - el manual vive en `docs/manual/MANUAL.md`;
@@ -243,7 +236,6 @@ Los pasos 1 a 6 y el 8 los puede escribir `/spec-impl` leyendo el código y la a
    - si cambia una pantalla capturada, se marca la captura para rehacer en la lista del README.
 9. **Antes de la primera entrega.**
    - Comparar el anexo A con la tabla `permisos` de producción.
-   - Confirmar que el `CONTADOR` ya tiene `MODULO-ADMINISTRACION`.
    - Pasar **Sin publicar** a `1.0` con la fecha y exportar el PDF.
 
 ---
@@ -252,14 +244,15 @@ Los pasos 1 a 6 y el 8 los puede escribir `/spec-impl` leyendo el código y la a
 
 - [ ] Existen `docs/manual/MANUAL.md`, `docs/manual/README.md`, `docs/manual/.gitignore` (con `*.pdf`) y `docs/manual/capturas/`.
 - [ ] La portada dice "METRIKA 360", "Manual de usuario", una versión y una fecha, y no nombra a ningún cliente.
-- [ ] El manual tiene las secciones 1 a 10, el anexo A y el historial de versiones, en el orden de este spec, y el índice enlaza a cada una.
-- [ ] Hay un capítulo para cada rol: `OPERADOR`, `SUPERVISOR`, `ADMIN` y `CONTADOR`. El del `APROBADOR` explica su lugar en el ciclo del lote y remite a la app móvil, sin pantallas.
+- [ ] El manual tiene las secciones 1 a 9, el anexo A y el historial de versiones, en el orden de este spec, y el índice enlaza a cada una.
+- [ ] Hay un capítulo para cada rol: `OPERADOR`, `SUPERVISOR` y `ADMIN`. El del `APROBADOR` explica su lugar en el ciclo del lote y remite a la app móvil, sin pantallas.
 - [ ] El capítulo 2 dice que la báscula solo funciona en Chrome o Edge de escritorio, y explica cada estado de la báscula que muestra la pantalla.
 - [ ] El capítulo 4 explica que el ticket es obligatorio y cuándo aparece la salida de emergencia (dos fallos).
 - [ ] El capítulo 4.3 explica que el PIN lo tipea un supervisor y que el nombre del supervisor queda en la tara.
 - [ ] Cada procedimiento es una lista numerada, y cada botón citado existe con ese texto exacto en la UI.
 - [ ] Ninguna sección contiene "endpoint", "token", "localStorage", códigos de status HTTP ni códigos de permiso (`MODULO-…`, `VER-…`).
-- [ ] El capítulo 9 responde las siete preguntas del paso 6, y el glosario define los términos listados ahí.
+- [ ] El capítulo 8 responde las siete preguntas del paso 6, y el glosario (capítulo 9) define los términos listados ahí.
+- [ ] El manual no describe el módulo Documentos Fiscales ni el rol `CONTADOR`.
 - [ ] Todas las capturas de la lista del README existen en `docs/manual/capturas/`, con ese nombre exacto, y ninguna referencia de imagen en `MANUAL.md` está rota.
 - [ ] Ninguna captura muestra un cliente, un RTN o un usuario reales.
 - [ ] El anexo A coincide con la tabla `permisos` de la base de producción el día de la entrega.
@@ -279,7 +272,7 @@ Los pasos 1 a 6 y el 8 los puede escribir `/spec-impl` leyendo el código y la a
 - **Sí:** capítulos por rol fijo. Decisión del usuario. El cliente piensa en "el operario" y "el contador", no en permisos.
 - **No:** capítulos por tarea con una matriz de permisos. Es más resistente a cambios en los roles, pero es menos directo para quien lo lee.
 - **Sí:** un anexo con la matriz rol → pantallas, verificado contra producción el día de la entrega. Es lo que vuelve visible que el manual quedó viejo si alguien cambió los permisos de un rol.
-- **Sí:** el manual describe el acceso previsto del `CONTADOR`, y la corrección de permisos en la base es un prerrequisito de la entrega. Decisión del usuario. Mezclar cambios de datos con documentación en un mismo spec complica revisar los dos.
+- **No:** documentar el módulo Documentos Fiscales ni el rol `CONTADOR`. Decisión del usuario, tomada al implementar el paso 5. Reemplaza la decisión anterior, que describía el acceso previsto del `CONTADOR` y exigía corregir sus permisos antes de entregar. Los capítulos 8 a 10 pasaron a ser 7 a 9.
 - **Sí:** el `APROBADOR` solo aparece en el ciclo del lote, con remisión a la app móvil. Decisión del usuario. Sus pantallas son de otro producto.
 - **Sí:** capturas a mano con datos de demo. Decisión del usuario. Son pocas, y la báscula real no se puede simular sin trabajo extra.
 - **No:** capturas automáticas con Playwright. Habría que simular el login y la Web Serial API, y sumaría una dependencia.
@@ -291,6 +284,7 @@ Los pasos 1 a 6 y el 8 los puede escribir `/spec-impl` leyendo el código y la a
 - **Sí:** se incluyen requisitos y báscula, FAQ y glosario. Decisión del usuario.
 - **No:** documentar las tareas de Swagger (PINs, usuarios, permisos). Decisión del usuario. Son tareas internas, sin pantalla.
 - **Sí:** la marca del producto sin el nombre del cliente. Decisión del usuario. El mismo manual sirve para cualquier entrega.
+- **No:** logo en la portada. Decisión del usuario, tomada al implementar. `public/logo192.png` es el logo de React que dejó la plantilla de TanStack, y la app no tiene un archivo de logo propio. Se agrega cuando exista uno oficial.
 - **Sí:** versión e historial de cambios, sin contacto de soporte. Decisión del usuario. El contacto cambia por entrega.
 - **Sí:** una regla en `CLAUDE.md` para actualizar el manual en el mismo cambio. Decisión del usuario. Sin la regla, el manual envejece en silencio.
 - **Sí:** tratar al lector de usted. Es el registro esperable en un entregable formal para un cliente en Honduras.
@@ -302,7 +296,7 @@ Los pasos 1 a 6 y el 8 los puede escribir `/spec-impl` leyendo el código y la a
 | Riesgo | Mitigación |
 | --- | --- |
 | El cliente cambia los permisos de un rol y el capítulo describe pantallas que ese rol ya no ve | El anexo A lo hace visible. Se verifica contra producción en cada entrega (paso 9). |
-| Se entrega el manual con el `CONTADOR` todavía sin `MODULO-ADMINISTRACION` | El paso 9 lo exige antes de exportar. El capítulo 7 marca el acceso como previsto. |
+| El administrador ve **Administración → Documentos Fiscales** en el menú, y el manual no lo explica | El capítulo 6 aclara que ese módulo no está cubierto por este manual. |
 | La `1.0` describe la UI de hoy, y un PR posterior cambia una pantalla sin tocar el manual | La regla de `CLAUDE.md`, y la revisión de **Sin publicar** antes de cada entrega. |
 | Una captura filtra datos reales de un cliente | La regla de datos de demo y un criterio de aceptación propio. Se revisa en el PDF antes de mandarlo. |
 | Las capturas quedan viejas tras un cambio de diseño | La regla de `CLAUDE.md` marca la captura para rehacer en la lista del README. |
@@ -314,7 +308,7 @@ Los pasos 1 a 6 y el 8 los puede escribir `/spec-impl` leyendo el código y la a
 ## Lo que **no** entra en este spec
 
 - Las pantallas de la app móvil del aprobador.
-- La corrección de permisos en la base.
+- El módulo Documentos Fiscales y el rol `CONTADOR`.
 - Las tareas por Swagger o SQL.
 - La versión móvil de la web.
 - La ayuda dentro de la app.

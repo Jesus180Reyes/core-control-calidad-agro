@@ -13,6 +13,8 @@ import {
 import type { Cliente } from '#/presentation/types/clientes/clientes.types'
 import { useNavigate } from '@tanstack/react-router'
 import { RejectClienteDialog } from '#/presentation/components/inspeccion-clientes/RejectClienteDialog'
+import { EditClienteDialog } from '#/presentation/components/inspeccion-clientes/EditClienteDialog'
+import { EditOperadoresClienteDialog } from '#/presentation/components/inspeccion-clientes/EditOperadoresClienteDialog'
 import { PERMISSIONS, type Permission } from '#/presentation/types/auth/permissions'
 import { Can } from '../shared/Can'
 
@@ -33,7 +35,7 @@ interface RowAction {
     separatorBefore?: boolean
 }
 
-type ItemActionSelected = 'RECHAZAR_CLIENTE' | 'EDITAR_CLIENTE' | 'VER_REPORTE_LOTES' | null;
+type ItemActionSelected = 'RECHAZAR_CLIENTE' | 'EDITAR_CLIENTE' | 'EDITAR_OPERADORES_VINCULADOS_CLIENTE' | 'VER_REPORTE_LOTES' | null;
 export function ClientRowActions({ cliente }: ClientRowActionsProps) {
     const [selectedAction, setselectedAction] = useState<ItemActionSelected>(null);
     const [abierto, setAbierto] = useState(false);
@@ -43,7 +45,14 @@ export function ClientRowActions({ cliente }: ClientRowActionsProps) {
         {
             label: 'Editar Cliente',
             icon: Edit,
-            run: () => console.log('Ver lotes', cliente.id),
+            permission: PERMISSIONS.EDITARCLIENTE,
+            run: () => setselectedAction('EDITAR_CLIENTE'),
+        },
+        {
+            label: 'Editar Operadores Vinculados',
+            icon: Edit,
+            permission: PERMISSIONS.EDITAROPERADORESCLIENTE,
+            run: () => setselectedAction('EDITAR_OPERADORES_VINCULADOS_CLIENTE'),
         },
         {
             label: 'Ver lotes pendientes de inspección',
@@ -90,6 +99,18 @@ export function ClientRowActions({ cliente }: ClientRowActionsProps) {
             <RejectClienteDialog
                 cliente={cliente}
                 open={selectedAction === 'RECHAZAR_CLIENTE'}
+                onOpenChange={(open) => !open && setselectedAction(null)}
+            />
+
+            <EditClienteDialog
+                cliente={cliente}
+                open={selectedAction === 'EDITAR_CLIENTE'}
+                onOpenChange={(open) => !open && setselectedAction(null)}
+            />
+
+            <EditOperadoresClienteDialog
+                cliente={cliente}
+                open={selectedAction === 'EDITAR_OPERADORES_VINCULADOS_CLIENTE'}
                 onOpenChange={(open) => !open && setselectedAction(null)}
             />
         </>

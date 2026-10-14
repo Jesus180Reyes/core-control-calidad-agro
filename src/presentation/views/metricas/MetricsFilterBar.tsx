@@ -4,9 +4,9 @@ import { X } from 'lucide-react'
 import { PeriodChips } from '#/presentation/components/metricas/PeriodChips'
 import { ControlledDatePicker } from '#/presentation/components/shared/inputs/ControlledDatePicker'
 import { ControlledSelector } from '#/presentation/components/shared/inputs/ControlledSelector'
-import { useGetCatalogosUsuarios } from '#/presentation/hooks/catalogos/useGetCatalogosUsuarios'
 import { useClientInspection } from '#/presentation/hooks/inspeccion-clientes/useClientInspection'
 import type { PeriodPreset, QualityMetricsFilters } from '#/presentation/hooks/metricas/qualityMetricsParams'
+import { useGetCatalogosOperadores } from '#/presentation/hooks/catalogos/useGetCatalogosOperadores'
 
 // Lo que vive en el form: el preset no, que es de los chips.
 type FilterFormValues = Pick<QualityMetricsFilters, 'desde' | 'hasta' | 'cliente_id' | 'usuario_id'>
@@ -51,7 +51,7 @@ interface MetricsFilterBarProps {
 export function MetricsFilterBar({ filters, onChange }: MetricsFilterBarProps) {
     // Sin página: los selectores necesitan la lista completa (SPEC 12).
     const { clientes } = useClientInspection()
-    const { usuarios } = useGetCatalogosUsuarios()
+    const { operadores } = useGetCatalogosOperadores()
 
     const form = useForm<FilterFormValues>({ defaultValues: toFormValues(filters) })
 
@@ -99,7 +99,7 @@ export function MetricsFilterBar({ filters, onChange }: MetricsFilterBarProps) {
     const operadorActivo =
         filters.usuario_id === undefined
             ? undefined
-            : usuarios.find((usuario) => usuario.id === filters.usuario_id)?.nombre ??
+            : operadores.find((operador) => operador.id === filters.usuario_id)?.nombre ??
             `Operador #${filters.usuario_id}`
 
     return (
@@ -127,7 +127,7 @@ export function MetricsFilterBar({ filters, onChange }: MetricsFilterBarProps) {
                         placeholder="Todos los operadores"
                         valueAsNumber
                         showSearch
-                        options={usuarios.map((usuario) => ({ value: usuario.id, label: usuario.nombre }))}
+                        options={operadores.map((operador) => ({ value: operador.id, label: operador.nombre }))}
                     />
                 </div>
             </div>
