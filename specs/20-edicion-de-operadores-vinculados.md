@@ -1,6 +1,6 @@
 # SPEC 20 — Edición de los operadores vinculados a un cliente
 
-> **Estado:** Approved
+> **Estado:** Implemented
 > **Depende de:** SPEC 19 (`EditClienteDialog`, el patrón de diálogo que se copia, y el ítem **Editar Operadores Vinculados** ya agregado a `ClientRowActions`), SPEC 42 del backend (`core-control-calidad-agro-backend/specs/42-gestion-de-operadores-de-cliente.md`), implementado en la rama `spec-42-gestion-de-operadores-de-cliente` del backend y **todavía sin mergear**
 > **Fecha:** 2026-10-14
 > **Objetivo:** Que el ítem **Editar Operadores Vinculados** del menú de cada fila de `/inspeccion-clientes` abra un `CustomDialog` que precarga los operadores del cliente con `GET /clientes/:id/operadores` y guarda la lista final con `PATCH /clientes/:id/operadores`.
