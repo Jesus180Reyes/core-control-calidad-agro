@@ -20,9 +20,9 @@ El backend deja editar a cualquier usuario autenticado. **Quién ve el botón lo
 **Entra:**
 
 - Componente nuevo `EditClienteDialog` (`presentation/components/inspeccion-clientes/`), sobre `CustomDialog`, con la misma forma que `RejectClienteDialog`.
-- Formulario con los campos editables que ya tiene la creación: **Nombre**, **Producto**, **Correo de contacto**, **Teléfono** y **Dirección de planta**.
+- Formulario con los campos editables que ya tiene la creación, menos el correo: **Nombre**, **Producto**, **Teléfono** y **Dirección de planta**.
 - **Código de exportación** se muestra deshabilitado, como referencia. No viaja en el body.
-- Precarga desde la fila (`Cliente`): nombre, teléfono y dirección. El producto se preselecciona buscando por nombre en el catálogo de productos. El correo arranca vacío, porque la lista no lo devuelve.
+- Precarga desde la fila (`Cliente`): nombre, teléfono y dirección. El producto se preselecciona buscando por nombre en el catálogo de productos.
 - Solo se envían los campos que el usuario cambió (`dirtyFields`).
 - El botón **Guardar cambios** queda deshabilitado mientras no haya cambios o mientras se guarda.
 - Nombre y dirección se pasan a mayúsculas, igual que en la creación.
@@ -36,6 +36,7 @@ El backend deja editar a cualquier usuario autenticado. **Quién ve el botón lo
 **Fuera de alcance (para futuros specs):**
 
 - Editar **Ubicación** (longitud y latitud) y **Constancia de exoneración**. El backend los acepta, pero la creación tampoco los pide.
+- Editar el **Correo de contacto**. El backend lo acepta, pero la lista no lo devuelve: el campo arrancaría vacío sin que el usuario sepa si el cliente ya tiene uno. Decisión del usuario durante la implementación.
 - Editar el RTN o el código de exportación. El backend no lo permite.
 - Editar los operadores vinculados (`usuario_ids`). El backend no tiene endpoint para eso.
 - Mostrar el RTN en el diálogo. La lista no lo devuelve.
@@ -56,7 +57,7 @@ El backend deja editar a cualquier usuario autenticado. **Quién ve el botón lo
 | --- | --- | --- |
 | 200 `{ ok, msg: 'Cliente actualizado correctamente' }` | Se guardó | Toast verde con el `msg`, invalida `['clientes']` y cierra el diálogo. |
 | 400 `Debe enviar al menos un campo a editar` | Body sin campos editables | No pasa: el botón está deshabilitado sin cambios. |
-| 400 del DTO (vacío, `null`, correo inválido, largo excedido) | Campo inválido | No debería pasar, porque el schema del front aplica las mismas reglas. Si pasa, toast rojo automático y el diálogo sigue abierto. |
+| 400 del DTO (vacío, `null`, largo excedido) | Campo inválido | No debería pasar, porque el schema del front aplica las mismas reglas. Si pasa, toast rojo automático y el diálogo sigue abierto. |
 | 400 `El cliente con id 'X' ya fue rechazado` / `no existe` | Otro usuario lo rechazó mientras tanto | Toast rojo automático, el diálogo sigue abierto. |
 | 400 `El producto ... no existe` / `no esta activo` | Producto dado de baja mientras tanto | Toast rojo automático. |
 
@@ -76,6 +77,8 @@ export type EditarClienteBody = Partial<{
 }>
 ```
 
+- `correo_contacto` queda en el tipo porque es parte del contrato del backend, aunque el formulario no lo envía.
+
 ### Schema (`src/presentation/schema/editar-cliente/editarClienteSchema.ts`)
 
 Es una fábrica, `createEditarClienteSchema(cliente: Cliente)`, igual que `createTaraSchema`, porque las reglas dependen de con qué vino precargado cada campo.
@@ -84,7 +87,6 @@ Es una fábrica, `createEditarClienteSchema(cliente: Cliente)`, igual que `creat
 | --- | --- |
 | `nombre` | `trim`, mínimo 1 (`El nombre es requerido`), máximo 100, `.toUpperCase()` |
 | `producto_id` | entero positivo, opcional |
-| `correo_contacto` | `''` o email válido de máximo 100 |
 | `telefono` | `trim`, máximo 20. Mínimo 1 **solo si** `cliente.telefono` venía con dato (`No se puede dejar vacío`) |
 | `direccion_planta` | `trim`, máximo 16383, `.toUpperCase()`. Mínimo 1 **solo si** `cliente.direccion_planta` venía con dato |
 | `codigo_exportacion` | `string`, solo para mostrar. Nunca se envía. |
@@ -98,7 +100,6 @@ Es una fábrica, `createEditarClienteSchema(cliente: Cliente)`, igual que `creat
 {
     nombre: cliente.nombre,
     producto_id: productos.find((p) => p.nombre === cliente.producto)?.id,
-    correo_contacto: '',
     telefono: cliente.telefono ?? '',
     direccion_planta: cliente.direccion_planta ?? '',
     codigo_exportacion: cliente.codigo_exportacion ?? '',
@@ -106,7 +107,6 @@ Es una fábrica, `createEditarClienteSchema(cliente: Cliente)`, igual que `creat
 ```
 
 - Si el producto no aparece en el catálogo, el selector arranca vacío con el placeholder "Sin cambios". Puede pasar si el producto está inactivo o si el nombre no coincide.
-- El correo arranca vacío con el placeholder "Sin cambios": la lista no lo devuelve, así que el front no sabe si el cliente tiene uno.
 
 ### Body
 
@@ -118,6 +118,7 @@ const body = pickDirty(data, dirtyFields) satisfies EditarClienteBody
 ```
 
 - Un campo que vino vacío y se dejó vacío no está en `dirtyFields`, así que no viaja.
+- `pickDirty` además descarta los `''` y los `undefined`: un campo que vino vacío y en el que se tipearon solo espacios queda en `dirtyFields`, pero el `trim` lo deja en `''`, y el backend no acepta vacíos. Un campo que vino con dato no puede llegar vacío porque el schema lo frena antes.
 - El botón se deshabilita con `!form.formState.isDirty || isPending`, así que el body nunca sale vacío.
 
 ### Hook
@@ -143,8 +144,9 @@ export const useEditarCliente = ({ clienteId }: { clienteId: number }) => {
 
 - `title="Editar cliente"`, `description="Cambie los datos y pulse Guardar cambios."`, `size="lg"`.
 - Footer: **Cancelar** (`secondary`) y **Guardar cambios** (`form="form-editar-cliente"`, `type="submit"`). Mientras guarda, el botón dice **Guardando...**.
-- Los campos van en una grilla de dos columnas, como `CreateClienteForm`: Nombre, Código de exportación (deshabilitado), Correo de contacto, Teléfono, Dirección de planta, y abajo el selector de Producto con `showSearch` y `valueAsNumber`.
-- El diálogo se monta **solo mientras está abierto**, dentro de un `ErrorBoundary` y un `Suspense`, porque `useGetCatalogosProductos` suspende. Así `useForm` toma los valores iniciales al montarse, y al cerrar se desmonta, sin `form.reset()`.
+- Los campos van en una grilla de dos columnas, como `CreateClienteForm`: Nombre, Código de exportación (deshabilitado), Teléfono, Dirección de planta (a todo el ancho, `sm:col-span-2`), y abajo el selector de Producto con `showSearch` y `valueAsNumber`.
+- `EditClienteDialog` recibe `open` y `onOpenChange`, igual que `RejectClienteDialog`. Con `open` en `false` no pinta nada; abierto, monta un `ErrorBoundary` y un `Suspense` (porque `useGetCatalogosProductos` suspende) alrededor de `EditClienteForm`, el formulario interno. Así `useForm` toma los valores iniciales al montarse, y al cerrar se desmonta, sin `form.reset()`. Tampoco se pide el catálogo hasta que alguien abre el diálogo.
+- Los fallbacks son el mismo diálogo **Editar cliente**: con el `LoadingState` adentro mientras carga, y con "No se pudo cargar el catálogo de productos." más **Cerrar** y **Reintentar** si falla. Pintados en la fila deformarían la celda de acciones de la tabla.
 - Al guardar con éxito se cierra con un `useEffect` sobre `isSuccess`, como `RejectClienteDialog`.
 
 ### Permiso
@@ -194,7 +196,7 @@ WHERE r.nombre IN ('ADMIN', 'SUPERVISOR');
 3. **Schema.** Crear `createEditarClienteSchema` con las reglas del modelo de datos. Verificación: `npx tsc --noEmit` sin errores.
 4. **Hook.** Crear `useEditarCliente`. Todavía nadie lo llama.
 5. **Diálogo.** Crear `EditClienteDialog` con el formulario, los valores iniciales, el armado del body desde `dirtyFields` y el botón deshabilitado sin cambios. Todavía nadie lo monta.
-6. **Conectar el menú.** En `ClientRowActions`, el ítem **Editar Cliente** usa `PERMISSIONS.EDITARCLIENTE` y abre el diálogo, que se monta solo con `selectedAction === 'EDITAR_CLIENTE'` dentro de `ErrorBoundary` + `Suspense`. Prueba manual: cambiar el teléfono de un cliente, guardar y ver el teléfono nuevo en la tabla sin recargar.
+6. **Conectar el menú.** En `ClientRowActions`, el ítem **Editar Cliente** usa `PERMISSIONS.EDITARCLIENTE` y abre el diálogo, con `open={selectedAction === 'EDITAR_CLIENTE'}`. Prueba manual: cambiar el teléfono de un cliente, guardar y ver el teléfono nuevo en la tabla sin recargar.
 7. **Manual.** En `docs/manual/MANUAL.md`:
    - Sección nueva **5.6 Editar un cliente** en el capítulo del supervisor, con los pasos: **Clientes** → **⋯** → **Editar Cliente** → cambiar los datos → **Guardar cambios**. Debe decir que el RTN y el código de exportación no se pueden cambiar, y que un dato cargado no se puede dejar vacío.
    - En la tabla del capítulo del administrador, la fila "Editar clientes | 5.6".
@@ -219,7 +221,7 @@ WHERE r.nombre IN ('ADMIN', 'SUPERVISOR');
 - [ ] Ninguna petición lleva `rtn` ni `codigo_exportacion`.
 - [ ] Al guardar con éxito, aparece el toast "Cliente actualizado correctamente", el diálogo se cierra y la tabla muestra el dato nuevo sin recargar.
 - [ ] Vaciar el nombre, o un teléfono o dirección que venían con dato, marca el error en el campo y no envía nada.
-- [ ] Un correo inválido marca el error en el campo y no envía nada.
+- [ ] No hay campo de correo de contacto, y la dirección de planta ocupa todo el ancho.
 - [ ] Un teléfono de más de 20 caracteres marca el error en el campo.
 - [ ] Un 400 del backend (por ejemplo, el cliente fue rechazado mientras tanto) muestra un toast rojo con el mensaje del backend y deja el diálogo abierto.
 - [ ] Cerrar el diálogo y volver a abrirlo muestra los datos de la fila, no lo que se había tipeado.
@@ -231,6 +233,7 @@ WHERE r.nombre IN ('ADMIN', 'SUPERVISOR');
 
 - **Sí:** el diálogo se abre desde el ítem **Editar Cliente** que ya existe en `ClientRowActions`. Decisión del usuario: un `CustomDialog` con el formulario.
 - **Sí:** el formulario solo tiene los campos que ya pide la creación. Decisión del usuario. Ubicación y constancia quedan para otro spec.
+- **No:** el correo de contacto. Decisión del usuario durante la implementación: sin precarga, un campo vacío no dice si el cliente ya tiene correo.
 - **No:** los ocho campos que acepta el backend. Ubicación y constancia no tienen campo ni en la creación.
 - **Sí:** precargar solo lo que trae la fila y enviar solo lo que cambió. Decisión del usuario. No hace falta tocar el backend.
 - **No:** ampliar `GET /clientes/all` o agregar `GET /clientes/:id` en el backend. Cambia una respuesta publicada, o abre la trampa de `:id` junto a `/clientes/all`.
@@ -242,7 +245,7 @@ WHERE r.nombre IN ('ADMIN', 'SUPERVISOR');
 - **Sí:** código de exportación visible y deshabilitado. Decisión del usuario. El RTN no se muestra porque la lista no lo devuelve.
 - **Sí:** el schema es una fábrica que recibe el cliente. Un campo vacío es válido o no según con qué vino precargado, y eso no se puede escribir en un schema fijo.
 - **No:** reusar `createClienteSchema`. Exige `rtn` y `usuario_ids`.
-- **Sí:** el diálogo se monta solo mientras está abierto. `useForm` toma los valores iniciales al montarse, sin `useEffect` de `reset`, y el `Suspense` del catálogo queda contenido.
+- **Sí:** el formulario se monta solo mientras el diálogo está abierto, pero el diálogo recibe `open` como `RejectClienteDialog`. Decisión del usuario: la condición de montaje vive dentro del diálogo, no en `ClientRowActions`. `useForm` toma los valores iniciales al montarse, sin `useEffect` de `reset`, y el `Suspense` del catálogo queda contenido.
 - **Sí:** el hook no declara `onError`. Es la regla de `CLAUDE.md`. `useCrearCliente` y `useRechazarCliente` sí lo declaran, pero no se copian en eso.
 - **Sí:** nombres `useEditarCliente` y `EditClienteDialog`, contra la regla de identificadores nuevos en inglés. Es el mismo criterio del SPEC 18: la carpeta ya tiene `useCrearCliente`, `useRechazarCliente` y `RejectClienteDialog`, y romper el patrón confunde más que lo que aporta la regla.
 
@@ -264,7 +267,7 @@ WHERE r.nombre IN ('ADMIN', 'SUPERVISOR');
 
 ## Lo que **no** entra en este spec
 
-- Ubicación y constancia de exoneración en el formulario.
+- Ubicación, constancia de exoneración y correo de contacto en el formulario.
 - Editar RTN, código de exportación u operadores vinculados.
 - Precargar el correo o el `producto_id` exacto desde el backend.
 - Vaciar campos.

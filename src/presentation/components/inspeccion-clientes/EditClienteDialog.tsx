@@ -1,9 +1,12 @@
-import { useEffect } from 'react'
+import { Suspense, useEffect } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { useQueryErrorResetBoundary } from '@tanstack/react-query'
 import { FormProvider, useForm, type SubmitHandler } from 'react-hook-form'
 
 import { CustomButton } from '#/presentation/components/shared/button/CustomButton'
 import { CustomDialog } from '#/presentation/components/shared/dialog/CustomDialog'
+import { ErrorBoundary } from '#/presentation/components/shared/ErrorBoundary'
+import { LoadingState } from '#/presentation/components/shared/LoadingState'
 import { ControlledInput } from '#/presentation/components/shared/inputs/ControlledInput'
 import { ControlledSelector } from '#/presentation/components/shared/inputs/ControlledSelector'
 import { useGetCatalogosProductos } from '#/presentation/hooks/catalogos/useGetCatalogosProductos'
@@ -14,7 +17,7 @@ import type { Cliente, EditarClienteBody } from '#/presentation/types/clientes/c
 const EDIT_CLIENTE_FORM_ID = 'form-editar-cliente'
 
 // `codigo_exportacion` queda afuera a propósito: se muestra, pero nunca viaja.
-const EDITABLE_FIELDS = ['nombre', 'producto_id', 'correo_contacto', 'telefono', 'direccion_planta'] as const
+const EDITABLE_FIELDS = ['nombre', 'producto_id', 'telefono', 'direccion_planta'] as const
 
 /**
  * Solo los campos que el usuario tocó. Un `''` no viaja: el schema ya impide
@@ -40,15 +43,70 @@ interface EditClienteDialogProps {
 }
 
 /**
- * Se monta solo mientras está abierto: `useForm` toma los valores de la fila al
- * montarse y al cerrar se descarta lo tipeado, sin `form.reset()`. Suspende por
- * el catálogo de productos, así que va dentro de `Suspense` + `ErrorBoundary`.
+ * El formulario se monta solo mientras el diálogo está abierto: `useForm` toma
+ * los valores de la fila al montarse y al cerrar se descarta lo tipeado, sin
+ * `form.reset()`. Suspende por el catálogo de productos; los fallbacks son el
+ * mismo diálogo con el spinner o el error adentro, porque pintados en la fila
+ * deformarían la celda de acciones de la tabla.
  */
 export function EditClienteDialog({
     cliente,
     open,
     onOpenChange,
 }: EditClienteDialogProps) {
+    const { reset: limpiarErrorDeQuery } = useQueryErrorResetBoundary()
+
+    if (!open) return null
+
+    return (
+        <ErrorBoundary
+            fallback={(_error, reset) => (
+                <CustomDialog
+                    open
+                    onOpenChange={onOpenChange}
+                    title="Editar cliente"
+                    showCloseButton
+                    size="lg"
+                    footer={
+                        <>
+                            <CustomButton variant="secondary" fullWidth={false} onClick={() => onOpenChange(false)}>
+                                Cerrar
+                            </CustomButton>
+                            <CustomButton
+                                fullWidth={false}
+                                onClick={() => {
+                                    limpiarErrorDeQuery()
+                                    reset()
+                                }}
+                            >
+                                Reintentar
+                            </CustomButton>
+                        </>
+                    }
+                >
+                    <p className="text-sm text-text-muted">
+                        No se pudo cargar el catálogo de productos.
+                    </p>
+                </CustomDialog>
+            )}
+        >
+            <Suspense
+                fallback={
+                    <CustomDialog open onOpenChange={onOpenChange} title="Editar cliente" showCloseButton size="lg">
+                        <LoadingState size="sm" className="py-10" />
+                    </CustomDialog>
+                }
+            >
+                <EditClienteForm cliente={cliente} onOpenChange={onOpenChange} />
+            </Suspense>
+        </ErrorBoundary>
+    )
+}
+
+function EditClienteForm({
+    cliente,
+    onOpenChange,
+}: Omit<EditClienteDialogProps, 'open'>) {
     const { productos } = useGetCatalogosProductos()
     const { mutate: editarCliente, isPending, isSuccess } = useEditarCliente({ clienteId: cliente.id })
 
@@ -59,7 +117,6 @@ export function EditClienteDialog({
             // La fila trae el nombre del producto, no su id: si no coincide con
             // el catálogo, el selector arranca vacío y el producto no se envía.
             producto_id: productos.find((p) => p.nombre === cliente.producto)?.id,
-            correo_contacto: '',
             telefono: cliente.telefono ?? '',
             direccion_planta: cliente.direccion_planta ?? '',
             codigo_exportacion: cliente.codigo_exportacion ?? '',
@@ -77,7 +134,7 @@ export function EditClienteDialog({
 
     return (
         <CustomDialog
-            open={open}
+            open
             onOpenChange={onOpenChange}
             title="Editar cliente"
             description="Cambie los datos y pulse Guardar cambios."
@@ -125,13 +182,6 @@ export function EditClienteDialog({
                         />
                         <ControlledInput
                             control={form.control}
-                            name="correo_contacto"
-                            label="Correo de contacto"
-                            type="email"
-                            placeholder="Sin cambios"
-                        />
-                        <ControlledInput
-                            control={form.control}
                             name="telefono"
                             label="Teléfono"
                             type="tel"
@@ -142,6 +192,7 @@ export function EditClienteDialog({
                             name="direccion_planta"
                             label="Dirección de planta"
                             placeholder="Km 12 carretera al norte"
+                            className="sm:col-span-2"
                         />
                     </div>
                     <ControlledSelector

@@ -21,10 +21,6 @@ export const createEditarClienteSchema = (cliente: Cliente) => {
             .max(100, 'Máximo 100 caracteres')
             .toUpperCase(),
         producto_id: z.number().int().positive('El producto_id debe ser un id valido').optional(),
-        correo_contacto: z.union([
-            z.literal(''),
-            z.email('Correo inválido').max(100, 'Máximo 100 caracteres'),
-        ]),
         telefono: cliente.telefono ? telefono.min(1, NO_VACIO) : telefono,
         direccion_planta: (cliente.direccion_planta ? direccion.min(1, NO_VACIO) : direccion).toUpperCase(),
         codigo_exportacion: z.string(),

@@ -48,6 +48,7 @@ Control de calidad de pesajes en planta
    3. [Agri, el asistente con IA](#cap-5-3)
    4. [Mirador: la planta en vivo](#cap-5-4)
    5. [Métricas de calidad](#cap-5-5)
+   6. [Editar un cliente](#cap-5-6)
 6. [Administrador](#cap-6)
    1. [Qué ve el administrador](#cap-6-1)
    2. [Rechazar un cliente](#cap-6-2)
@@ -92,7 +93,7 @@ Cada usuario tiene un rol. El rol decide qué módulos ve en el menú lateral y 
 | Rol | Qué hace | Capítulo |
 | --- | --- | --- |
 | **Operador** | Registra los pesajes en la báscula, crea clientes y lotes, y revisa el historial. | [4](#cap-4) |
-| **Supervisor** | Autoriza con su PIN los pesos que superan el máximo, inspecciona lotes y pesajes, y consulta el Mirador, las métricas y el asistente Agri. | [5](#cap-5) |
+| **Supervisor** | Autoriza con su PIN los pesos que superan el máximo, inspecciona lotes y pesajes, edita los datos de los clientes, y consulta el Mirador, las métricas y el asistente Agri. | [5](#cap-5) |
 | **Administrador** | Tiene acceso a todos los módulos del sistema. | [6](#cap-6) |
 | **Aprobador** | Aprueba los lotes y sus pesajes desde la aplicación móvil. | [7](#cap-7) |
 
@@ -596,7 +597,7 @@ Para volver a descargar el ticket de un pesaje, búsquelo desde **Clientes**, en
 
 ## 5. Supervisor
 
-El supervisor autoriza los pesos fuera de rango, revisa lotes y pesajes, y sigue la operación con el Mirador, las métricas y el asistente Agri.
+El supervisor autoriza los pesos fuera de rango, revisa lotes y pesajes, corrige los datos de los clientes, y sigue la operación con el Mirador, las métricas y el asistente Agri.
 
 Desde **Clientes** también puede inspeccionar y aprobar o rechazar lotes, igual que el operador (vea los capítulos [4.6](#cap-4-6) y [4.7](#cap-4-7)).
 
@@ -762,6 +763,34 @@ Un valor **—** significa que no hay datos para calcularlo. No es lo mismo que 
 - **Aparece "Sin pesajes en este período".** Elija un período más largo o quite algún filtro.
 - **Aparece "No se pudieron cargar las métricas".** Pulse **Reintentar**. Los filtros siguen disponibles.
 
+<a id="cap-5-6"></a>
+
+### 5.6 Editar un cliente
+
+Si un dato de un cliente quedó mal cargado o cambió, el supervisor lo puede corregir desde **Clientes**.
+
+1. En el menú lateral, pulse **Clientes**.
+2. Busque al cliente con los filtros, si hace falta.
+3. En la fila del cliente, pulse **⋯** y elija **Editar Cliente**.
+4. En el diálogo **Editar cliente**, cambie los datos que necesite: **Nombre**, **Teléfono**, **Dirección de planta** o **Producto**.
+5. Pulse **Guardar cambios**.
+
+Al guardar aparece el aviso *"Cliente actualizado correctamente"*, el diálogo se cierra y la tabla muestra el dato nuevo.
+
+Lo que tiene que saber:
+
+- **Solo se guardan los datos que cambió.** Lo que no toca queda como estaba. Mientras no cambie nada, **Guardar cambios** no se puede pulsar.
+- **El RTN y el código de exportación no se pueden cambiar.** El **Código de exportación** se muestra como referencia, pero no se puede editar.
+- **Un dato que ya estaba cargado no se puede dejar vacío.** Si borra el nombre, el teléfono o la dirección, el campo avisa con *"No se puede dejar vacío"* (o *"El nombre es requerido"*) y no se guarda nada.
+- **El nombre y la dirección se guardan en mayúsculas**, igual que al crear el cliente.
+- **Si el producto aparece vacío**, el sistema no pudo reconocer el producto actual del cliente. Si no lo cambia, el producto queda como estaba. Si elige uno, se guarda el que eligió.
+- Para descartar lo que escribió, pulse **Cancelar**. La próxima vez que abra el diálogo verá los datos guardados.
+
+**Qué pasa si…**
+
+- **Aparece un aviso en rojo al guardar**, por ejemplo porque otra persona rechazó al cliente mientras usted lo editaba. El diálogo sigue abierto y no se guardó nada. Lea el aviso, cierre el diálogo con **Cancelar** y revise el cliente.
+- **Aparece "No se pudo cargar el catálogo de productos."** Pulse **Reintentar**. Si sigue sin cargar, pulse **Cerrar** e intente más tarde.
+
 <div style="page-break-after: always"></div>
 
 <a id="cap-6"></a>
@@ -782,6 +811,7 @@ El administrador tiene acceso a todos los módulos del sistema. Para cada uno, s
 | Aprobar o rechazar lotes | [4.7](#cap-4-7) |
 | Rechazar pesajes | [5.2](#cap-5-2) |
 | Agri, Mirador y Métricas | [5.3](#cap-5-3) a [5.5](#cap-5-5) |
+| Editar clientes | [5.6](#cap-5-6) |
 
 El administrador no puede autorizar un peso sobre el máximo: el PIN es solo de los supervisores (vea el [capítulo 5.1](#cap-5-1)).
 
@@ -939,6 +969,7 @@ Esta tabla muestra qué pantallas y acciones tiene cada rol en esta versión del
 | Crear clientes y lotes | Sí | — | Sí | — |
 | Aprobar y rechazar lotes | Sí | Sí | Sí | — |
 | Rechazar pesajes | — | Sí | Sí | — |
+| Editar clientes | — | Sí | Sí | — |
 | Rechazar clientes | — | — | Sí | — |
 | Agri | — | Sí | Sí | — |
 | Mirador | — | Sí | Sí | — |
@@ -958,3 +989,4 @@ Esta tabla muestra qué pantallas y acciones tiene cada rol en esta versión del
 
 - Primera versión del manual: introducción, requisitos y báscula, primeros pasos, y capítulos de operador, supervisor, administrador y aprobador, más solución de problemas, glosario y anexo A.
 - Los filtros de **Pesajes registrados** y del historial de pesajes eligen el **Estado de calidad** de una lista, en vez de escribir un número.
+- Nueva sección 5.6: el supervisor y el administrador pueden editar el nombre, el teléfono, la dirección de planta y el producto de un cliente desde **Clientes**, con **Editar Cliente**.
