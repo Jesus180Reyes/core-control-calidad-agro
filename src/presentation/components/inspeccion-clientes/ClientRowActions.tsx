@@ -34,7 +34,7 @@ interface RowAction {
     separatorBefore?: boolean
 }
 
-type ItemActionSelected = 'RECHAZAR_CLIENTE' | 'EDITAR_CLIENTE' | 'VER_REPORTE_LOTES' | null;
+type ItemActionSelected = 'RECHAZAR_CLIENTE' | 'EDITAR_CLIENTE' | 'EDITAR_OPERADORES_VINCULADOS_CLIENTE' | 'VER_REPORTE_LOTES' | null;
 export function ClientRowActions({ cliente }: ClientRowActionsProps) {
     const [selectedAction, setselectedAction] = useState<ItemActionSelected>(null);
     const [abierto, setAbierto] = useState(false);
@@ -46,6 +46,11 @@ export function ClientRowActions({ cliente }: ClientRowActionsProps) {
             icon: Edit,
             permission: PERMISSIONS.EDITARCLIENTE,
             run: () => setselectedAction('EDITAR_CLIENTE'),
+        },
+        {
+            label: 'Editar Operadores Vinculados',
+            icon: Edit,
+            run: () => setselectedAction('EDITAR_OPERADORES_VINCULADOS_CLIENTE'),
         },
         {
             label: 'Ver lotes pendientes de inspección',
