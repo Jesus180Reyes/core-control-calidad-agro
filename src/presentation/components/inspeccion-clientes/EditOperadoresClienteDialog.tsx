@@ -35,12 +35,6 @@ interface EditOperadoresClienteDialogProps {
     onOpenChange: (open: boolean) => void
 }
 
-/**
- * El formulario se monta solo mientras el diálogo está abierto: `useForm` toma
- * los operadores vinculados al montarse y al cerrar se descarta lo elegido, sin
- * `form.reset()`. Ninguna de las dos consultas sale hasta abrirlo. Los fallbacks
- * son el mismo diálogo con el spinner o el error adentro, como en `EditClienteDialog`.
- */
 export function EditOperadoresClienteDialog({
     cliente,
     open,
