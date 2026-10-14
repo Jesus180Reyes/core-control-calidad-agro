@@ -61,7 +61,7 @@ No hay tipos nuevos. El endpoint devuelve la misma forma que los otros catálogo
 ```ts
 // src/presentation/hooks/catalogos/useGetCatalogosEstadosCalidad.tsx
 export const useGetCatalogosEstadosCalidad = () => {
-    const { data } = useExecuteQuery<CatalogoResponse>(['estados-calidad'], '/catalogos/estados-calidad')
+    const { data } = useExecuteQuery<CatalogoResponse>(['estados-calidad'], '/catalogos/estados-calidad', CATALOG_QUERY_OPTIONS)
     return { estadosCalidad: data.data }
 }
 ```
@@ -141,7 +141,7 @@ Misma forma que `useGetCatalogosOperadores` y `useGetCatalogosUnidadMedida`.
 - **No:** colores por estado. El backend decidió no devolver `codigo`, y el front colorea por `codigo`, nunca por id.
 - **Sí:** cambiar las dos barras en el mismo spec. Comparten el campo, el endpoint y el problema.
 - **No:** tocar los schemas. Ya validan `estado_calidad_id` como entero positivo.
-- **Sí:** el `staleTime` por defecto de `query-client.ts` (5 s), como los otros catálogos. El catálogo casi nunca cambia, pero subirlo solo para este hook sería una excepción sin una necesidad medida.
+- **Sí:** `CATALOG_QUERY_OPTIONS` (`hooks/catalogos/catalogQueryOptions.ts`, 10 min de `staleTime` y `gcTime`), como los otros catálogos. Dejarlo en los 5 s por defecto lo convertiría en la única excepción de la carpeta.
 
 ---
 
