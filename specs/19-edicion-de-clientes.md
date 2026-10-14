@@ -208,24 +208,24 @@ WHERE r.nombre IN ('ADMIN', 'SUPERVISOR');
 
 ## Criterios de aceptación
 
-- [ ] `npx tsc --noEmit` y `npm run test` pasan.
-- [ ] Con un `ADMIN` o un `SUPERVISOR`, el menú de cada fila de `/inspeccion-clientes` muestra **Editar Cliente**.
-- [ ] Con un `OPERADOR`, el ítem no aparece.
-- [ ] **Editar Cliente** abre el diálogo **Editar cliente** con nombre, teléfono y dirección precargados desde la fila.
-- [ ] El selector de Producto aparece preseleccionado con el producto del cliente cuando el nombre coincide con el catálogo.
-- [ ] **Código de exportación** se ve con el valor del cliente y no se puede editar.
-- [ ] No hay campo de RTN.
-- [ ] Sin tocar nada, **Guardar cambios** está deshabilitado.
-- [ ] Al cambiar solo el teléfono, la petición es `PATCH /clientes/:id` con body `{ "telefono": "..." }` y nada más.
-- [ ] Al cambiar el nombre a minúsculas, el body lleva el nombre en mayúsculas.
-- [ ] Ninguna petición lleva `rtn` ni `codigo_exportacion`.
-- [ ] Al guardar con éxito, aparece el toast "Cliente actualizado correctamente", el diálogo se cierra y la tabla muestra el dato nuevo sin recargar.
-- [ ] Vaciar el nombre, o un teléfono o dirección que venían con dato, marca el error en el campo y no envía nada.
-- [ ] No hay campo de correo de contacto, y la dirección de planta ocupa todo el ancho.
-- [ ] Un teléfono de más de 20 caracteres marca el error en el campo.
-- [ ] Un 400 del backend (por ejemplo, el cliente fue rechazado mientras tanto) muestra un toast rojo con el mensaje del backend y deja el diálogo abierto.
-- [ ] Cerrar el diálogo y volver a abrirlo muestra los datos de la fila, no lo que se había tipeado.
-- [ ] El manual tiene la sección 5.6, la fila en la tabla del administrador y su línea en **Sin publicar**.
+- [X] `npx tsc --noEmit` y `npm run test` pasan.
+- [X] Con un `ADMIN` o un `SUPERVISOR`, el menú de cada fila de `/inspeccion-clientes` muestra **Editar Cliente**.
+- [X] Con un `OPERADOR`, el ítem no aparece.
+- [X] **Editar Cliente** abre el diálogo **Editar cliente** con nombre, teléfono y dirección precargados desde la fila.
+- [X] El selector de Producto aparece preseleccionado con el producto del cliente cuando el nombre coincide con el catálogo.
+- [X] **Código de exportación** se ve con el valor del cliente y no se puede editar.
+- [X] No hay campo de RTN.
+- [X] Sin tocar nada, **Guardar cambios** está deshabilitado.
+- [X] Al cambiar solo el teléfono, la petición es `PATCH /clientes/:id` con body `{ "telefono": "..." }` y nada más.
+- [X] Al cambiar el nombre a minúsculas, el body lleva el nombre en mayúsculas.
+- [X] Ninguna petición lleva `rtn` ni `codigo_exportacion`.
+- [X] Al guardar con éxito, aparece el toast "Cliente actualizado correctamente", el diálogo se cierra y la tabla muestra el dato nuevo sin recargar.
+- [X] Vaciar el nombre, o un teléfono o dirección que venían con dato, marca el error en el campo y no envía nada.
+- [X] No hay campo de correo de contacto, y la dirección de planta ocupa todo el ancho.
+- [X] Un teléfono de más de 20 caracteres marca el error en el campo.
+- [X] Un 400 del backend (por ejemplo, el cliente fue rechazado mientras tanto) muestra un toast rojo con el mensaje del backend y deja el diálogo abierto.
+- [X] Cerrar el diálogo y volver a abrirlo muestra los datos de la fila, no lo que se había tipeado.
+- [X] El manual tiene la sección 5.6, la fila en la tabla del administrador y su línea en **Sin publicar**.
 
 ---
 
