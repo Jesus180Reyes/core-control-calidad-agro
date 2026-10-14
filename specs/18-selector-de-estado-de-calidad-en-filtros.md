@@ -1,6 +1,6 @@
 # SPEC 18 — Selector de estado de calidad en los filtros de pesajes
 
-> **Estado:** Approved
+> **Estado:** Implemented
 > **Depende de:** SPEC 40 del backend (`core-control-calidad-agro-backend/specs/40-catalogo-de-estados-de-calidad.md`), implementado en la rama `spec-40-catalogo-de-estados-de-calidad` del backend y **todavía sin mergear**
 > **Fecha:** 2026-10-14
 > **Objetivo:** Consumir `GET /catalogos/estados-calidad` con un hook nuevo y cambiar el campo numérico "ID de estado de calidad" de `PesajesFiltersBar` y `HistorialFiltersBar` por un selector con los estados que devuelve el backend.
@@ -115,18 +115,18 @@ Misma forma que `useGetCatalogosOperadores` y `useGetCatalogosUnidadMedida`.
 
 ## Criterios de aceptación
 
-- [ ] `npx tsc --noEmit` no da errores.
-- [ ] En `/inspeccion-pesajes-by-lote`, el filtro se llama **Estado de calidad** y es un selector, no un campo numérico.
-- [ ] En `/historial`, lo mismo.
-- [ ] El selector muestra exactamente las opciones que devuelve `GET /catalogos/estados-calidad`, en el mismo orden.
-- [ ] Sin un estado elegido, el selector muestra "Todos los estados" y la petición no lleva `estado_calidad_id`.
-- [ ] Al elegir un estado y pulsar **Buscar**, la petición lleva `estado_calidad_id` con el id numérico de ese estado.
-- [ ] La tabla muestra solo pesajes con ese estado de calidad.
-- [ ] El badge de filtros activos cuenta el estado elegido como un filtro.
-- [ ] **Limpiar Filtros** vacía el selector y quita el param de la petición.
-- [ ] Las dos barras piden el catálogo con la misma `queryKey`, `['estados-calidad']`.
-- [ ] Ningún archivo del front contiene los ids de estados de calidad escritos a mano.
-- [ ] El manual nombra **Estado de calidad** en los dos párrafos de filtros y tiene su línea en **Sin publicar**.
+- [X] `npx tsc --noEmit` no da errores.
+- [X] En `/inspeccion-pesajes-by-lote`, el filtro se llama **Estado de calidad** y es un selector, no un campo numérico.
+- [X] En `/historial`, lo mismo.
+- [X] El selector muestra exactamente las opciones que devuelve `GET /catalogos/estados-calidad`, en el mismo orden.
+- [X] Sin un estado elegido, el selector muestra "Todos los estados" y la petición no lleva `estado_calidad_id`.
+- [X] Al elegir un estado y pulsar **Buscar**, la petición lleva `estado_calidad_id` con el id numérico de ese estado.
+- [X] La tabla muestra solo pesajes con ese estado de calidad.
+- [X] El badge de filtros activos cuenta el estado elegido como un filtro.
+- [X] **Limpiar Filtros** vacía el selector y quita el param de la petición.
+- [X] Las dos barras piden el catálogo con la misma `queryKey`, `['estados-calidad']`.
+- [X] Ningún archivo del front contiene los ids de estados de calidad escritos a mano.
+- [X] El manual nombra **Estado de calidad** en los dos párrafos de filtros y tiene su línea en **Sin publicar**.
 
 ---
 
