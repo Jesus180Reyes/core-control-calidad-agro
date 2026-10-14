@@ -539,7 +539,7 @@ La pantalla **Pesajes registrados** muestra:
 - Los botones **Aprobar lote** y **Rechazar lote** (vea el [capítulo 4.7](#cap-4-7)).
 - Una tabla con todos los pesajes del lote: fecha, peso bruto, tara, peso neto, estado de calidad, si está fuera de rango y quién lo registró.
 
-Puede filtrar los pesajes por **Usuario**, por fecha (**Desde** y **Hasta**) o por **Fuera de rango**.
+Puede filtrar los pesajes por **Usuario**, por fecha (**Desde** y **Hasta**), por **Fuera de rango** o por **Estado de calidad**.
 
 **Volver a descargar un ticket.** En la fila del pesaje, pulse **⋯** y elija **Descargar etiqueta**. El ticket se descarga como PDF, para imprimirlo de nuevo.
 
@@ -584,7 +584,7 @@ El lote pasa a **cliente final** y ya no recibe pesajes. El sistema vuelve a la 
 
 *El historial de pesajes, con los filtros.*
 
-- Para buscar, use los filtros **Nombre de lote**, **Cliente**, fechas **Desde** y **Hasta**, y **Fuera de rango**. Luego pulse **Buscar**. **Limpiar Filtros** vuelve a mostrar todo.
+- Para buscar, use los filtros **Nombre de lote**, **Cliente**, fechas **Desde** y **Hasta**, **Fuera de rango** y **Estado de calidad**. Luego pulse **Buscar**. **Limpiar Filtros** vuelve a mostrar todo.
 - La tabla muestra, por cada pesaje: fecha, lote, unidad, peso bruto, tara, peso neto, estado de calidad y si quedó fuera de rango.
 - Se muestran 20 pesajes por página. Use **Anterior** y **Siguiente** para pasar de página.
 
@@ -957,3 +957,4 @@ Esta tabla muestra qué pantallas y acciones tiene cada rol en esta versión del
 **Sin publicar**
 
 - Primera versión del manual: introducción, requisitos y báscula, primeros pasos, y capítulos de operador, supervisor, administrador y aprobador, más solución de problemas, glosario y anexo A.
+- Los filtros de **Pesajes registrados** y del historial de pesajes eligen el **Estado de calidad** de una lista, en vez de escribir un número.
