@@ -11,7 +11,8 @@ import {
 } from '#/presentation/types/documentos-fiscales/documento-fiscal-section'
 import { DocumentoFiscalImpuestosTable } from '#/presentation/views/documentos-fiscales/DocumentoFiscalImpuestosTable'
 import { DocumentoFiscalLotesTable } from '#/presentation/views/documentos-fiscales/DocumentoFiscalLotesTable'
-import { DocumentoFiscalSectionCards } from '#/presentation/views/documentos-fiscales/DocumentoFiscalSectionCards'
+import { DocumentoFiscalSectionTabs } from '#/presentation/views/documentos-fiscales/DocumentoFiscalSectionTabs'
+import { DocumentoFiscalSummary } from '#/presentation/views/documentos-fiscales/DocumentoFiscalSummary'
 
 export const Route = createFileRoute(
     '/(portal)/_portal/ver-detalles-documento-fiscal',
@@ -45,7 +46,9 @@ function RouteComponent() {
 
             <Suspense fallback={<LoadingState />}>
                 <div className="space-y-6">
-                    <DocumentoFiscalSectionCards
+                    <DocumentoFiscalSummary documentoId={documentoId} />
+
+                    <DocumentoFiscalSectionTabs
                         documentoId={documentoId}
                         selected={seccion}
                     />
@@ -62,7 +65,7 @@ function RouteComponent() {
                         <EmptyState
                             icon={<MousePointerClick className="size-7" />}
                             title="Seleccione qué desea visualizar"
-                            description="Elija impuestos o lotes en las tarjetas de arriba para ver el detalle."
+                            description="Elija impuestos o lotes en el selector de arriba para ver el detalle."
                         />
                     )}
                 </div>
