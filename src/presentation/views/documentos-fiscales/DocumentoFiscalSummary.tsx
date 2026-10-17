@@ -102,7 +102,7 @@ export function DocumentoFiscalSummary({ documentoId }: DocumentoFiscalSummaryPr
             </dl>
 
             {isVoided && (
-                <div className="mx-3 mb-3 rounded-[20px] bg-destructive/[0.06] px-4 py-3.5 sm:mx-4 sm:mb-4 sm:px-5">
+                <div className="mx-3 mb-3 rounded-[20px] bg-destructive/6 px-4 py-3.5 sm:mx-4 sm:mb-4 sm:px-5">
                     <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-destructive">
                         Anulado
                         {documento.anulado_por && ` por ${documento.anulado_por}`}
