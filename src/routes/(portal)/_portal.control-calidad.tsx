@@ -121,7 +121,7 @@ function ControlCalidadPage() {
                 unidad={parametros.unidad}
                 supervisor={tara.supervisor}
                 guardando={guardando}
-                onConfirm={(valor) => void tara.confirmar(valor)}
+                onConfirm={(valor, observaciones) => void tara.confirmar(valor, observaciones)}
             />
 
             <PrintTicketDialog

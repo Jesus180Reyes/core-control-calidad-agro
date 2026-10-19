@@ -26,6 +26,7 @@ export function usePesajes(lote: Lote | null) {
         pesoBruto: number,
         tara: number,
         autorizacionToken?: string,
+        observaciones?: string,
     ): Promise<PesajeCreado | 'autorizacion-invalida' | null> => {
         if (!lote) return Promise.resolve(null)
 
@@ -36,6 +37,7 @@ export function usePesajes(lote: Lote | null) {
                 tara,
                 // Sin PIN la clave no viaja.
                 ...(autorizacionToken ? { autorizacion_token: autorizacionToken } : {}),
+                observaciones,
             })
             .then(
                 ({ pesaje }) => pesaje,

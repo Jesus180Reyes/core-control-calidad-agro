@@ -1,9 +1,10 @@
 import type { ReactNode } from 'react'
-import { Boxes } from 'lucide-react'
+import { Boxes, MapPin } from 'lucide-react'
 import { cn } from '#/lib/utils'
 import type { Lote } from '#/presentation/types/lotes/lotes.types'
 
 const SIN_VARIEDAD = 'Sin variedad o talla'
+const SIN_ORIGEN = 'Sin origen'
 
 const CARD_STYLES = cn(
     'w-full text-left bg-surface border border-border-ui/50 rounded-[28px] p-6',
@@ -52,6 +53,10 @@ export function LoteCard({ lote, onSeleccionar, footer }: LoteCardProps) {
                     </p>
                     <p className="text-text-muted text-[11px] font-medium truncate">
                         {lote.producto} · {lote.variedad_o_talla ?? SIN_VARIEDAD}
+                    </p>
+                    <p className="flex items-center gap-1 text-text-muted text-[11px] font-medium mt-0.5 min-w-0">
+                        <MapPin className="w-3 h-3 shrink-0" strokeWidth={2.2} />
+                        <span className="truncate">{lote.origen ?? SIN_ORIGEN}</span>
                     </p>
                 </div>
 

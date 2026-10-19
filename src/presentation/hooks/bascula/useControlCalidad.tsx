@@ -193,10 +193,10 @@ export function useControlCalidad(cliente: Cliente | null, lote: Lote | null) {
      * fallaría igual. Se descarta la autorización y se cierra la tara sin
      * reiniciar la muestra, así el mismo peso vuelve a disparar el bloqueo.
      */
-    const confirmarTara = async (tara: number): Promise<void> => {
+    const confirmarTara = async (tara: number, observaciones?: string): Promise<void> => {
         if (scale.pesoEstable === null) return
 
-        const creado = await pesajes.guardarPesaje(scale.pesoEstable, tara, autorizacion?.token)
+        const creado = await pesajes.guardarPesaje(scale.pesoEstable, tara, autorizacion?.token, observaciones)
 
         if (creado === 'autorizacion-invalida') {
             setAutorizacion(null)

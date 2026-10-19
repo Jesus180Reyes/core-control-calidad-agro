@@ -24,7 +24,7 @@ interface TaraPesajeDialogProps {
     supervisor?: string | null
     /** Hay un `POST /pesajes` en vuelo. */
     guardando: boolean
-    onConfirm: (tara: number) => void
+    onConfirm: (tara: number, observaciones?: string) => void
 }
 
 /**
@@ -54,10 +54,11 @@ export function TaraPesajeDialog({
         resolver: zodResolver(schema),
     })
 
-    // Cada pesaje declara su propia tara: al reabrir, el campo arranca vacío.
+    // Cada pesaje declara su propia tara y su propia nota: al reabrir, los campos
+    // arrancan vacíos.
     useEffect(() => {
         if (!open) return
-        form.reset({ tara: undefined })
+        form.reset({ tara: undefined, observaciones: undefined })
     }, [open])
 
     // Con un peso bruto nuevo, una tara ya escrita puede haber dejado de ser
@@ -68,9 +69,9 @@ export function TaraPesajeDialog({
         void form.trigger('tara')
     }, [open, pesoBruto])
 
-    const onSubmit: SubmitHandler<TaraSchema> = ({ tara }) => {
+    const onSubmit: SubmitHandler<TaraSchema> = ({ tara, observaciones }) => {
         if (pesoBruto === null) return
-        onConfirm(tara)
+        onConfirm(tara, observaciones)
     }
 
     const tara = form.watch('tara')
@@ -119,6 +120,15 @@ export function TaraPesajeDialog({
                     placeholder="0.00"
                     type="number"
                     valueAsNumber
+                    disabled={guardando}
+                />
+
+                <ControlledInput
+                    control={form.control}
+                    name="observaciones"
+                    label="Observaciones del pesaje"
+                    uppercase
+                    placeholder="Ej.: Brix 12, pulpa 8 °C (opcional)"
                     disabled={guardando}
                 />
 

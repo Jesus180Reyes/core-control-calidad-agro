@@ -1,6 +1,6 @@
 # SPEC 21 — Origen del lote en el formulario de creación
 
-> **Estado:** Approved
+> **Estado:** implemented
 > **Depende de:** SPEC 43 del backend (`core-control-calidad-agro-backend/specs/43-catalogo-de-origenes-de-lotes.md`), implementado en la rama `spec-43-catalogo-de-origenes-de-lotes` del backend y **todavía sin mergear**
 > **Fecha:** 2026-10-18
 > **Objetivo:** Agregar a `CreateLoteForm` un selector **Origen** alimentado por `GET /catalogos/origenes`, con un botón **Crear origen** debajo que abre un mini modal contra `POST /origenes` y, al crear, invalida el catálogo de orígenes.
@@ -190,22 +190,22 @@ useExecuteMutation<CreateOrigenResponse, CreateOrigenSchema>('/origenes', {
 
 ## Criterios de aceptación
 
-- [ ] `npx tsc --noEmit` no da errores.
-- [ ] El formulario **Nuevo lote** tiene un selector **Origen** debajo de **Producto**, con buscador.
-- [ ] El selector muestra exactamente las opciones de `GET /catalogos/origenes`, en el mismo orden.
-- [ ] Sin orígenes en el backend, el selector abre y muestra "Todavía no hay orígenes".
-- [ ] Crear un lote sin elegir origen funciona como antes y la petición no lleva `origen_id`.
-- [ ] Crear un lote con un origen elegido manda su `origen_id` numérico.
-- [ ] Debajo del selector hay un botón **Crear origen**, visible haya o no orígenes.
-- [ ] Pulsar **Crear origen** abre el mini modal **Nuevo origen** encima del formulario del lote, y no envía el lote.
-- [ ] El mini modal exige **Nombre**. **Dirección** y **Teléfono** se pueden dejar vacíos.
-- [ ] Con **Dirección** y **Teléfono** vacíos, la petición a `POST /origenes` no lleva esas claves.
-- [ ] Al crear un origen: sale un toast de éxito, el mini modal cierra, el catálogo `['origenes']` se vuelve a pedir y el origen nuevo queda elegido en **Origen**.
-- [ ] Después de crear el origen, lo escrito en el formulario del lote sigue igual y el lote no se creó.
-- [ ] Un nombre repetido muestra el error del backend en un toast y el mini modal queda abierto con lo escrito.
-- [ ] **Cancelar** en el mini modal lo cierra sin tocar el formulario del lote.
-- [ ] Cerrar el formulario del lote y volver a abrirlo deja **Origen** vacío.
-- [ ] El manual nombra **Origen** y **Crear origen**, y hay una línea en **Sin publicar**.
+- [X] `npx tsc --noEmit` no da errores.
+- [X] El formulario **Nuevo lote** tiene un selector **Origen** debajo de **Producto**, con buscador.
+- [X] El selector muestra exactamente las opciones de `GET /catalogos/origenes`, en el mismo orden.
+- [X] Sin orígenes en el backend, el selector abre y muestra "Todavía no hay orígenes".
+- [X] Crear un lote sin elegir origen funciona como antes y la petición no lleva `origen_id`.
+- [X] Crear un lote con un origen elegido manda su `origen_id` numérico.
+- [X] Debajo del selector hay un botón **Crear origen**, visible haya o no orígenes.
+- [X] Pulsar **Crear origen** abre el mini modal **Nuevo origen** encima del formulario del lote, y no envía el lote.
+- [X] El mini modal exige **Nombre**. **Dirección** y **Teléfono** se pueden dejar vacíos.
+- [X] Con **Dirección** y **Teléfono** vacíos, la petición a `POST /origenes` no lleva esas claves.
+- [X] Al crear un origen: sale un toast de éxito, el mini modal cierra, el catálogo `['origenes']` se vuelve a pedir y el origen nuevo queda elegido en **Origen**.
+- [X] Después de crear el origen, lo escrito en el formulario del lote sigue igual y el lote no se creó.
+- [X] Un nombre repetido muestra el error del backend en un toast y el mini modal queda abierto con lo escrito.
+- [X] **Cancelar** en el mini modal lo cierra sin tocar el formulario del lote.
+- [X] Cerrar el formulario del lote y volver a abrirlo deja **Origen** vacío.
+- [X] El manual nombra **Origen** y **Crear origen**, y hay una línea en **Sin publicar**.
 
 ---
 
