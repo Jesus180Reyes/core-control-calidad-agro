@@ -9,6 +9,8 @@ export interface Lote {
     peso_ideal: string
     peso_maximo: string
     estado: string
+    /** Nombre del origen (finca o proveedor); `null` si el lote no lo tiene cargado. */
+    origen: string | null
 }
 
 export interface LotesResponse {

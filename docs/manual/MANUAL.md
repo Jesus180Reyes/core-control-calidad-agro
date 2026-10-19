@@ -324,7 +324,7 @@ Si la pantalla dice *"No hay clientes asignados"*, su usuario no está vinculado
 
 *Los lotes del cliente, con su rango de peso.*
 
-1. Aparecen los lotes del cliente. Cada tarjeta muestra el producto, la variedad o talla y el rango del lote: **Mínimo**, **Ideal** y **Máximo**.
+1. Aparecen los lotes del cliente. Cada tarjeta muestra el producto, la variedad o talla, el origen (la finca o el proveedor; "Sin origen" si no se cargó) y el rango del lote: **Mínimo**, **Ideal** y **Máximo**.
 2. Pulse la tarjeta del lote que va a pesar. Se abre la pantalla de pesaje.
 
 Si la pantalla dice *"Este cliente no tiene lotes"*, hay que crear uno primero (vea el [capítulo 4.5](#cap-4-5)).
@@ -1022,3 +1022,4 @@ Esta tabla muestra qué pantallas y acciones tiene cada rol en esta versión del
 - Los filtros de **Pesajes registrados** y del historial de pesajes eligen el **Estado de calidad** de una lista, en vez de escribir un número.
 - Nueva sección 5.6: el supervisor y el administrador pueden editar el nombre, el teléfono, la dirección de planta y el producto de un cliente desde **Clientes**, con **Editar Cliente**.
 - Nueva sección 5.7: el supervisor y el administrador pueden agregar o quitar los operadores de un cliente desde **Clientes**, con **Editar Operadores Vinculados**.
+- Las tarjetas de lote muestran el origen del lote, o "Sin origen" si no se cargó.
