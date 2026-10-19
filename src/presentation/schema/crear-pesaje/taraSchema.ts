@@ -10,6 +10,7 @@ export const createTaraSchema = (pesoBruto: number) =>
             .number({ error: 'Tara requerida' })
             .nonnegative('La tara no puede ser negativa')
             .lt(pesoBruto, 'La tara debe ser menor al peso bruto'),
+        observaciones: z.string().toUpperCase().optional(),
     });
 
 export type TaraSchema = z.infer<ReturnType<typeof createTaraSchema>>;

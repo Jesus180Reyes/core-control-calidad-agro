@@ -357,8 +357,9 @@ La pantalla de pesaje tiene tres partes:
 *El diálogo Tara del envase, con el peso bruto y el neto.*
 
 6. En **Tara**, escriba el peso del envase, en la unidad del lote.
-7. Revise el **Peso bruto** (el que leyó la báscula) y el **Peso neto** (el bruto menos la tara).
-8. Pulse **Guardar pesaje**.
+7. En **Observaciones**, si quiere, anote lo que mida su planta, por ejemplo el Brix o la temperatura. Revíselas antes de guardar: una vez guardado el pesaje, las observaciones no se pueden corregir.
+8. Revise el **Peso bruto** (el que leyó la báscula) y el **Peso neto** (el bruto menos la tara).
+9. Pulse **Guardar pesaje**.
 
 Cuando el pesaje se guarda, aparece un aviso en verde y se abre el diálogo del ticket. Siga el [capítulo 4.4](#cap-4-4).
 
@@ -368,6 +369,7 @@ Cuando el pesaje se guarda, aparece un aviso en verde y se abre el diálogo del 
 - **El peso está por debajo del mínimo.** La lectura dice **Desviado** y aparece *"Falta producto: el peso está por debajo del mínimo del lote."* Agregue producto hasta entrar en el rango.
 - **El peso está por encima del máximo.** Se abre el **Bloqueo Crítico**. Siga el [capítulo 4.3](#cap-4-3).
 - **La tara no es válida.** El diálogo lo indica: *"Tara requerida"*, *"La tara no puede ser negativa"* o *"La tara debe ser menor al peso bruto"*.
+- **Las observaciones son muy largas.** Al pulsar **Guardar pesaje** aparece un aviso en rojo: *"Las observaciones no pueden superar los 500 caracteres"*. El pesaje no se guarda y el diálogo sigue abierto con lo que escribió, para que pueda acortarlas.
 - **El peso cambia con el diálogo de tara abierto.** El diálogo muestra *"El peso cambió — reestabilizando…"* y no permite guardar hasta que el peso vuelva a quedar estable.
 - **Quiere descartar la muestra.** Pulse **Cancelar** en el diálogo de tara. No se guarda nada y la báscula vuelve a estabilizar.
 - **No se pudo guardar.** Aparece un aviso en rojo con el motivo. El diálogo de tara sigue abierto para que pueda reintentar.
@@ -1023,3 +1025,4 @@ Esta tabla muestra qué pantallas y acciones tiene cada rol en esta versión del
 - Nueva sección 5.6: el supervisor y el administrador pueden editar el nombre, el teléfono, la dirección de planta y el producto de un cliente desde **Clientes**, con **Editar Cliente**.
 - Nueva sección 5.7: el supervisor y el administrador pueden agregar o quitar los operadores de un cliente desde **Clientes**, con **Editar Operadores Vinculados**.
 - Las tarjetas de lote muestran el origen del lote, o "Sin origen" si no se cargó.
+- El diálogo **Tara del envase** tiene un campo opcional **Observaciones**, debajo de **Tara**, para anotar lo que mida la planta en cada pesaje.
