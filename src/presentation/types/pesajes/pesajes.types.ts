@@ -5,6 +5,8 @@ export interface CrearPesajeBody {
     tara?: number
     /** SPEC 38 del backend. Se omite si no hubo PIN. */
     autorizacion_token?: string
+    /** SPEC 44 del backend. Nota libre del operador; opcional. */
+    observaciones?: string
 }
 
 export interface ValidarPinBody {
