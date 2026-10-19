@@ -5,6 +5,7 @@ import { ControlledSelector } from '#/presentation/components/shared/inputs/Cont
 import type { CreateLoteSchema } from '#/presentation/schema/crear-lote/crearLoteSchema'
 import { useGetCatalogosUnidadMedida } from '#/presentation/hooks/catalogos/useGetCatalogosUnidadMedida'
 import { useGetCatalogosProductos } from '#/presentation/hooks/catalogos/useGetCatalogosProductos'
+import { useGetCatalogosOrigenes } from '#/presentation/hooks/catalogos/useGetCatalogosOrigenes'
 
 export const CREATE_LOTE_FORM_ID = 'form-crear-lote'
 
@@ -14,6 +15,7 @@ export function CreateLoteForm() {
     const { control } = useFormContext<CreateLoteSchema>()
     const { unidadesMedidas } = useGetCatalogosUnidadMedida();
     const { productos } = useGetCatalogosProductos();
+    const { origenes } = useGetCatalogosOrigenes();
 
     return (
         <>
@@ -48,6 +50,17 @@ export function CreateLoteForm() {
                 placeholder="Elegí el producto"
                 options={productos.map(item => ({ value: item.id, label: item.nombre }))}
                 valueAsNumber
+            />
+            <ControlledSelector
+                control={control}
+                name="origen_id"
+                label="Origen"
+                placeholder="Elegí el origen (opcional)"
+                options={origenes.map(item => ({ value: item.id, label: item.nombre }))}
+                valueAsNumber
+                showSearch
+                searchPlaceholder="Buscar origen..."
+                emptyMessage="Todavía no hay orígenes"
             />
 
             <div className="grid gap-4 sm:grid-cols-3">
