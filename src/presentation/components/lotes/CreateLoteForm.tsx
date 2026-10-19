@@ -68,7 +68,7 @@ export function CreateLoteForm() {
                     searchPlaceholder="Buscar origen..."
                     emptyMessage="Todavía no hay orígenes"
                 />
-                {/* `type="button"`: un submit acá enviaría el formulario del lote. */}
+                <p className="text-sm text-text-muted">¿El origen no está inscrito aún? Crealo</p>
                 <CustomButton
                     type="button"
                     variant="secondary"
