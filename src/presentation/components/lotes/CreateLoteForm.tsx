@@ -1,3 +1,5 @@
+import { useState } from 'react'
+import { Plus } from 'lucide-react'
 import { useFormContext } from 'react-hook-form'
 
 import { ControlledInput } from '#/presentation/components/shared/inputs/ControlledInput'
@@ -6,13 +8,16 @@ import type { CreateLoteSchema } from '#/presentation/schema/crear-lote/crearLot
 import { useGetCatalogosUnidadMedida } from '#/presentation/hooks/catalogos/useGetCatalogosUnidadMedida'
 import { useGetCatalogosProductos } from '#/presentation/hooks/catalogos/useGetCatalogosProductos'
 import { useGetCatalogosOrigenes } from '#/presentation/hooks/catalogos/useGetCatalogosOrigenes'
+import { CreateOrigenDialog } from '#/presentation/components/origenes/CreateOrigenDialog'
+import { CustomButton } from '#/presentation/components/shared/button/CustomButton'
 
 export const CREATE_LOTE_FORM_ID = 'form-crear-lote'
 
 
 
 export function CreateLoteForm() {
-    const { control } = useFormContext<CreateLoteSchema>()
+    const { control, setValue } = useFormContext<CreateLoteSchema>()
+    const [createOrigenOpen, setCreateOrigenOpen] = useState(false)
     const { unidadesMedidas } = useGetCatalogosUnidadMedida();
     const { productos } = useGetCatalogosProductos();
     const { origenes } = useGetCatalogosOrigenes();
@@ -51,16 +56,33 @@ export function CreateLoteForm() {
                 options={productos.map(item => ({ value: item.id, label: item.nombre }))}
                 valueAsNumber
             />
-            <ControlledSelector
-                control={control}
-                name="origen_id"
-                label="Origen"
-                placeholder="Elegí el origen (opcional)"
-                options={origenes.map(item => ({ value: item.id, label: item.nombre }))}
-                valueAsNumber
-                showSearch
-                searchPlaceholder="Buscar origen..."
-                emptyMessage="Todavía no hay orígenes"
+            <div className="space-y-2">
+                <ControlledSelector
+                    control={control}
+                    name="origen_id"
+                    label="Origen"
+                    placeholder="Elegí el origen (opcional)"
+                    options={origenes.map(item => ({ value: item.id, label: item.nombre }))}
+                    valueAsNumber
+                    showSearch
+                    searchPlaceholder="Buscar origen..."
+                    emptyMessage="Todavía no hay orígenes"
+                />
+                {/* `type="button"`: un submit acá enviaría el formulario del lote. */}
+                <CustomButton
+                    type="button"
+                    variant="secondary"
+                    fullWidth={false}
+                    icon={<Plus className="size-4" />}
+                    onClick={() => setCreateOrigenOpen(true)}
+                >
+                    Crear origen
+                </CustomButton>
+            </div>
+            <CreateOrigenDialog
+                open={createOrigenOpen}
+                onOpenChange={setCreateOrigenOpen}
+                onCreated={(origenId) => setValue('origen_id', origenId, { shouldValidate: true })}
             />
 
             <div className="grid gap-4 sm:grid-cols-3">

@@ -10,7 +10,7 @@ export const createLoteSchema = z
         peso_ideal: z.number({ error: 'Peso ideal requerido' }).positive('El peso ideal debe ser mayor a 0'),
         peso_maximo: z.number({ error: 'Peso maximo requerido' }).positive('El peso maximo debe ser mayor a 0'),
         variedad_o_talla: z.string().optional(),
-        origen_id: z.number().int().positive('El origen_id debe ser un id valido').optional(),
+        origen_id: z.number().int().positive('El origen es requerido'),
     })
     .refine((data) => data.peso_minimo <= data.peso_ideal, {
         error: 'El peso minimo no puede ser mayor al peso ideal',
