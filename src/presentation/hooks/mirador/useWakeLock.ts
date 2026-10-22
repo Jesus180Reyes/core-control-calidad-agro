@@ -24,10 +24,10 @@ export function useWakeLock(active: boolean) {
             navigator.wakeLock.request('screen')
                 .then((l) => {
                     // Pudo llegar después de desactivarse: se suelta enseguida.
-                    if (cancelado) void l.release().catch(() => {})
+                    if (cancelado) void l.release().catch(() => { })
                     else lock = l
                 })
-                .catch(() => {})
+                .catch(() => { })
                 .finally(() => { pidiendo = false })
         }
 
@@ -38,7 +38,7 @@ export function useWakeLock(active: boolean) {
         return () => {
             cancelado = true
             document.removeEventListener('visibilitychange', alCambiarVisibilidad)
-            void lock?.release().catch(() => {})
+            void lock?.release().catch(() => { })
         }
     }, [active])
 }
