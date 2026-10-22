@@ -237,6 +237,14 @@
   to   { transform: scaleX(0); }
 }
 
+/* La barra de tiempo de cada parada del modo TV del Mirador (`PlantTourIndicator`).
+   La duración la escribe el componente en el `style`, y un `key` por parada la
+   reinicia: React no re-renderiza en cada frame. */
+@keyframes tour-progress {
+  from { width: 0%; }
+  to   { width: 100%; }
+}
+
 /* El `both` de `.md-word` es lo que mantiene la palabra invisible durante su
    retardo; sin él, el texto entero se vería desde el primer frame. */
 @keyframes fade-word {

@@ -200,6 +200,15 @@ El indicador "en vivo" (`FOTO_VIEJA_MS`, 4 min) mira el `dataUpdatedAt` de la qu
 
 **El detalle del lote sale de `GET /pesajes/byLote/:loteId`** (`useLotWeighings`, sobre `useGetInspeccionPesajes`), ordenado por `created_at` DESC, no por `id`. Lo pide `LotWeighingsLoader`, que se monta sólo con un lote seleccionado y tiene su propio `<Suspense>` y `ErrorBoundary`: suspender la vista desmontaría la escena 3D cada vez que se elige un lote. Le pasa los pesajes a la vista por `onLoad`, que los reparte entre el panel y la diana de la escena. `usePlantTwin` invalida esa query cuando una foto trae un `weighing-added` o `weighing-voided` del lote abierto.
 
+**Modo TV (SPEC 23).** El botón **Modo TV** de `PlantControls` (sólo con Fullscreen API y panel lateral) pone el tablero en pantalla completa y arranca el recorrido de `usePlantTour`; la lógica pura vive en `plantTour.ts`, con tests. El recorrido corre con `tvRequested && pantallaCompleta.active`: salir de la pantalla completa, por donde sea, lo termina, y no hay recorrido sin ella.
+
+- **El recorrido sólo cambia la selección.** Llama a `select` y la cámara la mueve `focusCamera`, como con un click. No hay API de cámara nueva ni posiciones calculadas desde React.
+- **No agrega pedidos.** Recorre la foto que ya trajo `GET /plantas/en-vivo`, sin tocar el polling. Por eso sus paradas son de **cliente** —planta 10 s, cada cliente con lotes en pesaje o por aprobar 15 s, en el orden de sus filas— y sólo una alerta entra a un pesaje: cada lote seleccionado monta `LotWeighingsLoader` y es un `GET /pesajes/byLote/:loteId`.
+- **Las alertas son sólo los pesajes fuera de rango**: un `weighing-added` con `fuera_de_rango`, uno por foto (el de mayor id), 12 s, y nunca con el recorrido en pausa.
+- **Dos pausas.** Click, rueda o tecla pausan y se retoma solo a los 90 s desde lo seleccionado; **Pausar** no se retoma solo. Los botones del indicador llevan `data-plant-tour-controls` para no contar como interacción.
+- **El giro se suma al `theta` pintado (`viewTheta`), no a `goal.theta`.** Así no se acumula ni pelea con el arrastre. `setCinematic` (ritmo 1,5 en vez de 5,5, más el giro) no hace nada con `prefers-reduced-motion`.
+- `useWakeLock` mantiene la pantalla encendida mientras el recorrido está activo, y falla en silencio sin la API.
+
 ### Métricas de calidad (SPEC 15)
 
 `/metricas` es el tablero de calidad: `routes/(portal)/_portal.metricas.tsx` → `views/metricas/QualityMetricsDashboard.tsx` → `useQualityMetrics` sobre `GET /metricas/calidad` (SPEC 35 del backend). Filtra por período, cliente y operador.

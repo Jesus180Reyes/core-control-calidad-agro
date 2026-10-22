@@ -1,5 +1,5 @@
 import type { CSSProperties } from 'react'
-import { Crosshair, Maximize, Minimize, Minus, Plus } from 'lucide-react'
+import { Crosshair, Maximize, Minimize, Minus, MonitorPlay, Plus } from 'lucide-react'
 
 import { GLASS } from './format'
 
@@ -10,6 +10,8 @@ interface PlantControlsProps {
     /** Sin este callback (navegador sin Fullscreen API) el botón no se pinta. */
     onToggleFullscreen?: () => void
     fullscreen?: boolean
+    /** Modo TV: pantalla completa y recorrido automático. Sin este callback el botón no se pinta. */
+    onStartTv?: () => void
     vertical?: boolean
     className?: string
     /** La posición depende del panel, que se mide en píxeles. */
@@ -18,8 +20,8 @@ interface PlantControlsProps {
 
 const BOTON = 'grid size-9 place-items-center rounded-xl text-text-main transition-colors hover:bg-muted focus-visible:outline-2 focus-visible:outline-brand'
 
-/** Acercar, alejar, volver a ver la planta entera y pasar a pantalla completa. */
-export function PlantControls({ onZoomIn, onZoomOut, onHome, onToggleFullscreen, fullscreen = false, vertical = false, className = '', style }: PlantControlsProps) {
+/** Acercar, alejar, volver a ver la planta entera, pasar a pantalla completa y al modo TV. */
+export function PlantControls({ onZoomIn, onZoomOut, onHome, onToggleFullscreen, fullscreen = false, onStartTv, vertical = false, className = '', style }: PlantControlsProps) {
     const etiquetaPantalla = fullscreen ? 'Salir de pantalla completa' : 'Pantalla completa'
     return (
         <div role="toolbar" aria-label="Controles de la vista" style={style} className={`${GLASS} flex gap-0.5 p-1 ${vertical ? 'flex-col' : 'items-center'} ${className}`}>
@@ -30,6 +32,11 @@ export function PlantControls({ onZoomIn, onZoomOut, onHome, onToggleFullscreen,
             {onToggleFullscreen && (
                 <button type="button" className={BOTON} onClick={onToggleFullscreen} aria-label={etiquetaPantalla} aria-pressed={fullscreen} title={etiquetaPantalla}>
                     {fullscreen ? <Minimize className="size-4" strokeWidth={2.2} /> : <Maximize className="size-4" strokeWidth={2.2} />}
+                </button>
+            )}
+            {onStartTv && (
+                <button type="button" className={BOTON} onClick={onStartTv} aria-label="Modo TV" title="Modo TV: pantalla completa y recorrido automático">
+                    <MonitorPlay className="size-4" strokeWidth={2.2} />
                 </button>
             )}
         </div>
