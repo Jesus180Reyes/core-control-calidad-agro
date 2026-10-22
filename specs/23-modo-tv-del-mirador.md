@@ -1,6 +1,6 @@
 # SPEC 23 — Modo TV del Mirador
 
-> **Estado:** Approved
+> **Estado:** Implemented
 > **Depende de:** SPEC 13 (Mirador conectado a la planta en vivo), SPEC 17 (manual de usuario)
 > **Fecha:** 2026-10-21
 > **Objetivo:** Agregar a `/mirador` un botón **Modo TV** que pone el tablero en pantalla completa y recorre solo los clientes con lotes activos, deteniéndose en cada pesaje fuera de rango.
