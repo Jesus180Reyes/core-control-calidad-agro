@@ -20,7 +20,7 @@ import {
 } from '#/presentation/types/mirador/plantTwin.types'
 
 import { addMesh, createCart, createPerson, createTruck, disposeFigureMaterials, SKIN, walkPose, type Person, type Truck } from './figures'
-import { chipGeometry, disposeGeometryCache, slab } from './geometry'
+import { chipGeometry, disposeGeometryCache, shared, slab } from './geometry'
 import {
     BOARD_X0, BOARD_X1, CAP_IN, CAP_OUT, CHIP_H, RED_STACK, ROW, SCALE_X, SLOT_OFFSETS, STACKS, STAGE_INDEX, STRIP_X0, STRIP_X1,
     TERR_D, TERR_TOP, TILE_D, TILE_TOP, TILE_W, TILE_X, rowZ, slotPosition,
@@ -76,6 +76,23 @@ interface ClientVisual {
     theme: Themed
 }
 
+/** Lo que dice una pieza de la escena cuando se la toca. */
+type PickData = Partial<{ kind: PlantPickTarget['kind']; clientId: number; lotId: number; weighingId: number }>
+
+/** Una ficha de la pila: su lugar dentro del `InstancedMesh` de su color. */
+interface ChipItem {
+    pick: PickData
+    x: number
+    y: number
+    z: number
+    ry: number
+}
+
+interface ChipRef {
+    mesh: THREE.InstancedMesh
+    index: number
+}
+
 interface LotPerson {
     person: Person
     kind: 'estibador' | 'supervisor' | 'cargador'
@@ -93,7 +110,7 @@ interface LotVisual {
     stacks: THREE.Group
     status: THREE.Group
     picks: THREE.Object3D[]
-    tokens: Map<number, THREE.Mesh>
+    tokens: Map<number, ChipRef>
     pulse: THREE.Mesh | null
     spin: THREE.Mesh | null
     people: LotPerson[]
@@ -135,6 +152,8 @@ interface Pusher {
 type Themed = (p: ScenePalette) => void
 
 const V3 = THREE.Vector3
+const EJE_Y = new V3(0, 1, 0)
+const NIVELES: QualityLevel[] = ['ok', 'desviado', 'fuera']
 const clamp = (v: number, a: number, b: number) => Math.max(a, Math.min(b, v))
 const ease = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2)
 const easeOut = (t: number) => 1 - Math.pow(1 - t, 3)
@@ -248,7 +267,11 @@ export class PlantScene {
     private readonly dianaTilt = new THREE.Group()
     private readonly dianaDots = new THREE.Group()
     private readonly dianaStem: THREE.Mesh
-    private highlighted: THREE.Mesh | null = null
+    private highlighted: ChipRef | null = null
+    private readonly chipMatrix = new THREE.Matrix4()
+    private readonly chipQuat = new THREE.Quaternion()
+    private readonly chipPos = new V3()
+    private readonly chipScale = new V3()
 
     private readonly tweens: Tween[] = []
     private readonly ripples: { mesh: THREE.Mesh<THREE.RingGeometry, THREE.MeshBasicMaterial>; t: number }[] = []
@@ -472,10 +495,12 @@ export class PlantScene {
             const fila = slots.rows[client.id] ?? 0
             const lv = this.lots.get(lot.id)
             if (!lv) { this.createLot(client.id, lot, slot.stage, slot.slot, fila, animar); continue }
+            // `structuralSharing` conserva la referencia de un lote que no cambió: no se rearma.
+            const cambio = lv.data !== lot
             lv.data = lot
             if (lv.stage !== slot.stage || lv.slot !== slot.slot || lv.row !== fila) this.moveLot(lv, slot.stage, slot.slot, fila, animar)
-            else if (!lv.moving) this.rebuildLot(lv)
-            this.updateLotLabel(lv)
+            else if (cambio && !lv.moving) this.rebuildLot(lv)
+            if (cambio) this.updateLotLabel(lv)
         }
 
         // Pesajes nuevos: vuelan los más recientes; el resto ya está en los conteos.
@@ -767,12 +792,12 @@ export class PlantScene {
             const tile = addMesh(group, slab(TILE_W, 0.08, TILE_D, 0.55, 0.03), [this.M.tile, this.M.tileSide], tx, TERR_TOP, 0)
             tile.userData = { kind: 'cliente', clientId: c.id }
             picks.push(tile)
-            const rotulo = new THREE.Mesh(new THREE.PlaneGeometry(TILE_W, TILE_D).rotateX(-Math.PI / 2), this.tileLabelMats[k])
+            const rotulo = new THREE.Mesh(shared('rotulo', () => new THREE.PlaneGeometry(TILE_W, TILE_D).rotateX(-Math.PI / 2)), this.tileLabelMats[k])
             rotulo.position.set(tx, TILE_TOP + 0.004, 0)
             rotulo.renderOrder = 1
             group.add(rotulo)
             if (k < TILE_X.length - 1) {
-                const flecha = addMesh(group, new THREE.ConeGeometry(0.2, 0.34, 3), this.M.chevron, tx + TILE_W / 2 + 0.25, TILE_TOP - 0.02, 2.9, false)
+                const flecha = addMesh(group, shared('flecha', () => new THREE.ConeGeometry(0.2, 0.34, 3)), this.M.chevron, tx + TILE_W / 2 + 0.25, TILE_TOP - 0.02, 2.9, false)
                 flecha.rotation.z = -Math.PI / 2
                 flecha.scale.set(1, 1, 0.35)
             }
@@ -919,6 +944,7 @@ export class PlantScene {
 
     private rebuildLot(lv: LotVisual) {
         const vaciar = (g: THREE.Group) => { while (g.children.length) g.remove(g.children[0]) }
+        this.disposeChips(lv)
         vaciar(lv.stacks)
         // La ambientación del lote se recrea, salvo el camión y el contenedor mientras se van.
         vaciar(lv.status)
@@ -940,7 +966,7 @@ export class PlantScene {
             const caja = addMesh(cont, slab(2.25, 1.2, 1.7, 0.12, 0.04), cliente?.contMat ?? this.M.pallet, 0, 0.2, 0)
             caja.userData = { kind: 'lote', clientId: lv.clientId, lotId: lv.id }
             lv.picks.push(caja)
-            for (let k = 0; k < 7; k++) addMesh(cont, new THREE.BoxGeometry(0.05, 1.0, 1.74), cliente?.ribMat ?? this.M.pallet, -0.95 + k * 0.32, 0.82, 0, false)
+            for (let k = 0; k < 7; k++) addMesh(cont, shared('costilla', () => new THREE.BoxGeometry(0.05, 1.0, 1.74)), cliente?.ribMat ?? this.M.pallet, -0.95 + k * 0.32, 0.82, 0, false)
             lv.container = cont
             const camion = createTruck(cliente?.color ?? '#888')
             camion.root.position.set(2.9, 0, -0.05)
@@ -960,25 +986,22 @@ export class PlantScene {
             // Las fichas de arriba son las recientes: esas sí saben su pesaje y su color.
             const recEnRango = c.recientesEnRango.slice(-muestraEnRango)
             const recFuera = c.recientesFuera.slice(-muestraFuera)
+            const fichas: Record<QualityLevel, ChipItem[]> = { ok: [], desviado: [], fuera: [] }
+            const pickDe = (reciente: PlantWeighing | undefined): PickData => reciente
+                ? { kind: 'pesaje', clientId: lv.clientId, lotId: lv.id, weighingId: reciente.id }
+                : { kind: 'lote', clientId: lv.clientId, lotId: lv.id }
             for (let j = 0; j < muestraEnRango; j++) {
                 const reciente = recEnRango[j - (muestraEnRango - recEnRango.length)]
                 const nivel: QualityLevel = reciente ? qualityLevel(d, Number(reciente.peso_neto), reciente.fuera_de_rango) : 'ok'
                 const s = STACKS[j % 3]
                 const semilla = reciente?.id ?? j
-                const m = addMesh(lv.stacks, chipGeometry, this.M[nivel], s.x + ((semilla % 5) - 2) * 0.012, Math.floor(j / 3) * CHIP_H, s.z + ((semilla % 3) - 1) * 0.012)
-                m.rotation.y = (semilla % 7) * 0.45
-                if (reciente) { m.userData = { kind: 'pesaje', clientId: lv.clientId, lotId: lv.id, weighingId: reciente.id }; lv.tokens.set(reciente.id, m) }
-                else m.userData = { kind: 'lote', clientId: lv.clientId, lotId: lv.id }
-                lv.picks.push(m)
+                fichas[nivel].push({ pick: pickDe(reciente), x: s.x + ((semilla % 5) - 2) * 0.012, y: Math.floor(j / 3) * CHIP_H, z: s.z + ((semilla % 3) - 1) * 0.012, ry: (semilla % 7) * 0.45 })
             }
             for (let j = 0; j < muestraFuera; j++) {
                 const reciente = recFuera[j - (muestraFuera - recFuera.length)]
-                const m = addMesh(lv.stacks, chipGeometry, this.M.fuera, RED_STACK.x, j * CHIP_H, RED_STACK.z)
-                m.rotation.y = ((reciente?.id ?? j) % 7) * 0.45
-                if (reciente) { m.userData = { kind: 'pesaje', clientId: lv.clientId, lotId: lv.id, weighingId: reciente.id }; lv.tokens.set(reciente.id, m) }
-                else m.userData = { kind: 'lote', clientId: lv.clientId, lotId: lv.id }
-                lv.picks.push(m)
+                fichas.fuera.push({ pick: pickDe(reciente), x: RED_STACK.x, y: j * CHIP_H, z: RED_STACK.z, ry: ((reciente?.id ?? j) % 7) * 0.45 })
             }
+            this.buildChips(lv, fichas)
             niveles = Math.max(Math.ceil(muestraEnRango / 3), muestraFuera)
 
             if (lv.stage === 'en-pesaje') {
@@ -989,11 +1012,11 @@ export class PlantScene {
                 lv.people.push({ person: estibador, kind: 'estibador' })
             }
             if (lv.stage === 'por-aprobar') {
-                const anillo = new THREE.Mesh(new THREE.RingGeometry(1.42, 1.6, 56).rotateX(-Math.PI / 2), this.B.warnRing)
+                const anillo = new THREE.Mesh(shared('anilloAprobar', () => new THREE.RingGeometry(1.42, 1.6, 56).rotateX(-Math.PI / 2)), this.B.warnRing)
                 anillo.position.y = 0.01
                 lv.status.add(anillo)
                 lv.pulse = anillo
-                lv.spin = addMesh(lv.status, new THREE.OctahedronGeometry(0.24), this.M.diamond, 0, 0.2 + niveles * CHIP_H + 0.55, 0)
+                lv.spin = addMesh(lv.status, shared('diamante', () => new THREE.OctahedronGeometry(0.24)), this.M.diamond, 0, 0.2 + niveles * CHIP_H + 0.55, 0)
                 const supervisor = createPerson({ vest: '#F3F5F4', hat: '#FFFFFF', pants: '#3A4656', clipboard: true, skin: SKIN[(lv.id + 2) % SKIN.length], phase: lv.id })
                 supervisor.root.position.set(1.32, 0, 1.38)
                 supervisor.root.rotation.y = Math.atan2(-1.32, -1.38)
@@ -1004,6 +1027,44 @@ export class PlantScene {
 
         lv.topY = 0.2 + niveles * CHIP_H
         if (this.selection.lotId === lv.id) this.refreshSelectionVisuals()
+    }
+
+    /**
+     * Una llamada de dibujo por color y por tarima, en vez de una por ficha:
+     * con 36 fichas por tarima, eran la mayor parte de lo que se dibujaba en cada cuadro.
+     */
+    private buildChips(lv: LotVisual, fichas: Record<QualityLevel, ChipItem[]>) {
+        for (const nivel of NIVELES) {
+            const items = fichas[nivel]
+            if (!items.length) continue
+            const mesh = new THREE.InstancedMesh(chipGeometry, this.M[nivel], items.length)
+            mesh.castShadow = true
+            mesh.receiveShadow = true
+            mesh.userData = { chips: items }
+            lv.stacks.add(mesh)
+            lv.picks.push(mesh)
+            items.forEach((item, index) => {
+                const ref: ChipRef = { mesh, index }
+                this.placeChip(ref)
+                if (item.pick.weighingId !== undefined) lv.tokens.set(item.pick.weighingId, ref)
+            })
+        }
+    }
+
+    /** Escribe la matriz de una ficha: su lugar en la pila, más un salto y una escala. */
+    private placeChip(ref: ChipRef, lift = 0, scale = 1) {
+        const c = (ref.mesh.userData.chips as ChipItem[])[ref.index]
+        this.chipQuat.setFromAxisAngle(EJE_Y, c.ry)
+        this.chipMatrix.compose(this.chipPos.set(c.x, c.y + lift, c.z), this.chipQuat, this.chipScale.setScalar(scale))
+        ref.mesh.setMatrixAt(ref.index, this.chipMatrix)
+        ref.mesh.instanceMatrix.needsUpdate = true
+        // Se recalcula sola al dibujar o al tocar; sin esto, el recorte usaría la pila anterior.
+        ref.mesh.boundingSphere = null
+    }
+
+    /** El buffer de matrices de las fichas no se libera solo al sacarlas de la escena. */
+    private disposeChips(lv: LotVisual) {
+        lv.stacks.children.forEach((o) => { if ((o as THREE.InstancedMesh).isInstancedMesh) (o as THREE.InstancedMesh).dispose() })
     }
 
     private moveLot(lv: LotVisual, stage: ActiveStage, slot: number, row: number, animar: boolean) {
@@ -1048,7 +1109,7 @@ export class PlantScene {
 
     private removeLot(lv: LotVisual, evento: Extract<PlantEvent, { type: 'lot-removed' }> | undefined) {
         this.lots.delete(lv.id)
-        const terminar = () => { this.scene.remove(lv.group); this.removeLabel(lv.label) }
+        const terminar = () => { this.scene.remove(lv.group); this.removeLabel(lv.label); this.disposeChips(lv) }
         if (!evento) { terminar(); return }
 
         lv.label.show = false
@@ -1204,9 +1265,9 @@ export class PlantScene {
                 if (!lvFinal.moving) this.rebuildLot(lvFinal)
                 const arriba = lvFinal.tokens.get(item.weighing.id)
                 if (arriba) {
-                    const y0 = arriba.position.y
-                    arriba.position.y = y0 + 0.5
-                    this.tween(0.35, (t) => { arriba.position.y = y0 + 0.5 * (1 - easeOut(t)) })
+                    const escala = () => (this.highlighted === arriba ? 1.3 : 1)
+                    this.placeChip(arriba, 0.5, escala())
+                    this.tween(0.35, (t) => this.placeChip(arriba, 0.5 * (1 - easeOut(t)), escala()))
                 }
                 this.ripple(lvFinal.group.position, color)
                 const estibador = lvFinal.people.find((x) => x.kind === 'estibador')
@@ -1232,14 +1293,14 @@ export class PlantScene {
     // ================================================================ selección
 
     private refreshSelectionVisuals() {
-        if (this.highlighted) { this.highlighted.scale.setScalar(1); this.highlighted = null }
+        if (this.highlighted) { this.placeChip(this.highlighted); this.highlighted = null }
         const lv = this.selection.lotId !== null ? this.lots.get(this.selection.lotId) : undefined
         this.selRing.visible = !!lv
         this.diana.visible = !!lv && this.selectionWeighings.length > 0
         if (lv) this.rebuildDiana(lv)
         if (lv && this.selection.weighingId !== null) {
             const ficha = lv.tokens.get(this.selection.weighingId)
-            if (ficha) { ficha.scale.setScalar(1.3); this.highlighted = ficha }
+            if (ficha) { this.placeChip(ficha, 0, 1.3); this.highlighted = ficha }
         }
         this.clients.forEach((cv) => {
             const activo = this.selection.clientId === cv.id || this.hoverClientId === cv.id
@@ -1254,7 +1315,8 @@ export class PlantScene {
 
     private rebuildDiana(lv: LotVisual) {
         while (this.dianaDots.children.length) this.dianaDots.remove(this.dianaDots.children[0])
-        const punto = new THREE.SphereGeometry(0.06, 12, 8)
+        // Corre en cada cambio de hover con un lote abierto: la geometría no se crea cada vez.
+        const punto = shared('puntoDiana', () => new THREE.SphereGeometry(0.06, 12, 8))
         for (const w of this.selectionWeighings) {
             const p = targetPoint(lv.data, Number(w.peso_neto), w.id, 1.47, w.fuera_de_rango)
             const m = new THREE.Mesh(punto, this.B[p.level])
@@ -1473,7 +1535,8 @@ export class PlantScene {
         this.lots.forEach((lv) => objetos.push(...lv.picks))
         const hit = this.raycaster.intersectObjects(objetos, false)[0]
         if (!hit) return null
-        const d = hit.object.userData as Partial<{ kind: PlantPickTarget['kind']; clientId: number; lotId: number; weighingId: number }>
+        const fichas = hit.object.userData.chips as ChipItem[] | undefined
+        const d: PickData = fichas && hit.instanceId !== undefined ? fichas[hit.instanceId].pick : hit.object.userData
         if (d.kind === 'cliente' && d.clientId !== undefined) return { kind: 'cliente', clientId: d.clientId }
         if (d.kind === 'lote' && d.clientId !== undefined && d.lotId !== undefined) return { kind: 'lote', clientId: d.clientId, lotId: d.lotId }
         if (d.kind === 'pesaje' && d.clientId !== undefined && d.lotId !== undefined && d.weighingId !== undefined) return { kind: 'pesaje', clientId: d.clientId, lotId: d.lotId, weighingId: d.weighingId }

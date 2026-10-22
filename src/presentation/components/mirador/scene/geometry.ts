@@ -40,6 +40,16 @@ export function slab(w: number, h: number, d: number, r: number, bevel = 0.05): 
     return g
 }
 
+/**
+ * Cualquier otra geometría que se repite: se crea una vez por clave y se
+ * comparte. Crear una por cada `rebuildLot` deja un buffer en la GPU por foto.
+ */
+export function shared(clave: string, crear: () => BufferGeometry): BufferGeometry {
+    let g = cache.get(clave)
+    if (!g) { g = crear(); cache.set(clave, g) }
+    return g
+}
+
 /** Ficha de pesaje: un disco con el canto redondeado, como una ficha de juego. */
 export const chipGeometry = new LatheGeometry([
     new Vector2(0, 0),

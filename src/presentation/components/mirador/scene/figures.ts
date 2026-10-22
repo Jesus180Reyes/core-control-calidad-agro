@@ -51,6 +51,15 @@ const PG = {
     caster: new CylinderGeometry(0.065, 0.065, 0.05, 12),
     box: new BoxGeometry(0.24, 0.19, 0.28),
     bag: new BoxGeometry(0.26, 0.14, 0.22),
+    // Camión y carrito: `rebuildLot` arma un camión por foto, y no se crea una geometría cada vez.
+    truckChassis: new BoxGeometry(2.7, 0.16, 0.86),
+    truckWindshield: new BoxGeometry(0.03, 0.4, 0.98),
+    truckWindows: new BoxGeometry(0.52, 0.32, 1.18),
+    truckStripe: new BoxGeometry(0.93, 0.09, 1.175),
+    truckLight: new BoxGeometry(0.03, 0.1, 0.18),
+    cartPost: new BoxGeometry(0.03, 0.36, 0.03),
+    cartHandlePost: new BoxGeometry(0.03, 0.62, 0.03),
+    cartHandle: new BoxGeometry(0.6, 0.035, 0.035),
 }
 
 export interface Person {
@@ -125,7 +134,7 @@ export interface Truck {
 export function createTruck(color: string): Truck {
     const root = new Group()
     const wheels: Mesh[] = []
-    addMesh(root, new BoxGeometry(2.7, 0.16, 0.86), fixedMaterial('#2B3036', 0.6), 0, 0.34, 0)
+    addMesh(root, PG.truckChassis, fixedMaterial('#2B3036', 0.6), 0, 0.34, 0)
     for (const x of [-1.0, -0.42, 0.92]) {
         for (const z of [-0.5, 0.5]) {
             const w = addMesh(root, PG.wheel, fixedMaterial('#1B1F23', 0.85), x, 0.24, z)
@@ -134,10 +143,10 @@ export function createTruck(color: string): Truck {
         }
     }
     addMesh(root, slab(0.92, 1.0, 1.16, 0.16, 0.05), fixedMaterial('#F2F4F3', 0.4), 0.92, 0.42, 0)
-    addMesh(root, new BoxGeometry(0.03, 0.4, 0.98), fixedMaterial('#1D2A33', 0.15), 1.385, 1.0, 0)
-    addMesh(root, new BoxGeometry(0.52, 0.32, 1.18), fixedMaterial('#1D2A33', 0.15), 0.96, 1.02, 0)
-    addMesh(root, new BoxGeometry(0.93, 0.09, 1.175), fixedMaterial(color, 0.5), 0.92, 0.64, 0)
-    for (const z of [-0.4, 0.4]) addMesh(root, new BoxGeometry(0.03, 0.1, 0.18), fixedMaterial('#FFF3C4', 0.3, '#FFE7A0'), 1.39, 0.6, z)
+    addMesh(root, PG.truckWindshield, fixedMaterial('#1D2A33', 0.15), 1.385, 1.0, 0)
+    addMesh(root, PG.truckWindows, fixedMaterial('#1D2A33', 0.15), 0.96, 1.02, 0)
+    addMesh(root, PG.truckStripe, fixedMaterial(color, 0.5), 0.92, 0.64, 0)
+    for (const z of [-0.4, 0.4]) addMesh(root, PG.truckLight, fixedMaterial('#FFF3C4', 0.3, '#FFE7A0'), 1.39, 0.6, z)
     addMesh(root, slab(1.78, 0.1, 1.16, 0.05, 0.02), fixedMaterial('#8B959B', 0.6), -0.5, 0.42, 0)
     return { root, wheels }
 }
@@ -148,9 +157,9 @@ export function createCart(accent: string): Group {
     const metal = fixedMaterial('#5E6A73', 0.45)
     addMesh(g, slab(0.62, 0.05, 0.86, 0.06, 0.015), metal, 0, 0.17, 0)
     addMesh(g, slab(0.62, 0.04, 0.86, 0.06, 0.012), metal, 0, 0.5, 0)
-    for (const [x, z] of [[-0.28, -0.4], [0.28, -0.4], [-0.28, 0.4], [0.28, 0.4]]) addMesh(g, new BoxGeometry(0.03, 0.36, 0.03), metal, x, 0.36, z)
-    for (const x of [-0.27, 0.27]) addMesh(g, new BoxGeometry(0.03, 0.62, 0.03), metal, x, 0.48, -0.43)
-    addMesh(g, new BoxGeometry(0.6, 0.035, 0.035), fixedMaterial(accent, 0.5), 0, 0.79, -0.43)
+    for (const [x, z] of [[-0.28, -0.4], [0.28, -0.4], [-0.28, 0.4], [0.28, 0.4]]) addMesh(g, PG.cartPost, metal, x, 0.36, z)
+    for (const x of [-0.27, 0.27]) addMesh(g, PG.cartHandlePost, metal, x, 0.48, -0.43)
+    addMesh(g, PG.cartHandle, fixedMaterial(accent, 0.5), 0, 0.79, -0.43)
     for (const [x, z] of [[-0.24, -0.33], [0.24, -0.33], [-0.24, 0.33], [0.24, 0.33]]) {
         const w = addMesh(g, PG.caster, fixedMaterial('#1B1F23', 0.85), x, 0.075, z)
         w.rotation.z = Math.PI / 2
