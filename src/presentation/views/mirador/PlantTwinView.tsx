@@ -8,9 +8,12 @@ import { PlantCanvas, type PlantCanvasHandle } from '#/presentation/components/m
 import { PlantControls } from '#/presentation/components/mirador/PlantControls'
 import { LotWeighingsLoader } from '#/presentation/components/mirador/LotWeighingsLoader'
 import { PlantKpiBar } from '#/presentation/components/mirador/PlantKpiBar'
+import { PlantTourIndicator } from '#/presentation/components/mirador/PlantTourIndicator'
 import { useFullscreen } from '#/presentation/hooks/mirador/useFullscreen'
 import { usePersistentFlag } from '#/presentation/hooks/mirador/usePersistentFlag'
+import { usePlantTour } from '#/presentation/hooks/mirador/usePlantTour'
 import type { PlantTwin } from '#/presentation/hooks/mirador/usePlantTwin'
+import { useWakeLock } from '#/presentation/hooks/mirador/useWakeLock'
 import type { PlantPickTarget, PlantWeighing } from '#/presentation/types/mirador/plantTwin.types'
 
 import { ClientPanel } from './panel/ClientPanel'
@@ -51,6 +54,25 @@ export function PlantTwinView({ twin }: { twin: PlantTwin }) {
     // Para el televisor de planta: el tablero solo, sin la barra lateral del portal.
     const pantallaCompleta = useFullscreen(rootRef)
 
+    // Modo TV (SPEC 23): pantalla completa más recorrido. Salir de la pantalla
+    // completa, por donde sea, termina el recorrido: no hay recorrido sin ella.
+    const [tvRequested, setTvRequested] = useState(false)
+    useEffect(() => { if (!pantallaCompleta.active) setTvRequested(false) }, [pantallaCompleta.active])
+    const tour = usePlantTour({ twin, enabled: tvRequested && pantallaCompleta.active, containerRef: rootRef })
+    useWakeLock(tour.active)
+
+    const iniciarTv = useCallback(() => {
+        setTvRequested(true)
+        // Ya en pantalla completa, el recorrido arranca sin salir de ella.
+        if (!pantallaCompleta.active) pantallaCompleta.toggle()
+    }, [pantallaCompleta])
+
+    // La pantalla completa de siempre no arranca el recorrido, aunque un Modo TV rechazado haya quedado pedido.
+    const alternarPantallaCompleta = useCallback(() => {
+        setTvRequested(false)
+        pantallaCompleta.toggle()
+    }, [pantallaCompleta])
+
     useEffect(() => {
         const el = rootRef.current
         if (!el) return
@@ -60,10 +82,11 @@ export function PlantTwinView({ twin }: { twin: PlantTwin }) {
     }, [])
 
     useEffect(() => {
-        const alTeclear = (e: KeyboardEvent) => { if (e.key === 'Escape') goUp() }
+        // En el modo TV, Esc sale de la pantalla completa y la selección queda donde estaba.
+        const alTeclear = (e: KeyboardEvent) => { if (e.key === 'Escape' && !tour.active) goUp() }
         window.addEventListener('keydown', alTeclear)
         return () => window.removeEventListener('keydown', alTeclear)
-    }, [goUp])
+    }, [goUp, tour.active])
 
     const lateral = tamanio.w >= ANCHO_PANEL_LATERAL
     const altoHoja = hojaAbierta ? Math.round(tamanio.h * 0.55) : HOJA_PLEGADA
@@ -81,7 +104,7 @@ export function PlantTwinView({ twin }: { twin: PlantTwin }) {
     const color = cliente ? clientColor(slots.rows[cliente.id]) : ''
 
     // Lo que tapa el HUD, para que la escena se centre en lo que queda a la vista.
-    const altoHud = kpisOcultos ? 110 : 170
+    const altoHud = tour.active ? 200 : kpisOcultos ? 110 : 170
     const insets = useMemo(
         () => (lateral ? { top: altoHud, right: PANEL_W + GAP * 2, bottom: 0 } : { top: altoHud + 40, right: 0, bottom: altoHoja }),
         [lateral, altoHoja, altoHud],
@@ -107,7 +130,10 @@ export function PlantTwinView({ twin }: { twin: PlantTwin }) {
         </>
     )
 
-    const tituloHoja = pesaje ? `Pesaje #${pesaje.id}` : lote ? `Lote ${lote.nombre_lote}` : cliente ? cliente.nombre : 'Clientes en planta'
+    const clienteDelRecorrido = tour.alert?.clientId ?? (tour.stop?.kind === 'cliente' ? tour.stop.clientId : null)
+    const nombreDelRecorrido = clienteDelRecorrido !== null ? snapshot.clientes.find((c) => c.id === clienteDelRecorrido)?.nombre ?? null : null
+
+    const tituloHoja =pesaje ? `Pesaje #${pesaje.id}` : lote ? `Lote ${lote.nombre_lote}` : cliente ? cliente.nombre : 'Clientes en planta'
 
     return (
         <div
@@ -124,16 +150,20 @@ export function PlantTwinView({ twin }: { twin: PlantTwin }) {
                 selection={selection}
                 weighings={pesajes}
                 insets={insets}
-                cinematic={false}
+                cinematic={tour.active}
                 onPick={alTocar}
             />
 
             <div className="pointer-events-none absolute left-3 top-3 z-10 flex flex-col gap-2.5" style={{ right: lateral ? PANEL_W + GAP * 2 : GAP }}>
                 <div className="flex min-w-0 flex-wrap items-stretch gap-2.5">
                     <PlantBrandCard updatedAt={updatedAt} kpisHidden={kpisOcultos} onToggleKpis={() => setKpisOcultos(!kpisOcultos)} />
-                    {!kpisOcultos && <PlantKpiBar kpis={snapshot.kpis} clientCount={snapshot.clientes.length} />}
+                    {!kpisOcultos && <PlantKpiBar kpis={snapshot.kpis} clientCount={snapshot.clientes.length} size={tour.active ? 'tv' : 'normal'} />}
                 </div>
-                <PlantBreadcrumbs level={level} selection={selection} clientName={cliente?.nombre ?? null} lotName={lote?.nombre_lote ?? null} onSelect={select} />
+                {tour.active ? (
+                    <PlantTourIndicator tour={tour} clientName={nombreDelRecorrido} onTogglePause={tour.togglePause} onExit={pantallaCompleta.toggle} />
+                ) : (
+                    <PlantBreadcrumbs level={level} selection={selection} clientName={cliente?.nombre ?? null} lotName={lote?.nombre_lote ?? null} onSelect={select} />
+                )}
             </div>
 
             {lateral ? (
@@ -174,16 +204,20 @@ export function PlantTwinView({ twin }: { twin: PlantTwin }) {
                 />
             )}
 
-            <PlantControls
-                vertical={!lateral}
-                onZoomIn={() => canvasRef.current?.zoomBy(1 / 1.25)}
-                onZoomOut={() => canvasRef.current?.zoomBy(1.25)}
-                onHome={() => select({})}
-                onToggleFullscreen={pantallaCompleta.supported ? pantallaCompleta.toggle : undefined}
-                fullscreen={pantallaCompleta.active}
-                className="absolute z-10"
-                style={lateral ? { right: PANEL_W + GAP * 2, bottom: GAP } : { right: GAP, bottom: altoHoja + GAP }}
-            />
+            {!tour.active && (
+                <PlantControls
+                    vertical={!lateral}
+                    onZoomIn={() => canvasRef.current?.zoomBy(1 / 1.25)}
+                    onZoomOut={() => canvasRef.current?.zoomBy(1.25)}
+                    onHome={() => select({})}
+                    onToggleFullscreen={pantallaCompleta.supported ? alternarPantallaCompleta : undefined}
+                    fullscreen={pantallaCompleta.active}
+                    // El modo TV es para un televisor: en el teléfono la hoja inferior taparía media escena.
+                    onStartTv={pantallaCompleta.supported && lateral ? iniciarTv : undefined}
+                    className="absolute z-10"
+                    style={lateral ? { right: PANEL_W + GAP * 2, bottom: GAP } : { right: GAP, bottom: altoHoja + GAP }}
+                />
+            )}
         </div>
     )
 }
