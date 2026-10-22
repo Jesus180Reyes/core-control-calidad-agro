@@ -266,35 +266,35 @@ El hook no persiste nada. Recargar vuelve al modo normal, y la pantalla completa
 
 ## Criterios de aceptación
 
-- [ ] `npx tsc --noEmit` no da errores.
-- [ ] `npx vitest run src/presentation/hooks/mirador/` pasa en verde, con los tests nuevos de `plantTour.test.ts`.
-- [ ] En Chrome de escritorio, con el panel lateral, `PlantControls` muestra el botón **Modo TV**.
-- [ ] Con menos de 768 px de ancho, o sin Fullscreen API, el botón **Modo TV** no aparece.
-- [ ] **Modo TV** pone el Mirador en pantalla completa y el indicador muestra `Recorrido · Toda la planta`.
-- [ ] A los 10 s de la planta, la cámara va al primer cliente con lotes activos, el panel muestra su `ClientPanel` y el indicador muestra `Recorrido · 1 de N · {cliente}`.
-- [ ] Cada cliente se muestra 15 s, en el orden de las filas de la escena, y después del último el recorrido vuelve a la planta.
-- [ ] Un cliente cuyos lotes son todos **Finalizado** no es una parada.
-- [ ] Sin clientes activos, el recorrido se queda en la planta con `Recorrido · Sin lotes activos`.
-- [ ] Una foto con un pesaje nuevo fuera de rango lleva la cámara a ese pesaje, el panel muestra su `WeighingPanel` y el indicador muestra `Fuera de rango · {cliente}`, durante 12 s.
-- [ ] Después de una alerta, el recorrido sigue con el cliente siguiente al de la alerta.
-- [ ] Una foto con varios pesajes fuera de rango produce una sola alerta, la del pesaje de mayor id.
-- [ ] Una alerta no llega con el recorrido en pausa.
-- [ ] Un click, una rueda o una tecla sobre el tablero pausa el recorrido y el indicador muestra `En pausa`.
-- [ ] Sin interacción durante 90 s, el recorrido se retoma desde el cliente que esté seleccionado.
-- [ ] **Pausar** detiene el recorrido, y sin **Reanudar** no se retoma solo.
-- [ ] Esc, **Salir del modo TV** y el botón de pantalla completa terminan el recorrido, y la selección queda donde estaba.
-- [ ] El botón de pantalla completa de siempre entra en pantalla completa sin el recorrido.
-- [ ] Durante el recorrido no se pintan `PlantControls` ni `PlantBreadcrumbs`, y los KPIs se ven con los números más grandes.
-- [ ] Durante el recorrido entre clientes, la pestaña Red no muestra pedidos nuevos fuera del `GET /plantas/en-vivo` de siempre.
-- [ ] Una alerta hace como mucho un `GET /pesajes/byLote/:loteId`.
-- [ ] Con el modo TV activo, la cámara se mueve más lento entre paradas y gira suave mientras está quieta.
-- [ ] Fuera del modo TV, la cámara se comporta como antes.
-- [ ] Con `prefers-reduced-motion`, no hay giro ni barra de tiempo animada.
-- [ ] Con el modo TV activo, la pantalla del equipo no se apaga por inactividad, en un navegador con Wake Lock.
-- [ ] En un navegador sin Wake Lock, el modo TV funciona igual y no aparece ningún error.
-- [ ] El manual tiene el bloque **Dejar el Mirador en un televisor**, nombra **Modo TV**, **Pausar**, **Reanudar** y **Salir del modo TV**, y hay una línea en **Sin publicar**.
-- [ ] El README del manual tiene la fila `5-4-mirador-modo-tv.png` en **Pendiente**.
-- [ ] `CLAUDE.md` tiene el párrafo del modo TV.
+- [X] `npx tsc --noEmit` no da errores.
+- [X] `npx vitest run src/presentation/hooks/mirador/` pasa en verde, con los tests nuevos de `plantTour.test.ts`.
+- [X] En Chrome de escritorio, con el panel lateral, `PlantControls` muestra el botón **Modo TV**.
+- [X] Con menos de 768 px de ancho, o sin Fullscreen API, el botón **Modo TV** no aparece.
+- [X] **Modo TV** pone el Mirador en pantalla completa y el indicador muestra `Recorrido · Toda la planta`.
+- [X] A los 10 s de la planta, la cámara va al primer cliente con lotes activos, el panel muestra su `ClientPanel` y el indicador muestra `Recorrido · 1 de N · {cliente}`.
+- [X] Cada cliente se muestra 15 s, en el orden de las filas de la escena, y después del último el recorrido vuelve a la planta.
+- [X] Un cliente cuyos lotes son todos **Finalizado** no es una parada.
+- [X] Sin clientes activos, el recorrido se queda en la planta con `Recorrido · Sin lotes activos`.
+- [X] Una foto con un pesaje nuevo fuera de rango lleva la cámara a ese pesaje, el panel muestra su `WeighingPanel` y el indicador muestra `Fuera de rango · {cliente}`, durante 12 s.
+- [X] Después de una alerta, el recorrido sigue con el cliente siguiente al de la alerta.
+- [X] Una foto con varios pesajes fuera de rango produce una sola alerta, la del pesaje de mayor id.
+- [X] Una alerta no llega con el recorrido en pausa.
+- [X] Un click, una rueda o una tecla sobre el tablero pausa el recorrido y el indicador muestra `En pausa`.
+- [X] Sin interacción durante 90 s, el recorrido se retoma desde el cliente que esté seleccionado.
+- [X] **Pausar** detiene el recorrido, y sin **Reanudar** no se retoma solo.
+- [X] Esc, **Salir del modo TV** y el botón de pantalla completa terminan el recorrido, y la selección queda donde estaba.
+- [X] El botón de pantalla completa de siempre entra en pantalla completa sin el recorrido.
+- [X] Durante el recorrido no se pintan `PlantControls` ni `PlantBreadcrumbs`, y los KPIs se ven con los números más grandes.
+- [X] Durante el recorrido entre clientes, la pestaña Red no muestra pedidos nuevos fuera del `GET /plantas/en-vivo` de siempre.
+- [X] Una alerta hace como mucho un `GET /pesajes/byLote/:loteId`.
+- [X] Con el modo TV activo, la cámara se mueve más lento entre paradas y gira suave mientras está quieta.
+- [X] Fuera del modo TV, la cámara se comporta como antes.
+- [X] Con `prefers-reduced-motion`, no hay giro ni barra de tiempo animada.
+- [X] Con el modo TV activo, la pantalla del equipo no se apaga por inactividad, en un navegador con Wake Lock.
+- [X] En un navegador sin Wake Lock, el modo TV funciona igual y no aparece ningún error.
+- [X] El manual tiene el bloque **Dejar el Mirador en un televisor**, nombra **Modo TV**, **Pausar**, **Reanudar** y **Salir del modo TV**, y hay una línea en **Sin publicar**.
+- [X] El README del manual tiene la fila `5-4-mirador-modo-tv.png` en **Pendiente**.
+- [X] `CLAUDE.md` tiene el párrafo del modo TV.
 
 ---
 
