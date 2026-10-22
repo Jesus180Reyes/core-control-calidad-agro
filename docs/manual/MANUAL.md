@@ -693,6 +693,26 @@ Al lado del título, el indicador **En vivo** muestra la hora de la última actu
 - **Acercar y alejar**: la rueda del mouse, o los botones **+** y **−**.
 - **Volver a la vista de toda la planta**: el botón de la mira.
 - **Pantalla completa**: el botón de las esquinas.
+- **Modo TV**: el botón de la pantalla con el triángulo de reproducir. Vea el bloque siguiente.
+
+**Dejar el Mirador en un televisor**
+
+El botón **Modo TV** pone el tablero en pantalla completa y lo recorre solo, para dejarlo a la vista en un televisor de la planta. El botón aparece en una computadora con pantalla ancha, no en el teléfono.
+
+- **El recorrido**: el tablero muestra primero toda la planta y después pasa, uno por uno, por cada cliente que tiene lotes **En pesaje** o **Por aprobar**, con su detalle en el panel de la derecha. Los clientes que sólo tienen lotes **Finalizado** no se muestran. Después del último cliente, vuelve a toda la planta.
+- **Un pesaje fuera de rango**: apenas llega, el tablero va a ese pesaje y muestra su detalle (el peso, cuánto se alejó del ideal y el operario) durante unos segundos. Después el recorrido sigue con el cliente siguiente.
+- **Arriba**, debajo de los indicadores, una barra dice en qué parte del recorrido está (por ejemplo, *"Recorrido · 3 de 8"* y el nombre del cliente) y una línea muestra cuánto falta para pasar al siguiente.
+- **Si toca el tablero** (un clic, la rueda del mouse o una tecla), el recorrido se pausa para que pueda mirar con calma. Se retoma solo, desde el cliente que esté viendo, después de un minuto y medio sin tocarlo. Mover el mouse no lo pausa.
+- **Pausar** deja el tablero quieto hasta que pulse **Reanudar**. Esta pausa no se retoma sola.
+- **Salir del modo TV**, o la tecla **Esc**, vuelve a la vista normal. El tablero queda en lo último que estaba mostrando.
+
+Mientras el modo TV está activo, la pantalla del equipo no se apaga ni entra en reposo. Algunos equipos no lo permiten, por ejemplo con el ahorro de batería activado: en ese caso, la pantalla puede apagarse como siempre.
+
+Para el televisor, conviene un equipo con Chrome o Edge. En otros navegadores el botón **Modo TV** puede no aparecer.
+
+![Mirador en modo TV](capturas/5-4-mirador-modo-tv.png)
+
+*El Mirador en modo TV, mostrando un cliente.*
 
 **Ver el detalle**
 
@@ -1026,3 +1046,4 @@ Esta tabla muestra qué pantallas y acciones tiene cada rol en esta versión del
 - Nueva sección 5.7: el supervisor y el administrador pueden agregar o quitar los operadores de un cliente desde **Clientes**, con **Editar Operadores Vinculados**.
 - Las tarjetas de lote muestran el origen del lote, o "Sin origen" si no se cargó.
 - El diálogo **Tara del envase** tiene un campo opcional **Observaciones**, debajo de **Tara**, para anotar lo que mida la planta en cada pesaje.
+- Sección 5.4: el Mirador tiene un botón **Modo TV**, que lo pone en pantalla completa y recorre solo cada cliente con lotes activos, mostrando enseguida cada pesaje fuera de rango.

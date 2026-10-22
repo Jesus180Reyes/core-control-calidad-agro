@@ -90,6 +90,7 @@ Esta lista es el checklist de quien toma las capturas. Si un cambio modifica una
 | `4-8-historial.png` | El historial con filtros. | Pendiente |
 | `5-3-agri.png` | Agri con una pregunta y su respuesta. | Pendiente |
 | `5-4-mirador.png` | El Mirador con un lote seleccionado. | Pendiente |
+| `5-4-mirador-modo-tv.png` | El Mirador en modo TV en un cliente, con los indicadores grandes y la barra del recorrido. | Pendiente |
 | `5-5-metricas.png` | El tablero de métricas. | Pendiente |
 
 ## Versiones
