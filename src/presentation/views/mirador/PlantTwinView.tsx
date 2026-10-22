@@ -124,6 +124,7 @@ export function PlantTwinView({ twin }: { twin: PlantTwin }) {
                 selection={selection}
                 weighings={pesajes}
                 insets={insets}
+                cinematic={false}
                 onPick={alTocar}
             />
 

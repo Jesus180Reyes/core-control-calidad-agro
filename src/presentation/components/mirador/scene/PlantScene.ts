@@ -190,6 +190,13 @@ const CALIDAD_ANGOSTA = 2
 const FPS_MINIMO = 45
 const VENTANA_FPS_S = 2
 
+/** Constante de interpolación de la cámara: la normal, y la del modo TV (SPEC 23), más lenta entre paradas. */
+const RITMO_CAMARA = 5.5
+const RITMO_CAMARA_CINEMATICO = 1.5
+/** Giro del modo TV: amplitud en radianes y período en segundos. */
+const GIRO_AMPLITUD = 0.22
+const GIRO_PERIODO_S = 40
+
 const CLASES = {
     // Sin `backdrop-blur`: la etiqueta se mueve en cada frame y el desenfoque se recalcularía con ella.
     cliente: 'pointer-events-auto cursor-pointer flex items-center gap-2.5 rounded-2xl border border-border-ui/80 bg-surface/95 py-1.5 pl-1.5 pr-3 shadow-clay-card transition-opacity duration-200',
@@ -286,6 +293,12 @@ export class PlantScene {
     private width = 1
     private height = 1
     private introDone: boolean
+    /** Modo TV: ritmo lento y giro. El giro tiene su propio reloj, para arrancar en 0 sin salto. */
+    private cinematic = false
+    private swayTime = 0
+    private swayAmp = 0
+    /** El `theta` con el que se pinta la cámara: `cam.theta` más el giro. */
+    private viewTheta = 0.5
     private hoverClientId: number | null = null
     private hoverEvent: PointerEvent | null = null
     private readonly pointers = new Map<number, { x: number; y: number; sx: number; sy: number }>()
@@ -551,6 +564,13 @@ export class PlantScene {
 
     zoomBy(factor: number) {
         this.goal.r = clamp(this.goal.r * factor, 8, 200)
+    }
+
+    /** Modo TV (SPEC 23). Con movimiento reducido no hace nada: ni ritmo lento ni giro. */
+    setCinematic(on: boolean) {
+        if (this.reduceMotion || on === this.cinematic) return
+        this.cinematic = on
+        if (on && this.swayAmp === 0) this.swayTime = 0
     }
 
     setTheme() {
@@ -1367,16 +1387,24 @@ export class PlantScene {
     }
 
     private updateCamera(dt: number) {
-        const k = 1 - Math.exp(-dt * (this.introDone ? 5.5 : 2.2))
+        const k = 1 - Math.exp(-dt * (!this.introDone ? 2.2 : this.cinematic ? RITMO_CAMARA_CINEMATICO : RITMO_CAMARA))
         this.cam.target.lerp(this.goal.target, k)
         this.cam.theta += (this.goal.theta - this.cam.theta) * k
         this.cam.el += (this.goal.el - this.cam.el) * k
         this.cam.r += (this.goal.r - this.cam.r) * k
+
+        // El giro se suma al theta pintado y no a `goal.theta`: no se acumula ni pelea
+        // con el arrastre. La amplitud entra y sale suave, para que salir del modo no salte.
+        this.swayAmp += ((this.cinematic ? 1 : 0) - this.swayAmp) * (1 - Math.exp(-dt * 1.5))
+        if (!this.cinematic && this.swayAmp < 1e-3) this.swayAmp = 0
+        if (this.swayAmp > 0) this.swayTime += dt
+        this.viewTheta = this.cam.theta + this.swayAmp * GIRO_AMPLITUD * Math.sin((2 * Math.PI * this.swayTime) / GIRO_PERIODO_S)
+
         const ce = Math.cos(this.cam.el)
         this.camera.position.set(
-            this.cam.target.x + this.cam.r * ce * Math.sin(this.cam.theta),
+            this.cam.target.x + this.cam.r * ce * Math.sin(this.viewTheta),
             this.cam.target.y + this.cam.r * Math.sin(this.cam.el),
-            this.cam.target.z + this.cam.r * ce * Math.cos(this.cam.theta),
+            this.cam.target.z + this.cam.r * ce * Math.cos(this.viewTheta),
         )
         this.camera.lookAt(this.cam.target)
     }
@@ -1665,7 +1693,7 @@ export class PlantScene {
             if (this.diana.visible) {
                 const alto = 1.9
                 this.diana.position.set(sel.group.position.x, sel.group.position.y + sel.topY + alto, sel.group.position.z)
-                this.diana.rotation.y = this.cam.theta
+                this.diana.rotation.y = this.viewTheta
                 this.dianaTilt.rotation.x = -Math.PI / 2 + 0.62
                 this.dianaStem.scale.y = alto - 0.05
                 this.dianaStem.position.y = -alto / 2 - 0.02

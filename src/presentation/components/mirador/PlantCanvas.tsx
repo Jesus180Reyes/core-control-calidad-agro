@@ -20,6 +20,8 @@ interface PlantCanvasProps {
     /** Pesajes del lote seleccionado, para la diana 3D. */
     weighings: PlantWeighing[] | null
     insets: SceneInsets
+    /** Modo TV: cámara más lenta entre paradas y con un giro suave. */
+    cinematic: boolean
     onPick: (target: PlantPickTarget | null) => void
     ref?: Ref<PlantCanvasHandle>
 }
@@ -29,15 +31,15 @@ interface PlantCanvasProps {
  * ninguna otra ruta lo descarga. La escena vive en un ref y recibe todo por
  * métodos; React no la re-renderiza.
  */
-export function PlantCanvas({ snapshot, slots, events, seq, selection, weighings, insets, onPick, ref }: PlantCanvasProps) {
+export function PlantCanvas({ snapshot, slots, events, seq, selection, weighings, insets, cinematic, onPick, ref }: PlantCanvasProps) {
     const hostRef = useRef<HTMLDivElement>(null)
     const labelsRef = useRef<HTMLDivElement>(null)
     const sceneRef = useRef<PlantScene | null>(null)
     const [estado, setEstado] = useState<'cargando' | 'lista' | 'error'>('cargando')
 
     // Lo último que llegó por props, para aplicarlo cuando la escena termine de cargar.
-    const ultimo = useRef({ snapshot, slots, events, seq, selection, weighings, insets, onPick })
-    ultimo.current = { snapshot, slots, events, seq, selection, weighings, insets, onPick }
+    const ultimo = useRef({ snapshot, slots, events, seq, selection, weighings, insets, cinematic, onPick })
+    ultimo.current = { snapshot, slots, events, seq, selection, weighings, insets, cinematic, onPick }
 
     useEffect(() => {
         let cancelado = false
@@ -49,6 +51,7 @@ export function PlantCanvas({ snapshot, slots, events, seq, selection, weighings
                     sceneRef.current = escena
                     const p = ultimo.current
                     escena.setInsets(p.insets)
+                    escena.setCinematic(p.cinematic)
                     escena.setSelection(p.selection, p.weighings)
                     escena.apply(p.snapshot, p.slots, p.events, p.seq)
                     setEstado('lista')
@@ -73,6 +76,7 @@ export function PlantCanvas({ snapshot, slots, events, seq, selection, weighings
     useEffect(() => { sceneRef.current?.apply(snapshot, slots, events, seq) }, [snapshot, slots, events, seq])
     useEffect(() => { sceneRef.current?.setSelection(selection, weighings) }, [selection, weighings])
     useEffect(() => { sceneRef.current?.setInsets({ top: insets.top, right: insets.right, bottom: insets.bottom }) }, [insets.top, insets.right, insets.bottom])
+    useEffect(() => { sceneRef.current?.setCinematic(cinematic) }, [cinematic])
 
     useImperativeHandle(ref, () => ({ zoomBy: (f) => sceneRef.current?.zoomBy(f) }), [])
 
