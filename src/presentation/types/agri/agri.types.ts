@@ -16,6 +16,11 @@ export interface AgriMessage {
      * `**hola**` le salga en negrita.
      */
     content: string
+    /**
+     * Las preguntas que trajo esta respuesta de Agri. Sólo en mensajes de Agri, y
+     * sólo si el backend mandó alguna: un mensaje sin sugerencias no lleva la clave.
+     */
+    suggestions?: string[]
 }
 
 /**
@@ -58,6 +63,13 @@ export interface AgriChatResponse {
      * explicación escrita acá. Para la pantalla es un mensaje más de Agri.
      */
     respuesta: string
+    /**
+     * SPEC 48 del backend. Preguntas en texto plano, sin markdown. Vacío en un
+     * turno normal; con 2 o 3 cuando Agri no entendió, y entonces `respuesta` es
+     * la frase fija que invita a elegir. Opcional mientras haya backends sin el
+     * SPEC 48: la ausencia se lee como `[]`.
+     */
+    sugerencias?: string[]
 }
 
 /** Respuesta de `GET /chat/sugerencias`. */
