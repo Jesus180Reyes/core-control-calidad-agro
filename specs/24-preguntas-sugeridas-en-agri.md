@@ -1,6 +1,6 @@
 # SPEC 24 — Preguntas sugeridas en Agri
 
-> **Estado:** Approved
+> **Estado:** Implemented
 > **Depende de:** SPEC 10 (Agri, chat IA), SPEC 48 del backend (`core-control-calidad-agro-backend/specs/48-preguntas-sugeridas-en-el-chat.md`), implementado en la rama `spec-48-preguntas-sugeridas-en-el-chat` del backend y **todavía sin mergear**
 > **Fecha:** 2026-10-23
 > **Objetivo:** Pintar como botones, debajo de la respuesta de Agri, las preguntas que `POST /chat` devuelve en `sugerencias` cuando no entendió la pregunta, y mandar la que se toque como el siguiente mensaje.
@@ -162,28 +162,28 @@ La forma visual es la opción B de la maqueta:
 
 **Automáticos (`agriHistory.test.ts`):**
 
-- [ ] `withSuggestions('Hola', undefined)` y `withSuggestions('Hola', [])` devuelven `'Hola'`.
-- [ ] `withSuggestions('Frase', ['A?', 'B?'])` devuelve `'Frase\n\n- A?\n- B?'`.
-- [ ] `aHistorial` manda un mensaje de Agri con sugerencias como `rol: 'asistente'` y el `contenido` armado por `withSuggestions`.
-- [ ] `aHistorial` manda los mensajes del usuario y los de Agri sin sugerencias igual que antes.
-- [ ] `aHistorial` sigue mandando solo los últimos 10 turnos y recortando cada `contenido` a 4000 caracteres.
-- [ ] `npx tsc --noEmit` no da errores y `npm run test` pasa.
+- [X] `withSuggestions('Hola', undefined)` y `withSuggestions('Hola', [])` devuelven `'Hola'`.
+- [X] `withSuggestions('Frase', ['A?', 'B?'])` devuelve `'Frase\n\n- A?\n- B?'`.
+- [X] `aHistorial` manda un mensaje de Agri con sugerencias como `rol: 'asistente'` y el `contenido` armado por `withSuggestions`.
+- [X] `aHistorial` manda los mensajes del usuario y los de Agri sin sugerencias igual que antes.
+- [X] `aHistorial` sigue mandando solo los últimos 10 turnos y recortando cada `contenido` a 4000 caracteres.
+- [X] `npx tsc --noEmit` no da errores y `npm run test` pasa.
 
 **Manuales, contra un backend con el SPEC 48 y con un cliente real en lugar de `<cliente>`:**
 
-- [ ] Preguntar "como va lo de `<cliente>`" muestra la frase fija y, debajo, de 2 a 3 cápsulas con preguntas que nombran a `<cliente>`.
-- [ ] Las cápsulas tienen borde y texto del acento de Agri, forma de píldora, y se acomodan en varias filas en el ancho de un teléfono sin scroll horizontal.
-- [ ] Tocar una cápsula agrega un globo del usuario con esa pregunta completa, muestra los tres puntos y luego la respuesta con datos.
-- [ ] Después de tocar una, las cápsulas de esa respuesta siguen visibles pero deshabilitadas y no responden al click.
-- [ ] Mientras Agri está pensando, las cápsulas de la última respuesta están deshabilitadas.
-- [ ] Escribir "la segunda" en el compositor, en lugar de tocar, responde la segunda pregunta sugerida.
-- [ ] Una pregunta clara ("que se peso hoy de `<cliente>`") responde sin cápsulas.
-- [ ] **Regenerar** sobre una respuesta con cápsulas la reemplaza, y las cápsulas viejas desaparecen.
-- [ ] **Copiar** sobre esa respuesta copia solo la frase.
-- [ ] Las cápsulas se navegan con Tab y se activan con Enter, con el anillo de foco visible.
-- [ ] Contra un backend **sin** el SPEC 48, el chat responde igual que hoy, sin cápsulas y sin errores en consola.
-- [ ] La pantalla vacía sigue mostrando sus sugerencias de siempre, en tarjetas.
-- [ ] El manual tiene el párrafo nuevo en la sección 5.3 y una línea en **Sin publicar**.
+- [X] Preguntar "como va lo de `<cliente>`" muestra la frase fija y, debajo, de 2 a 3 cápsulas con preguntas que nombran a `<cliente>`.
+- [X] Las cápsulas tienen borde y texto del acento de Agri, forma de píldora, y se acomodan en varias filas en el ancho de un teléfono sin scroll horizontal.
+- [X] Tocar una cápsula agrega un globo del usuario con esa pregunta completa, muestra los tres puntos y luego la respuesta con datos.
+- [X] Después de tocar una, las cápsulas de esa respuesta siguen visibles pero deshabilitadas y no responden al click.
+- [X] Mientras Agri está pensando, las cápsulas de la última respuesta están deshabilitadas.
+- [X] Escribir "la segunda" en el compositor, en lugar de tocar, responde la segunda pregunta sugerida.
+- [X] Una pregunta clara ("que se peso hoy de `<cliente>`") responde sin cápsulas.
+- [X] **Regenerar** sobre una respuesta con cápsulas la reemplaza, y las cápsulas viejas desaparecen.
+- [X] **Copiar** sobre esa respuesta copia solo la frase.
+- [X] Las cápsulas se navegan con Tab y se activan con Enter, con el anillo de foco visible.
+- [X] Contra un backend **sin** el SPEC 48, el chat responde igual que hoy, sin cápsulas y sin errores en consola.
+- [X] La pantalla vacía sigue mostrando sus sugerencias de siempre, en tarjetas.
+- [X] El manual tiene el párrafo nuevo en la sección 5.3 y una línea en **Sin publicar**.
 
 ---
 
