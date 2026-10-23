@@ -52,8 +52,14 @@ function crearConversacion(): string | null {
     return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`
 }
 
-function crearMensaje(role: AgriRole, content: string): AgriMessage {
-    return { id: crearId(), role, content }
+/**
+ * `suggestions` vacío o ausente deja el mensaje sin la clave: así un mensaje
+ * con sugerencias se distingue por tenerla, no por mirar su largo.
+ */
+function crearMensaje(role: AgriRole, content: string, suggestions?: string[]): AgriMessage {
+    const mensaje: AgriMessage = { id: crearId(), role, content }
+    if (suggestions !== undefined && suggestions.length > 0) mensaje.suggestions = suggestions
+    return mensaje
 }
 
 /**
@@ -88,8 +94,13 @@ export function useAgriChat() {
                 // propósito: éste es el callback de la llamada, y `reset()` lo
                 // desengancha. Es lo que hace que la respuesta de un turno
                 // abandonado no caiga dentro de la conversación nueva.
-                onSuccess: ({ respuesta }) => {
-                    setMessages((actuales) => [...actuales, crearMensaje('agri', respuesta)])
+                // `sugerencias` falta en un backend sin el SPEC 48, y llega
+                // vacío en un turno normal: en los dos casos no hay cápsulas.
+                onSuccess: ({ respuesta, sugerencias }) => {
+                    setMessages((actuales) => [
+                        ...actuales,
+                        crearMensaje('agri', respuesta, sugerencias),
+                    ])
                 },
             })
         },
