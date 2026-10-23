@@ -5,6 +5,7 @@ import { toast } from 'sonner'
 import { AgriAvatar } from '#/presentation/components/agri/AgriAvatar'
 import { AgriBubble } from '#/presentation/components/agri/AgriBubble'
 import { AgriComposer } from '#/presentation/components/agri/AgriComposer'
+import { AgriSuggestionChips } from '#/presentation/components/agri/AgriSuggestionChips'
 import { AgriTypingIndicator } from '#/presentation/components/agri/AgriTypingIndicator'
 import { AgriWelcome } from '#/presentation/components/agri/AgriWelcome'
 import { CustomButton } from '#/presentation/components/shared/button/CustomButton'
@@ -90,6 +91,17 @@ export function AgriChatView() {
                     <div className={`${ANCHO_COLUMNA} space-y-6 py-2`}>
                         {messages.map((message, indice) => (
                             <AgriBubble key={message.id} message={message} isLatest={indice === indiceUltimo}>
+                                {/* En toda respuesta que las trajo, para que el
+                                    hilo muestre qué se ofreció; activas sólo en
+                                    la última y sin un turno en vuelo. */}
+                                {message.suggestions !== undefined && (
+                                    <AgriSuggestionChips
+                                        suggestions={message.suggestions}
+                                        disabled={indice !== indiceUltimo || isThinking}
+                                        onSelect={sendMessage}
+                                    />
+                                )}
+
                                 {message.role === 'agri' && indice === indiceUltimo && !isThinking && (
                                     <ResponseActions
                                         copiado={copiado}
