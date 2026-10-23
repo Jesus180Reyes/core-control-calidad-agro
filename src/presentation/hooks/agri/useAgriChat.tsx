@@ -1,26 +1,17 @@
 import { useCallback, useState } from 'react'
 import { toast } from 'sonner'
 
+import { aHistorial } from '#/presentation/hooks/agri/agriHistory'
 import { useExecuteMutation } from '#/presentation/hooks/shared/useExecuteMutation'
 import type {
     AgriChatRequest,
     AgriChatResponse,
-    AgriHistoryTurn,
     AgriMessage,
     AgriRole,
 } from '#/presentation/types/agri/agri.types'
 
 /** Lo que el backend acepta en `mensaje` antes de contestar 400. */
 const MAXIMO_DEL_MENSAJE = 500
-
-/** Lo que el backend acepta en el `contenido` de cada turno del historial. */
-const MAXIMO_DEL_TURNO = 4000
-
-/**
- * Cuántos turnos previos se mandan. El backend sólo reenvía los últimos diez al
- * modelo, así que mandar más es ancho de banda tirado.
- */
-const TURNOS_DE_HISTORIAL = 10
 
 let contadorDeMensajes = 0
 
@@ -63,22 +54,6 @@ function crearConversacion(): string | null {
 
 function crearMensaje(role: AgriRole, content: string): AgriMessage {
     return { id: crearId(), role, content }
-}
-
-/**
- * El hilo traducido a lo que espera el backend: sólo los turnos visibles —nunca
- * resultados de herramientas ni mensajes de sistema, que el hilo no tiene—, con
- * los roles que él nombra y recortados a su máximo, porque un `contenido` vacío
- * o de más de 4000 caracteres invalida el cuerpo entero.
- */
-function aHistorial(mensajes: AgriMessage[]): AgriHistoryTurn[] {
-    return mensajes
-        .map((mensaje) => ({
-            rol: mensaje.role === 'user' ? ('usuario' as const) : ('asistente' as const),
-            contenido: mensaje.content.trim().slice(0, MAXIMO_DEL_TURNO),
-        }))
-        .filter((turno) => turno.contenido !== '')
-        .slice(-TURNOS_DE_HISTORIAL)
 }
 
 /**
