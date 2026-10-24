@@ -87,11 +87,12 @@ export function EstadoDesviado({ pesoActual, diferencia, isStabilizing, unidad }
             <div className="grid grid-cols-2 w-full border-t border-slate-100 dark:border-zinc-800/60 pt-8 mb-4">
                 <div className="flex flex-col items-center justify-center border-r border-slate-100 dark:border-zinc-800/60 pr-2">
                     <div className="w-1.5 h-8 lg:h-10 bg-slate-100 dark:bg-zinc-800 rounded-full relative mb-3">
-                        <div className="w-3 h-3 rounded-full absolute left-1/2 -translate-x-1/2 bg-amber-500 bottom-0" />
+                        {/* Arriba si sobra producto, abajo si falta. */}
+                        <div className={`w-3 h-3 rounded-full absolute left-1/2 -translate-x-1/2 bg-amber-500 ${diferencia > 0 ? 'top-0' : 'bottom-0'}`} />
                     </div>
                     <span className="text-[10px] lg:text-[11px] font-bold tracking-wider text-slate-400 dark:text-zinc-500 uppercase">Desviación</span>
                     <span className="text-sm lg:text-base font-black mt-1 text-amber-500">
-                        +{diferencia.toFixed(0)} <span className="lowercase">{unidad}</span>
+                        {diferencia > 0 ? '+' : ''}{diferencia.toFixed(0)} <span className="lowercase">{unidad}</span>
                     </span>
                 </div>
 
