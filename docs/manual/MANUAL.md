@@ -1053,3 +1053,4 @@ Esta tabla muestra qué pantallas y acciones tiene cada rol en esta versión del
 - Sección 5.4: el Mirador tiene un botón **Modo TV**, que lo pone en pantalla completa y recorre solo cada cliente con lotes activos, mostrando enseguida cada pesaje fuera de rango.
 - Sección 5.3: si Agri no entiende del todo una pregunta, propone dos o tres preguntas más concretas debajo de su respuesta, que se envían con solo pulsarlas.
 - Sección 5.3: mientras Agri responde, la flecha de enviar se convierte en un cuadrado que detiene la respuesta y devuelve la pregunta al recuadro; si la respuesta tarda, Agri avisa que está consultando los datos.
+- Sección 5.3: las tablas en las respuestas de Agri y en el resumen de lotes se muestran en un recuadro, con los títulos de las columnas resaltados y las filas alternadas.

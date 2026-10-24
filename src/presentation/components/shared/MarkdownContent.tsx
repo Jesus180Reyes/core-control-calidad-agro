@@ -24,8 +24,6 @@ const PROSE_STYLES = cn(
     'prose-a:text-brand prose-code:text-text-main',
     'prose-hr:border-border-ui prose-blockquote:border-border-ui',
     'prose-blockquote:text-text-muted',
-    'prose-th:text-text-main prose-td:text-text-main',
-    'prose-thead:border-border-ui prose-tr:border-border-ui',
 )
 
 /** Lo que tarda una palabra en salir después de la anterior. */
@@ -107,12 +105,41 @@ const PLUGINS_ANIMADOS = [rehypeFadeWords]
 /**
  * Una tabla ancha scrollea en su propia caja: sin el envoltorio, empuja el
  * ancho de la burbuja y en el teléfono se desplaza la página entera.
+ *
+ * La caja también es lo que hace que se lea como tabla: con el `prose` pelado
+ * sale como texto suelto separado por rayitas. Va con `not-prose` para que los
+ * márgenes y bordes del plugin no peleen con el marco; la alineación por
+ * columna de GFM llega en el `style` de cada celda y se respeta.
  */
 const COMPONENTES: Components = {
-    table: ({ node: _node, ...props }) => (
-        <div className="overflow-x-auto">
-            <table {...props} />
+    table: ({ node: _node, className, ...props }) => (
+        <div className="not-prose my-4 overflow-x-auto rounded-xl border border-border-ui bg-surface">
+            <table
+                {...props}
+                className={cn('w-full border-collapse text-left text-sm text-text-main', className)}
+            />
         </div>
+    ),
+    thead: ({ node: _node, className, ...props }) => (
+        <thead {...props} className={cn('bg-muted', className)} />
+    ),
+    th: ({ node: _node, className, ...props }) => (
+        <th
+            {...props}
+            className={cn(
+                'border-b border-border-ui px-3 py-2 text-xs font-bold whitespace-nowrap text-text-muted uppercase',
+                className,
+            )}
+        />
+    ),
+    tr: ({ node: _node, className, ...props }) => (
+        <tr
+            {...props}
+            className={cn('border-b border-border-ui last:border-b-0 even:bg-muted/40', className)}
+        />
+    ),
+    td: ({ node: _node, className, ...props }) => (
+        <td {...props} className={cn('px-3 py-2 align-top tabular-nums', className)} />
     ),
 }
 
