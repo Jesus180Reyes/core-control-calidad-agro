@@ -146,6 +146,26 @@ export function useAgriChat() {
         preguntar(pregunta.content, sinLaRespuesta.slice(0, -1))
     }, [isPending, messages, preguntar])
 
+    /**
+     * Corta el turno en vuelo y saca del hilo la pregunta que quedó sin
+     * respuesta. Devuelve su texto para que el compositor la vuelva a ofrecer,
+     * o `null` si no había nada que detener.
+     *
+     * El `reset()` sólo desengancha el `onSuccess`: el pedido ya salió y el
+     * backend lo procesa igual, así que el turno cuenta contra el límite diario.
+     */
+    const stop = useCallback((): string | null => {
+        if (!isPending) return null
+
+        reset()
+
+        const pregunta = messages.at(-1)
+        if (pregunta === undefined || pregunta.role !== 'user') return null
+
+        setMessages(messages.slice(0, -1))
+        return pregunta.content
+    }, [isPending, messages, reset])
+
     const startNewChat = useCallback(() => {
         // Un hilo nuevo es una conversación nueva también para el backend, y el
         // `reset` corta el turno que estuviera en vuelo: baja el "pensando" ya
@@ -161,6 +181,7 @@ export function useAgriChat() {
         isThinking: isPending,
         sendMessage,
         regenerate,
+        stop,
         startNewChat,
     }
 }

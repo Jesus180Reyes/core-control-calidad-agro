@@ -18,7 +18,7 @@ const CONFIRMACION_COPIADO_MS = 2000
 const ANCHO_COLUMNA = 'mx-auto w-full max-w-3xl'
 
 export function AgriChatView() {
-    const { messages, isThinking, sendMessage, regenerate, startNewChat } = useAgriChat()
+    const { messages, isThinking, sendMessage, regenerate, stop, startNewChat } = useAgriChat()
     const [copiado, setCopiado] = useState(false)
 
     const finDelHiloRef = useRef<HTMLDivElement>(null)
@@ -125,7 +125,7 @@ export function AgriChatView() {
             </div>
 
             <div className={`${ANCHO_COLUMNA} shrink-0 pb-[env(safe-area-inset-bottom)] md:pb-0`}>
-                <AgriComposer isThinking={isThinking} onSend={sendMessage} />
+                <AgriComposer isThinking={isThinking} onSend={sendMessage} onStop={stop} />
             </div>
         </div>
     )

@@ -650,6 +650,8 @@ Desde los pesajes de un lote (vea el [capítulo 4.6](#cap-4-6)), el supervisor p
    - También puede pulsar una de las tres sugerencias que aparecen al empezar: se envía sola.
 3. Pulse la flecha, o la tecla **Enter**, para enviarla. Para escribir en otra línea sin enviar, use **Shift + Enter**.
 4. Mientras Agri prepara la respuesta, aparecen tres puntos animados. La respuesta puede incluir listas y tablas.
+   - Si tarda, debajo de los puntos aparece *"Consultando los datos de la planta…"*, y más adelante *"Está tardando más de lo normal."*
+   - Para no esperar más, pulse el cuadrado que reemplaza a la flecha. La pregunta vuelve al recuadro, para corregirla o enviarla de nuevo. Aunque la detenga, la pregunta cuenta para el límite del día.
 
 Si Agri no entiende del todo su pregunta, le propone dos o tres preguntas más concretas debajo de su respuesta. Pulse la que busca y se envía sola. También puede escribir la suya, o contestar, por ejemplo, *la segunda*.
 
@@ -1050,3 +1052,4 @@ Esta tabla muestra qué pantallas y acciones tiene cada rol en esta versión del
 - El diálogo **Tara del envase** tiene un campo opcional **Observaciones**, debajo de **Tara**, para anotar lo que mida la planta en cada pesaje.
 - Sección 5.4: el Mirador tiene un botón **Modo TV**, que lo pone en pantalla completa y recorre solo cada cliente con lotes activos, mostrando enseguida cada pesaje fuera de rango.
 - Sección 5.3: si Agri no entiende del todo una pregunta, propone dos o tres preguntas más concretas debajo de su respuesta, que se envían con solo pulsarlas.
+- Sección 5.3: mientras Agri responde, la flecha de enviar se convierte en un cuadrado que detiene la respuesta y devuelve la pregunta al recuadro; si la respuesta tarda, Agri avisa que está consultando los datos.

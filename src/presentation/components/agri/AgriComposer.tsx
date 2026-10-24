@@ -1,4 +1,4 @@
-import { ArrowUp } from 'lucide-react'
+import { ArrowUp, Square } from 'lucide-react'
 import { useLayoutEffect, useRef, useState } from 'react'
 
 /** A partir de acá el textarea deja de crecer y scrollea por dentro. */
@@ -10,6 +10,8 @@ interface AgriComposerProps {
     /** Mientras Agri responde, el compositor no manda nada más. */
     isThinking: boolean
     onSend: (content: string) => void
+    /** Corta la respuesta en vuelo; devuelve la pregunta que quedó sin contestar. */
+    onStop: () => string | null
 }
 
 /**
@@ -17,7 +19,7 @@ interface AgriComposerProps {
  * enviar. El borrador vive acá y no en `useAgriChat` — lo que el usuario está
  * tipeando no es parte del hilo hasta que lo manda.
  */
-export function AgriComposer({ isThinking, onSend }: AgriComposerProps) {
+export function AgriComposer({ isThinking, onSend, onStop }: AgriComposerProps) {
     const [borrador, setBorrador] = useState('')
     const textareaRef = useRef<HTMLTextAreaElement>(null)
 
@@ -41,6 +43,14 @@ export function AgriComposer({ isThinking, onSend }: AgriComposerProps) {
 
         onSend(borrador)
         setBorrador('')
+    }
+
+    const detener = () => {
+        const pregunta = onStop()
+        // La pregunta vuelve al recuadro para corregirla y reenviarla, salvo
+        // que el usuario ya haya empezado a escribir otra mientras esperaba.
+        if (pregunta !== null && sinTexto) setBorrador(pregunta)
+        textareaRef.current?.focus()
     }
 
     const alPresionarTecla = (evento: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -78,20 +88,28 @@ export function AgriComposer({ isThinking, onSend }: AgriComposerProps) {
                         className="flex-1 resize-none bg-transparent px-2 py-2 text-sm leading-relaxed text-text-main outline-none placeholder:text-text-muted/70"
                     />
 
+                    {/* Un solo botón que cambia de función: mientras Agri
+                        responde no hay nada que enviar, y el lugar del dedo es
+                        el mismo para cortar la espera. */}
                     <button
                         type="button"
-                        onClick={enviar}
-                        disabled={deshabilitado}
-                        aria-label="Enviar mensaje"
+                        onClick={isThinking ? detener : enviar}
+                        disabled={!isThinking && sinTexto}
+                        aria-label={isThinking ? 'Detener respuesta' : 'Enviar mensaje'}
+                        title={isThinking ? 'Detener' : undefined}
                         className={
-                            'shrink-0 grid place-items-center size-10 rounded-full text-white ' +
+                            'shrink-0 grid place-items-center size-10 rounded-full text-white cursor-pointer ' +
                             'bg-linear-to-br from-agri-from to-agri-to shadow-clay-btn ' +
                             'transition-all duration-200 ease-out hover:scale-105 active:scale-95 ' +
                             'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-agri-to/50 ' +
                             'disabled:opacity-40 disabled:hover:scale-100 disabled:cursor-not-allowed'
                         }
                     >
-                        <ArrowUp className="size-5" strokeWidth={2.5} />
+                        {isThinking ? (
+                            <Square className="size-3.5 fill-current" strokeWidth={2.5} />
+                        ) : (
+                            <ArrowUp className="size-5" strokeWidth={2.5} />
+                        )}
                     </button>
                 </div>
             </div>
