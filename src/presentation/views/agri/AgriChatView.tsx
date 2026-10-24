@@ -82,7 +82,12 @@ export function AgriChatView() {
                 </CustomButton>
             </header>
 
-            <div className="flex-1 overflow-y-auto">
+            {/* El `relative` hace del hilo el bloque contenedor de lo que adentro
+                va `absolute`, como el `sr-only` del indicador de tipeo. Sin él,
+                ese span se ubica contra la página: queda tan abajo como el hilo
+                es largo, alarga el documento, y el `scrollIntoView` de abajo
+                termina desplazando la ventana entera. */}
+            <div className="relative flex-1 overflow-y-auto">
                 {hiloVacio ? (
                     <div className={`${ANCHO_COLUMNA} h-full`}>
                         <AgriWelcome onSend={sendMessage} />
