@@ -276,6 +276,7 @@
 
 @theme {
   --color-brand: var(--brand);
+  --color-brand-foreground: var(--brand-foreground);
   --color-success: var(--success);
   --color-warning: var(--warning);
   --color-bg-app: var(--bg-app);       
