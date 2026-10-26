@@ -12,16 +12,23 @@ import type { PlantEvent, PlantLevel, PlantSelection, PlantSnapshot, PlantSnapsh
  * backend (SPEC 32): nunca más de 2 min entre fotos, porque un lote rechazado
  * viaja sólo 5 min; y no bajarlo sin hablarlo allá, que no tiene caché.
  */
-export const INTERVALO_POLLING_MS = 75_000
+export const INTERVALO_POLLING_MS = 30_000
 
 /** Hasta este desfase extra, para que las pantallas no pidan todas a la vez. */
-export const DESFASE_POLLING_MS = 30_000
-
-/** Sin foto nueva en este tiempo, el indicador "en vivo" avisa. Más de dos intervalos máximos. */
-export const FOTO_VIEJA_MS = 4 * 60_000
+export const DESFASE_POLLING_MS = 10_000
 
 /**
- * 75–105 s. El desfase sale de la hora del último pedido y no de `Math.random()`:
+ * Una foto más nueva que esto no se vuelve a pedir al montar la pantalla ni al
+ * volver a la pestaña: entrar y salir del Mirador no le suma pedidos al backend.
+ * El timer del intervalo no la mira.
+ */
+const FOTO_FRESCA_MS = 20_000
+
+/** Sin foto nueva en este tiempo, el indicador "en vivo" avisa. Más de dos intervalos máximos. */
+export const FOTO_VIEJA_MS = 2 * 60_000
+
+/**
+ * 30–40 s. El desfase sale de la hora del último pedido y no de `Math.random()`:
  * React Query recalcula esto en cada render y reinicia el timer si el valor
  * cambia, así que tiene que ser estable entre renders y cambiar entre pedidos.
  */
@@ -71,7 +78,7 @@ function nivelDe(seleccion: PlantSelection): PlantLevel {
  *
  * La foto sale de `GET /plantas/en-vivo`, que no manda eventos: el diff lo hace
  * `diffPlantSnapshot`. Se pide sólo con la pestaña visible, y al volver a ella
- * se pide enseguida. Usa `useSuspenseQuery`: lo cubren el `<Suspense>` y el
+ * se pide enseguida si la foto ya no es fresca (`FOTO_FRESCA_MS`). Usa `useSuspenseQuery`: lo cubren el `<Suspense>` y el
  * `ErrorBoundary` del layout del portal. Un refetch que falla no lo dispara
  * (ya hay datos): la escena se queda con la última foto y el indicador "en
  * vivo" avisa cuando pasa `FOTO_VIEJA_MS`.
@@ -81,7 +88,7 @@ export function usePlantTwin() {
         refetchInterval: intervalo,
         refetchIntervalInBackground: false,
         refetchOnWindowFocus: true,
-        staleTime: 0,
+        staleTime: FOTO_FRESCA_MS,
     })
 
     const [twin, setTwin] = useState<TwinState>(() => ({

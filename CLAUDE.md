@@ -192,13 +192,13 @@ El item del `Sidebar` (arriba de "Operación", junto al de Agri) va envuelto en 
 
 Las casillas son `'en-pesaje' | 'por-aprobar' | 'finalizado'`, con el mismo string que manda el backend; `'rechazado'` no tiene casilla y sólo viaja para animar la salida. **No hay casilla de despacho ni `documento_fiscal`**: volver a tenerlos exige un spec en el backend primero. `pct_en_rango_hoy` es `null` sin pesajes en el día y se pinta "—"; `lote.producto`, `lote.unidad_medida`, `pesaje.usuario` y `estado_calidad_codigo` (`IDEAL`/`MAXIMO`/`MINIMO`) pueden venir en `null`. Un lote con `etapa_id` en `NULL` en la base no sale en la foto: es una regla del backend, no un bug.
 
-**El intervalo es un acuerdo con el backend, no una preferencia.** `INTERVALO_POLLING_MS` (75 s) más un desfase de hasta `DESFASE_POLLING_MS` (30 s), sólo con la pestaña visible y un pedido inmediato al volver a ella.
+**El intervalo es un acuerdo con el backend, no una preferencia.** `INTERVALO_POLLING_MS` (30 s) más un desfase de hasta `DESFASE_POLLING_MS` (10 s), sólo con la pestaña visible y un pedido inmediato al volver a ella si la foto tiene más de `FOTO_FRESCA_MS` (20 s, el `staleTime` de la query). Ese mismo `staleTime` hace que entrar y salir de `/mirador` no pida de nuevo una foto reciente; el timer del intervalo no lo mira.
 
 - **Nunca más de 2 min.** Un lote rechazado viaja sólo 5 min desde `rechazado_en`; con más intervalo una pantalla puede no verlo nunca. Subirlo exige agrandar esa ventana en `plantas.repository.ts` del backend.
-- **Nunca bajarlo sin hablarlo allá.** El backend no tiene caché: a 10 s, 50 pantallas son 5 req/s de cinco consultas cada una.
+- **Nunca bajarlo sin hablarlo allá.** El backend no tiene caché: a 30–40 s, 50 pantallas son ~1,4 req/s de cinco consultas cada una; a 10 s serían 5 req/s.
 - **El desfase sale de la hora del último pedido, no de `Math.random()`.** React Query recalcula `refetchInterval` en cada render y reinicia el timer si el valor cambió: un valor aleatorio posterga el pedido cada vez que alguien toca la escena.
 
-El indicador "en vivo" (`FOTO_VIEJA_MS`, 4 min) mira el `dataUpdatedAt` de la query, no `generado_en` (el reloj de MySQL y el del navegador no están sincronizados) ni el de la última foto distinta (una planta quieta devuelve la misma foto y eso también dice que responde). Un refetch que falla no dispara el `ErrorBoundary`, porque ya hay datos: la escena se queda con la última foto y el indicador avisa.
+El indicador "en vivo" (`FOTO_VIEJA_MS`, 2 min) mira el `dataUpdatedAt` de la query, no `generado_en` (el reloj de MySQL y el del navegador no están sincronizados) ni el de la última foto distinta (una planta quieta devuelve la misma foto y eso también dice que responde). Un refetch que falla no dispara el `ErrorBoundary`, porque ya hay datos: la escena se queda con la última foto y el indicador avisa.
 
 **Los pesajes vuelan repartidos en el intervalo.** Con `n` pesajes nuevos en una foto (como mucho `MAX_VUELOS`, 6), el espacio entre vuelos es `clamp(intervalo × 0,8 / n, 1,15 s, 12 s)`. Lo que quedó en cola al llegar la foto siguiente aterriza sin vuelo: la escena nunca se atrasa respecto del dato.
 

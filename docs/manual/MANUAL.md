@@ -688,7 +688,7 @@ El **Mirador** muestra toda la planta en un tablero en tres dimensiones:
 
 Arriba a la izquierda están **Pesajes hoy**, **Peso neto hoy**, **En rango** (el porcentaje de pesajes dentro del rango) y **Lotes activos**.
 
-Al lado del título, el indicador **En vivo** muestra la hora de la última actualización. El tablero se actualiza solo, aproximadamente cada uno o dos minutos, mientras la pestaña está a la vista. Si pasan más de 4 minutos sin poder actualizar, el indicador cambia a *"Sin actualizar hace…"* y el tablero muestra los últimos datos que recibió.
+Al lado del título, el indicador **En vivo** muestra la hora de la última actualización. El tablero se actualiza solo, aproximadamente cada 30 a 40 segundos, mientras la pestaña está a la vista. Si pasan más de 2 minutos sin poder actualizar, el indicador cambia a *"Sin actualizar hace…"* y el tablero muestra los últimos datos que recibió.
 
 **Moverse por el tablero**
 
@@ -1054,3 +1054,4 @@ Esta tabla muestra qué pantallas y acciones tiene cada rol en esta versión del
 - Sección 5.3: si Agri no entiende del todo una pregunta, propone dos o tres preguntas más concretas debajo de su respuesta, que se envían con solo pulsarlas.
 - Sección 5.3: mientras Agri responde, la flecha de enviar se convierte en un cuadrado que detiene la respuesta y devuelve la pregunta al recuadro; si la respuesta tarda, Agri avisa que está consultando los datos.
 - Sección 5.3: las tablas en las respuestas de Agri y en el resumen de lotes se muestran en un recuadro, con los títulos de las columnas resaltados y las filas alternadas.
+- Sección 5.4: el Mirador se actualiza cada 30 a 40 segundos, en vez de cada uno o dos minutos, y el indicador **En vivo** avisa a los 2 minutos sin actualizar, en vez de a los 4.
