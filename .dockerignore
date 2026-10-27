@@ -1,0 +1,15 @@
+node_modules
+dist
+.output
+.nitro
+.tanstack
+.git
+.vscode
+.env
+.env.*
+!.env.example
+*.local
+docs
+specs
+Dockerfile
+.dockerignore

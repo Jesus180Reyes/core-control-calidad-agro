@@ -1,0 +1,16 @@
+# docker compose up -d --build
+#
+# Las URLs salen del .env de esta carpeta (compose lo lee solo) y entran como
+# build args: cambiarlas es volver a correr con --build.
+services:
+  front:
+    build:
+      context: .
+      args:
+        VITE_API_URL: ${VITE_API_URL:?falta VITE_API_URL en el .env}
+        VITE_REPORT_SERVICE_URL: ${VITE_REPORT_SERVICE_URL:?falta VITE_REPORT_SERVICE_URL en el .env}
+    image: control-calidad-front
+    container_name: control-calidad-front
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
