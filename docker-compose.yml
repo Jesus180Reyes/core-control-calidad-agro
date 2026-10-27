@@ -12,5 +12,14 @@ services:
     image: control-calidad-front
     container_name: control-calidad-front
     restart: unless-stopped
+    # El público entra por HTTPS a través del Caddy del backend (red agro_default).
+    # El puerto queda sólo en 127.0.0.1, para el túnel SSH y para probar con curl.
     ports:
-      - "3000:3000"
+      - "127.0.0.1:3000:3000"
+    networks:
+      - agro
+
+networks:
+  agro:
+    name: agro_default
+    external: true
