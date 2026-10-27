@@ -9,114 +9,42 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as portalPortalRouteImport } from './routes/(portal)/_portal'
 import { Route as authAuthRouteImport } from './routes/(auth)/_auth'
-import { Route as portalPortalIndexRouteImport } from './routes/(portal)/_portal.index'
-import { Route as portalPortalVerDetallesDocumentoFiscalRouteImport } from './routes/(portal)/_portal.ver-detalles-documento-fiscal'
-import { Route as portalPortalMiradorRouteImport } from './routes/(portal)/_portal.mirador'
-import { Route as portalPortalMetricasRouteImport } from './routes/(portal)/_portal.metricas'
-import { Route as portalPortalLotesClientesRouteImport } from './routes/(portal)/_portal.lotes-clientes'
-import { Route as portalPortalInspeccionPesajesByLoteRouteImport } from './routes/(portal)/_portal.inspeccion-pesajes-by-lote'
-import { Route as portalPortalInspeccionLotesByClienteRouteImport } from './routes/(portal)/_portal.inspeccion-lotes-by-cliente'
-import { Route as portalPortalInspeccionClientesRouteImport } from './routes/(portal)/_portal.inspeccion-clientes'
-import { Route as portalPortalHistorialRouteImport } from './routes/(portal)/_portal.historial'
-import { Route as portalPortalCrearPesajeRouteImport } from './routes/(portal)/_portal.crear-pesaje'
-import { Route as portalPortalControlCalidadRouteImport } from './routes/(portal)/_portal.control-calidad'
-import { Route as portalPortalClientesFinalizadosRouteImport } from './routes/(portal)/_portal.clientes-finalizados'
-import { Route as portalPortalClientesRouteImport } from './routes/(portal)/_portal.clientes'
-import { Route as portalPortalAjustesRouteImport } from './routes/(portal)/_portal.ajustes'
-import { Route as portalPortalAgriRouteImport } from './routes/(portal)/_portal.agri'
-import { Route as portalPortalAdministracionDocumentosFiscalesRouteImport } from './routes/(portal)/_portal.administracion-documentos-fiscales'
+import { Route as portalPortalRouteImport } from './routes/(portal)/_portal'
 import { Route as authAuthLoginRouteImport } from './routes/(auth)/_auth.login'
+import { Route as portalPortalIndexRouteImport } from './routes/(portal)/_portal.index'
+import { Route as portalPortalAdministracionDocumentosFiscalesRouteImport } from './routes/(portal)/_portal.administracion-documentos-fiscales'
+import { Route as portalPortalAgriRouteImport } from './routes/(portal)/_portal.agri'
+import { Route as portalPortalAjustesRouteImport } from './routes/(portal)/_portal.ajustes'
+import { Route as portalPortalClientesRouteImport } from './routes/(portal)/_portal.clientes'
+import { Route as portalPortalClientesFinalizadosRouteImport } from './routes/(portal)/_portal.clientes-finalizados'
+import { Route as portalPortalControlCalidadRouteImport } from './routes/(portal)/_portal.control-calidad'
+import { Route as portalPortalCrearPesajeRouteImport } from './routes/(portal)/_portal.crear-pesaje'
+import { Route as portalPortalHistorialRouteImport } from './routes/(portal)/_portal.historial'
+import { Route as portalPortalInspeccionClientesRouteImport } from './routes/(portal)/_portal.inspeccion-clientes'
+import { Route as portalPortalInspeccionLotesByClienteRouteImport } from './routes/(portal)/_portal.inspeccion-lotes-by-cliente'
+import { Route as portalPortalInspeccionPesajesByLoteRouteImport } from './routes/(portal)/_portal.inspeccion-pesajes-by-lote'
+import { Route as portalPortalLotesClientesRouteImport } from './routes/(portal)/_portal.lotes-clientes'
+import { Route as portalPortalMetricasRouteImport } from './routes/(portal)/_portal.metricas'
+import { Route as portalPortalMiradorRouteImport } from './routes/(portal)/_portal.mirador'
+import { Route as portalPortalVerDetallesDocumentoFiscalRouteImport } from './routes/(portal)/_portal.ver-detalles-documento-fiscal'
 
-const portalPortalRoute = portalPortalRouteImport.update({
-  id: '/(portal)/_portal',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const authAuthRoute = authAuthRouteImport.update({
   id: '/(auth)/_auth',
   getParentRoute: () => rootRouteImport,
 } as any)
+const portalPortalRoute = portalPortalRouteImport.update({
+  id: '/(portal)/_portal',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const authAuthLoginRoute = authAuthLoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => authAuthRoute,
+} as any)
 const portalPortalIndexRoute = portalPortalIndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => portalPortalRoute,
-} as any)
-const portalPortalVerDetallesDocumentoFiscalRoute =
-  portalPortalVerDetallesDocumentoFiscalRouteImport.update({
-    id: '/ver-detalles-documento-fiscal',
-    path: '/ver-detalles-documento-fiscal',
-    getParentRoute: () => portalPortalRoute,
-  } as any)
-const portalPortalMiradorRoute = portalPortalMiradorRouteImport.update({
-  id: '/mirador',
-  path: '/mirador',
-  getParentRoute: () => portalPortalRoute,
-} as any)
-const portalPortalMetricasRoute = portalPortalMetricasRouteImport.update({
-  id: '/metricas',
-  path: '/metricas',
-  getParentRoute: () => portalPortalRoute,
-} as any)
-const portalPortalLotesClientesRoute =
-  portalPortalLotesClientesRouteImport.update({
-    id: '/lotes-clientes',
-    path: '/lotes-clientes',
-    getParentRoute: () => portalPortalRoute,
-  } as any)
-const portalPortalInspeccionPesajesByLoteRoute =
-  portalPortalInspeccionPesajesByLoteRouteImport.update({
-    id: '/inspeccion-pesajes-by-lote',
-    path: '/inspeccion-pesajes-by-lote',
-    getParentRoute: () => portalPortalRoute,
-  } as any)
-const portalPortalInspeccionLotesByClienteRoute =
-  portalPortalInspeccionLotesByClienteRouteImport.update({
-    id: '/inspeccion-lotes-by-cliente',
-    path: '/inspeccion-lotes-by-cliente',
-    getParentRoute: () => portalPortalRoute,
-  } as any)
-const portalPortalInspeccionClientesRoute =
-  portalPortalInspeccionClientesRouteImport.update({
-    id: '/inspeccion-clientes',
-    path: '/inspeccion-clientes',
-    getParentRoute: () => portalPortalRoute,
-  } as any)
-const portalPortalHistorialRoute = portalPortalHistorialRouteImport.update({
-  id: '/historial',
-  path: '/historial',
-  getParentRoute: () => portalPortalRoute,
-} as any)
-const portalPortalCrearPesajeRoute = portalPortalCrearPesajeRouteImport.update({
-  id: '/crear-pesaje',
-  path: '/crear-pesaje',
-  getParentRoute: () => portalPortalRoute,
-} as any)
-const portalPortalControlCalidadRoute =
-  portalPortalControlCalidadRouteImport.update({
-    id: '/control-calidad',
-    path: '/control-calidad',
-    getParentRoute: () => portalPortalRoute,
-  } as any)
-const portalPortalClientesFinalizadosRoute =
-  portalPortalClientesFinalizadosRouteImport.update({
-    id: '/clientes-finalizados',
-    path: '/clientes-finalizados',
-    getParentRoute: () => portalPortalRoute,
-  } as any)
-const portalPortalClientesRoute = portalPortalClientesRouteImport.update({
-  id: '/clientes',
-  path: '/clientes',
-  getParentRoute: () => portalPortalRoute,
-} as any)
-const portalPortalAjustesRoute = portalPortalAjustesRouteImport.update({
-  id: '/ajustes',
-  path: '/ajustes',
-  getParentRoute: () => portalPortalRoute,
-} as any)
-const portalPortalAgriRoute = portalPortalAgriRouteImport.update({
-  id: '/agri',
-  path: '/agri',
   getParentRoute: () => portalPortalRoute,
 } as any)
 const portalPortalAdministracionDocumentosFiscalesRoute =
@@ -125,11 +53,83 @@ const portalPortalAdministracionDocumentosFiscalesRoute =
     path: '/administracion-documentos-fiscales',
     getParentRoute: () => portalPortalRoute,
   } as any)
-const authAuthLoginRoute = authAuthLoginRouteImport.update({
-  id: '/login',
-  path: '/login',
-  getParentRoute: () => authAuthRoute,
+const portalPortalAgriRoute = portalPortalAgriRouteImport.update({
+  id: '/agri',
+  path: '/agri',
+  getParentRoute: () => portalPortalRoute,
 } as any)
+const portalPortalAjustesRoute = portalPortalAjustesRouteImport.update({
+  id: '/ajustes',
+  path: '/ajustes',
+  getParentRoute: () => portalPortalRoute,
+} as any)
+const portalPortalClientesRoute = portalPortalClientesRouteImport.update({
+  id: '/clientes',
+  path: '/clientes',
+  getParentRoute: () => portalPortalRoute,
+} as any)
+const portalPortalClientesFinalizadosRoute =
+  portalPortalClientesFinalizadosRouteImport.update({
+    id: '/clientes-finalizados',
+    path: '/clientes-finalizados',
+    getParentRoute: () => portalPortalRoute,
+  } as any)
+const portalPortalControlCalidadRoute =
+  portalPortalControlCalidadRouteImport.update({
+    id: '/control-calidad',
+    path: '/control-calidad',
+    getParentRoute: () => portalPortalRoute,
+  } as any)
+const portalPortalCrearPesajeRoute = portalPortalCrearPesajeRouteImport.update({
+  id: '/crear-pesaje',
+  path: '/crear-pesaje',
+  getParentRoute: () => portalPortalRoute,
+} as any)
+const portalPortalHistorialRoute = portalPortalHistorialRouteImport.update({
+  id: '/historial',
+  path: '/historial',
+  getParentRoute: () => portalPortalRoute,
+} as any)
+const portalPortalInspeccionClientesRoute =
+  portalPortalInspeccionClientesRouteImport.update({
+    id: '/inspeccion-clientes',
+    path: '/inspeccion-clientes',
+    getParentRoute: () => portalPortalRoute,
+  } as any)
+const portalPortalInspeccionLotesByClienteRoute =
+  portalPortalInspeccionLotesByClienteRouteImport.update({
+    id: '/inspeccion-lotes-by-cliente',
+    path: '/inspeccion-lotes-by-cliente',
+    getParentRoute: () => portalPortalRoute,
+  } as any)
+const portalPortalInspeccionPesajesByLoteRoute =
+  portalPortalInspeccionPesajesByLoteRouteImport.update({
+    id: '/inspeccion-pesajes-by-lote',
+    path: '/inspeccion-pesajes-by-lote',
+    getParentRoute: () => portalPortalRoute,
+  } as any)
+const portalPortalLotesClientesRoute =
+  portalPortalLotesClientesRouteImport.update({
+    id: '/lotes-clientes',
+    path: '/lotes-clientes',
+    getParentRoute: () => portalPortalRoute,
+  } as any)
+const portalPortalMetricasRoute = portalPortalMetricasRouteImport.update({
+  id: '/metricas',
+  path: '/metricas',
+  getParentRoute: () => portalPortalRoute,
+} as any)
+const portalPortalMiradorRoute = portalPortalMiradorRouteImport.update({
+  id: '/mirador',
+  path: '/mirador',
+  getParentRoute: () => portalPortalRoute,
+} as any)
+const portalPortalVerDetallesDocumentoFiscalRoute =
+  portalPortalVerDetallesDocumentoFiscalRouteImport.update({
+    id: '/ver-detalles-documento-fiscal',
+    path: '/ver-detalles-documento-fiscal',
+    getParentRoute: () => portalPortalRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/login': typeof authAuthLoginRoute
@@ -260,13 +260,6 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/(portal)/_portal': {
-      id: '/(portal)/_portal'
-      path: ''
-      fullPath: ''
-      preLoaderRoute: typeof portalPortalRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/(auth)/_auth': {
       id: '/(auth)/_auth'
       path: ''
@@ -274,109 +267,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof authAuthRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/(portal)/_portal': {
+      id: '/(portal)/_portal'
+      path: ''
+      fullPath: ''
+      preLoaderRoute: typeof portalPortalRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/(auth)/_auth/login': {
+      id: '/(auth)/_auth/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof authAuthLoginRouteImport
+      parentRoute: typeof authAuthRoute
+    }
     '/(portal)/_portal/': {
       id: '/(portal)/_portal/'
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof portalPortalIndexRouteImport
-      parentRoute: typeof portalPortalRoute
-    }
-    '/(portal)/_portal/ver-detalles-documento-fiscal': {
-      id: '/(portal)/_portal/ver-detalles-documento-fiscal'
-      path: '/ver-detalles-documento-fiscal'
-      fullPath: '/ver-detalles-documento-fiscal'
-      preLoaderRoute: typeof portalPortalVerDetallesDocumentoFiscalRouteImport
-      parentRoute: typeof portalPortalRoute
-    }
-    '/(portal)/_portal/mirador': {
-      id: '/(portal)/_portal/mirador'
-      path: '/mirador'
-      fullPath: '/mirador'
-      preLoaderRoute: typeof portalPortalMiradorRouteImport
-      parentRoute: typeof portalPortalRoute
-    }
-    '/(portal)/_portal/metricas': {
-      id: '/(portal)/_portal/metricas'
-      path: '/metricas'
-      fullPath: '/metricas'
-      preLoaderRoute: typeof portalPortalMetricasRouteImport
-      parentRoute: typeof portalPortalRoute
-    }
-    '/(portal)/_portal/lotes-clientes': {
-      id: '/(portal)/_portal/lotes-clientes'
-      path: '/lotes-clientes'
-      fullPath: '/lotes-clientes'
-      preLoaderRoute: typeof portalPortalLotesClientesRouteImport
-      parentRoute: typeof portalPortalRoute
-    }
-    '/(portal)/_portal/inspeccion-pesajes-by-lote': {
-      id: '/(portal)/_portal/inspeccion-pesajes-by-lote'
-      path: '/inspeccion-pesajes-by-lote'
-      fullPath: '/inspeccion-pesajes-by-lote'
-      preLoaderRoute: typeof portalPortalInspeccionPesajesByLoteRouteImport
-      parentRoute: typeof portalPortalRoute
-    }
-    '/(portal)/_portal/inspeccion-lotes-by-cliente': {
-      id: '/(portal)/_portal/inspeccion-lotes-by-cliente'
-      path: '/inspeccion-lotes-by-cliente'
-      fullPath: '/inspeccion-lotes-by-cliente'
-      preLoaderRoute: typeof portalPortalInspeccionLotesByClienteRouteImport
-      parentRoute: typeof portalPortalRoute
-    }
-    '/(portal)/_portal/inspeccion-clientes': {
-      id: '/(portal)/_portal/inspeccion-clientes'
-      path: '/inspeccion-clientes'
-      fullPath: '/inspeccion-clientes'
-      preLoaderRoute: typeof portalPortalInspeccionClientesRouteImport
-      parentRoute: typeof portalPortalRoute
-    }
-    '/(portal)/_portal/historial': {
-      id: '/(portal)/_portal/historial'
-      path: '/historial'
-      fullPath: '/historial'
-      preLoaderRoute: typeof portalPortalHistorialRouteImport
-      parentRoute: typeof portalPortalRoute
-    }
-    '/(portal)/_portal/crear-pesaje': {
-      id: '/(portal)/_portal/crear-pesaje'
-      path: '/crear-pesaje'
-      fullPath: '/crear-pesaje'
-      preLoaderRoute: typeof portalPortalCrearPesajeRouteImport
-      parentRoute: typeof portalPortalRoute
-    }
-    '/(portal)/_portal/control-calidad': {
-      id: '/(portal)/_portal/control-calidad'
-      path: '/control-calidad'
-      fullPath: '/control-calidad'
-      preLoaderRoute: typeof portalPortalControlCalidadRouteImport
-      parentRoute: typeof portalPortalRoute
-    }
-    '/(portal)/_portal/clientes-finalizados': {
-      id: '/(portal)/_portal/clientes-finalizados'
-      path: '/clientes-finalizados'
-      fullPath: '/clientes-finalizados'
-      preLoaderRoute: typeof portalPortalClientesFinalizadosRouteImport
-      parentRoute: typeof portalPortalRoute
-    }
-    '/(portal)/_portal/clientes': {
-      id: '/(portal)/_portal/clientes'
-      path: '/clientes'
-      fullPath: '/clientes'
-      preLoaderRoute: typeof portalPortalClientesRouteImport
-      parentRoute: typeof portalPortalRoute
-    }
-    '/(portal)/_portal/ajustes': {
-      id: '/(portal)/_portal/ajustes'
-      path: '/ajustes'
-      fullPath: '/ajustes'
-      preLoaderRoute: typeof portalPortalAjustesRouteImport
-      parentRoute: typeof portalPortalRoute
-    }
-    '/(portal)/_portal/agri': {
-      id: '/(portal)/_portal/agri'
-      path: '/agri'
-      fullPath: '/agri'
-      preLoaderRoute: typeof portalPortalAgriRouteImport
       parentRoute: typeof portalPortalRoute
     }
     '/(portal)/_portal/administracion-documentos-fiscales': {
@@ -386,12 +295,103 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof portalPortalAdministracionDocumentosFiscalesRouteImport
       parentRoute: typeof portalPortalRoute
     }
-    '/(auth)/_auth/login': {
-      id: '/(auth)/_auth/login'
-      path: '/login'
-      fullPath: '/login'
-      preLoaderRoute: typeof authAuthLoginRouteImport
-      parentRoute: typeof authAuthRoute
+    '/(portal)/_portal/agri': {
+      id: '/(portal)/_portal/agri'
+      path: '/agri'
+      fullPath: '/agri'
+      preLoaderRoute: typeof portalPortalAgriRouteImport
+      parentRoute: typeof portalPortalRoute
+    }
+    '/(portal)/_portal/ajustes': {
+      id: '/(portal)/_portal/ajustes'
+      path: '/ajustes'
+      fullPath: '/ajustes'
+      preLoaderRoute: typeof portalPortalAjustesRouteImport
+      parentRoute: typeof portalPortalRoute
+    }
+    '/(portal)/_portal/clientes': {
+      id: '/(portal)/_portal/clientes'
+      path: '/clientes'
+      fullPath: '/clientes'
+      preLoaderRoute: typeof portalPortalClientesRouteImport
+      parentRoute: typeof portalPortalRoute
+    }
+    '/(portal)/_portal/clientes-finalizados': {
+      id: '/(portal)/_portal/clientes-finalizados'
+      path: '/clientes-finalizados'
+      fullPath: '/clientes-finalizados'
+      preLoaderRoute: typeof portalPortalClientesFinalizadosRouteImport
+      parentRoute: typeof portalPortalRoute
+    }
+    '/(portal)/_portal/control-calidad': {
+      id: '/(portal)/_portal/control-calidad'
+      path: '/control-calidad'
+      fullPath: '/control-calidad'
+      preLoaderRoute: typeof portalPortalControlCalidadRouteImport
+      parentRoute: typeof portalPortalRoute
+    }
+    '/(portal)/_portal/crear-pesaje': {
+      id: '/(portal)/_portal/crear-pesaje'
+      path: '/crear-pesaje'
+      fullPath: '/crear-pesaje'
+      preLoaderRoute: typeof portalPortalCrearPesajeRouteImport
+      parentRoute: typeof portalPortalRoute
+    }
+    '/(portal)/_portal/historial': {
+      id: '/(portal)/_portal/historial'
+      path: '/historial'
+      fullPath: '/historial'
+      preLoaderRoute: typeof portalPortalHistorialRouteImport
+      parentRoute: typeof portalPortalRoute
+    }
+    '/(portal)/_portal/inspeccion-clientes': {
+      id: '/(portal)/_portal/inspeccion-clientes'
+      path: '/inspeccion-clientes'
+      fullPath: '/inspeccion-clientes'
+      preLoaderRoute: typeof portalPortalInspeccionClientesRouteImport
+      parentRoute: typeof portalPortalRoute
+    }
+    '/(portal)/_portal/inspeccion-lotes-by-cliente': {
+      id: '/(portal)/_portal/inspeccion-lotes-by-cliente'
+      path: '/inspeccion-lotes-by-cliente'
+      fullPath: '/inspeccion-lotes-by-cliente'
+      preLoaderRoute: typeof portalPortalInspeccionLotesByClienteRouteImport
+      parentRoute: typeof portalPortalRoute
+    }
+    '/(portal)/_portal/inspeccion-pesajes-by-lote': {
+      id: '/(portal)/_portal/inspeccion-pesajes-by-lote'
+      path: '/inspeccion-pesajes-by-lote'
+      fullPath: '/inspeccion-pesajes-by-lote'
+      preLoaderRoute: typeof portalPortalInspeccionPesajesByLoteRouteImport
+      parentRoute: typeof portalPortalRoute
+    }
+    '/(portal)/_portal/lotes-clientes': {
+      id: '/(portal)/_portal/lotes-clientes'
+      path: '/lotes-clientes'
+      fullPath: '/lotes-clientes'
+      preLoaderRoute: typeof portalPortalLotesClientesRouteImport
+      parentRoute: typeof portalPortalRoute
+    }
+    '/(portal)/_portal/metricas': {
+      id: '/(portal)/_portal/metricas'
+      path: '/metricas'
+      fullPath: '/metricas'
+      preLoaderRoute: typeof portalPortalMetricasRouteImport
+      parentRoute: typeof portalPortalRoute
+    }
+    '/(portal)/_portal/mirador': {
+      id: '/(portal)/_portal/mirador'
+      path: '/mirador'
+      fullPath: '/mirador'
+      preLoaderRoute: typeof portalPortalMiradorRouteImport
+      parentRoute: typeof portalPortalRoute
+    }
+    '/(portal)/_portal/ver-detalles-documento-fiscal': {
+      id: '/(portal)/_portal/ver-detalles-documento-fiscal'
+      path: '/ver-detalles-documento-fiscal'
+      fullPath: '/ver-detalles-documento-fiscal'
+      preLoaderRoute: typeof portalPortalVerDetallesDocumentoFiscalRouteImport
+      parentRoute: typeof portalPortalRoute
     }
   }
 }
