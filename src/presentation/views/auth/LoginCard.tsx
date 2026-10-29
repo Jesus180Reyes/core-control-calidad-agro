@@ -48,7 +48,7 @@ export function LoginCard({
 
                 <header className="mb-7 space-y-1.5">
                     <h2 className="text-2xl font-black tracking-tight text-text-main">
-                        Bienvenido de nuevo COMO ESTASSSS
+                        Bienvenido de nuevo
                     </h2>
                     <p className="text-sm text-text-muted">
                         Ingresá tus credenciales para operar la báscula.
