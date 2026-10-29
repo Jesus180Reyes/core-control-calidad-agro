@@ -1,0 +1,127 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main, develop]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: Tests y build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Tests
+        run: npm test
+
+      # Sin VITE_*: aqui solo se comprueba que compila. El build que se sirve
+      # lo hace la VPS, uno por empresa, con las URLs de su .env.
+      - name: Build
+        run: npm run build
+
+  # No hay imagen en GHCR: Vite escribe VITE_API_URL dentro del bundle al
+  # compilar, asi que cada empresa construye su front en la VPS con su propio
+  # .env (spec 49 del backend, deploy/README.md seccion 13).
+  deploy-dev:
+    name: Deploy a la VPS de dev
+    needs: check
+    if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
+    runs-on: ubuntu-latest
+    # Los secrets DEV_SSH_* viven en el environment "dev" del repo, con los
+    # mismos valores que en el backend.
+    environment: dev
+    # Nunca dos deploys a la vez; uno en curso termina antes de que entre el
+    # siguiente (no se cancela a medio build).
+    concurrency:
+      group: deploy-dev-frontend
+      cancel-in-progress: false
+    steps:
+      - name: Llave SSH
+        env:
+          SSH_KEY: ${{ secrets.DEV_SSH_KEY }}
+          SSH_KNOWN_HOSTS: ${{ secrets.DEV_SSH_KNOWN_HOSTS }}
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$SSH_KEY" > ~/.ssh/id_deploy
+          chmod 600 ~/.ssh/id_deploy
+          printf '%s\n' "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
+
+      # Falla con un mensaje claro en vez del 255 mudo de ssh.
+      - name: Revisar secrets y conexion
+        env:
+          SSH_HOST: ${{ secrets.DEV_SSH_HOST }}
+          SSH_USER: ${{ secrets.DEV_SSH_USER }}
+          HAY_KEY: ${{ secrets.DEV_SSH_KEY != '' }}
+          HAY_KNOWN_HOSTS: ${{ secrets.DEV_SSH_KNOWN_HOSTS != '' }}
+          # Para detectar un secret guardado por error como variable.
+          VAR_HOST: ${{ vars.DEV_SSH_HOST != '' }}
+          VAR_USER: ${{ vars.DEV_SSH_USER != '' }}
+        run: |
+          faltan=""
+          [ -n "$SSH_HOST" ] || faltan="$faltan DEV_SSH_HOST"
+          [ -n "$SSH_USER" ] || faltan="$faltan DEV_SSH_USER"
+          [ "$HAY_KEY" = true ] || faltan="$faltan DEV_SSH_KEY"
+          [ "$HAY_KNOWN_HOSTS" = true ] || faltan="$faltan DEV_SSH_KNOWN_HOSTS"
+          if [ -n "$faltan" ]; then
+            echo "DEV_SSH_HOST como variable: $VAR_HOST; DEV_SSH_USER como variable: $VAR_USER"
+            echo "::error::Faltan los secrets:$faltan (environment dev o repositorio, en Secrets, no en Variables)"
+            exit 1
+          fi
+          ssh-keygen -y -f ~/.ssh/id_deploy > /dev/null \
+            || { echo "::error::DEV_SSH_KEY no es una llave privada valida (incompleta o con contrasena)"; exit 1; }
+          ssh-keygen -F "$SSH_HOST" > /dev/null \
+            || { echo "::error::DEV_SSH_KNOWN_HOSTS no tiene la huella de $SSH_HOST (usa la salida de ssh-keyscan $SSH_HOST)"; exit 1; }
+          ssh -v -i ~/.ssh/id_deploy -o IdentitiesOnly=yes -o BatchMode=yes -o ConnectTimeout=15 \
+            "$SSH_USER@$SSH_HOST" true 2> ssh.log \
+            || { tail -n 15 ssh.log; echo "::error::$(grep -E 'Permission denied|Host key verification|Connection (refused|timed out)|Could not resolve' ssh.log | tail -n 1)"; exit 1; }
+          echo "Conexion SSH correcta"
+
+      # Solo lee los .env, nunca los escribe. Solo las empresas cuyo
+      # COMPOSE_FILE suma docker-compose.frontend.yml, y solo el servicio
+      # "frontend": api y reporte no se reinician. Los builds van uno tras
+      # otro para no juntar varios npm run build en la misma maquina.
+      - name: Build y reinicio del front en cada empresa
+        env:
+          SSH_DESTINO: ${{ secrets.DEV_SSH_USER }}@${{ secrets.DEV_SSH_HOST }}
+        run: |
+          ssh -i ~/.ssh/id_deploy -o IdentitiesOnly=yes "$SSH_DESTINO" 'bash -s' <<'EOF'
+          set -u
+          # Cualquier cambio a mano en /opt/frontend-src se pierde aqui.
+          if ! (cd /opt/frontend-src && git fetch origin develop && git reset --hard origin/develop); then
+            echo "::error::No se pudo actualizar /opt/frontend-src (ver deploy/README.md seccion 13)"
+            exit 1
+          fi
+          echo "Front en $(git -C /opt/frontend-src log -1 --format='%h %s')"
+          actualizados=0
+          fallos=0
+          for t in /opt/*/; do
+            grep -qs '^TENANT=.' "${t}.env" || continue
+            grep -Eqs '^COMPOSE_FILE=.*docker-compose\.frontend\.yml' "${t}.env" || continue
+            echo "== ${t}"
+            if (cd "$t" && docker compose build frontend && docker compose up -d frontend); then
+              actualizados=$((actualizados + 1))
+            else
+              echo "!! fallo en ${t}"
+              fallos=$((fallos + 1))
+            fi
+          done
+          # La imagen anterior de cada frontend-<empresa>:local queda sin tag.
+          docker image prune -f > /dev/null
+          echo "Tenants actualizados: ${actualizados}, con fallo: ${fallos}"
+          if [ "$actualizados" -eq 0 ] && [ "$fallos" -eq 0 ]; then
+            echo "::warning::Ninguna empresa tiene docker-compose.frontend.yml en COMPOSE_FILE"
+          fi
+          [ "$fallos" -eq 0 ]
+          EOF
