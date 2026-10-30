@@ -43,7 +43,7 @@ export function ClientesFiltersBar({ filtros, onApply }: ClientesFiltersBarProps
         >
             <SectionCardHeader
                 title="Filtros"
-                description="Acotá los clientes por nombre, producto, código de exportación o RTN."
+                description="Acotá los clientes por nombre, producto, código de exportación o identificación fiscal."
                 icon={<SlidersHorizontal className="size-4.5" />}
                 badge={
                     filtrosActivos > 0
@@ -83,7 +83,7 @@ export function ClientesFiltersBar({ filtros, onApply }: ClientesFiltersBarProps
                 <ControlledInput
                     control={form.control}
                     name="rtn"
-                    label="RTN"
+                    label="Identificación fiscal"
                     placeholder="Ej. 08011999123456"
                 />
             </div>

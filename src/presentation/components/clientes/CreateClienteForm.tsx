@@ -29,7 +29,7 @@ export function CreateClienteForm() {
                 <ControlledInput
                     control={control}
                     name="rtn"
-                    label="RTN"
+                    label="Identificación fiscal"
                     placeholder="08011999123456"
                 />
                 <ControlledInput

@@ -488,11 +488,11 @@ Los clientes y los lotes se crean desde **Clientes**, en el menú lateral. No to
 
 1. En el menú lateral, pulse **Clientes**.
 2. Pulse **Crear Nuevo cliente**. Se abre el formulario **Nuevo cliente**.
-3. Complete los datos: **Nombre**, **RTN**, **Código de exportación**, **Correo de contacto**, **Teléfono**, **Dirección de planta** y **Producto**.
+3. Complete los datos: **Nombre**, **Identificación fiscal**, **Código de exportación**, **Correo de contacto**, **Teléfono**, **Dirección de planta** y **Producto**.
 4. En **Operadores que estaran vinculados a este cliente**, elija uno o más operadores. Solo los operadores vinculados pueden pesar para este cliente.
 5. Pulse **Crear cliente**.
 
-El nombre, el RTN, el código de exportación, el producto y al menos un operador son obligatorios.
+El nombre, la identificación fiscal, el código de exportación, el producto y al menos un operador son obligatorios.
 
 **Crear un lote**
 
@@ -521,7 +521,7 @@ Los tres pesos tienen que ser mayores que 0, y el mínimo no puede ser mayor que
 
 **La lista de clientes**
 
-- Para buscar un cliente, use los filtros **Nombre del cliente**, **Producto**, **Código de exportación** o **RTN**, y pulse **Buscar**. **Limpiar Filtros** vuelve a mostrar todos.
+- Para buscar un cliente, use los filtros **Nombre del cliente**, **Producto**, **Código de exportación** o **Identificación fiscal**, y pulse **Buscar**. **Limpiar Filtros** vuelve a mostrar todos.
 - La tabla muestra 20 clientes por página. Use **Anterior** y **Siguiente** para pasar de página.
 - Cada fila tiene un botón **⋯** con las acciones sobre ese cliente:
   - **Ver lotes pendientes de inspección**: todos los lotes del cliente.
@@ -807,7 +807,7 @@ Al guardar aparece el aviso *"Cliente actualizado correctamente"*, el diálogo s
 Lo que tiene que saber:
 
 - **Solo se guardan los datos que cambió.** Lo que no toca queda como estaba. Mientras no cambie nada, **Guardar cambios** no se puede pulsar.
-- **El RTN y el código de exportación no se pueden cambiar.** El **Código de exportación** se muestra como referencia, pero no se puede editar.
+- **La identificación fiscal y el código de exportación no se pueden cambiar.** El **Código de exportación** se muestra como referencia, pero no se puede editar.
 - **Un dato que ya estaba cargado no se puede dejar vacío.** Si borra el nombre, el teléfono o la dirección, el campo avisa con *"No se puede dejar vacío"* (o *"El nombre es requerido"*) y no se guarda nada.
 - **El nombre y la dirección se guardan en mayúsculas**, igual que al crear el cliente.
 - **Si el producto aparece vacío**, el sistema no pudo reconocer el producto actual del cliente. Si no lo cambia, el producto queda como estaba. Si elige uno, se guarda el que eligió.
@@ -1055,3 +1055,4 @@ Esta tabla muestra qué pantallas y acciones tiene cada rol en esta versión del
 - Sección 5.3: mientras Agri responde, la flecha de enviar se convierte en un cuadrado que detiene la respuesta y devuelve la pregunta al recuadro; si la respuesta tarda, Agri avisa que está consultando los datos.
 - Sección 5.3: las tablas en las respuestas de Agri y en el resumen de lotes se muestran en un recuadro, con los títulos de las columnas resaltados y las filas alternadas.
 - Sección 5.4: el Mirador se actualiza cada 30 a 40 segundos, en vez de cada uno o dos minutos, y el indicador **En vivo** avisa a los 2 minutos sin actualizar, en vez de a los 4.
+- Secciones 4.5 y 4.6: el campo **RTN** del cliente ahora se llama **Identificación fiscal**, en el formulario de cliente nuevo y en los filtros de **Clientes**.

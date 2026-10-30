@@ -57,7 +57,7 @@ function crearColumnas(): DataTableColumns<Documento> {
         },
         {
             accessorKey: 'cliente_rtn',
-            header: 'RTN del cliente',
+            header: 'Identificación fiscal del cliente',
             enableSorting: true,
             meta: { headerClassName: HIDE_BELOW_LG, cellClassName: HIDE_BELOW_LG },
         },

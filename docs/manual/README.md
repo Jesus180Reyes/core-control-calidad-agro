@@ -24,7 +24,7 @@ Antes de mandarlo, revisar el PDF:
 
 - [ ] Se ven todas las imágenes, ninguna rota.
 - [ ] La portada tiene la versión y la fecha de esta entrega.
-- [ ] Ninguna captura muestra un cliente, un RTN o un usuario reales.
+- [ ] Ninguna captura muestra un cliente, una identificación fiscal o un usuario reales.
 - [ ] Se agregó el contacto de soporte de esta entrega. No se guarda en el repo: se agrega sobre el PDF o en el correo de entrega.
 
 ### Saltos de página
@@ -54,7 +54,7 @@ El id es `cap-` más el número de la sección con guiones (`cap-4`, `cap-4-1`, 
 Se toman a mano. Reglas:
 
 - En escritorio, con la ventana a **1440 × 900**, en **Chrome** y con el **tema claro**.
-- Siempre con **datos de demo**: clientes, lotes y usuarios ficticios. Nunca un nombre de cliente real, un RTN real ni el nombre de un usuario real en la barra lateral.
+- Siempre con **datos de demo**: clientes, lotes y usuarios ficticios. Nunca un nombre de cliente real, una identificación fiscal real ni el nombre de un usuario real en la barra lateral.
 - Se guardan en `capturas/` en PNG, con el nombre exacto de la lista de abajo.
 - El nombre sigue el patrón `<sección>-<pantalla>-<estado>.png`, en kebab-case.
 - En el manual van con ruta relativa y un pie en cursiva debajo:
@@ -83,9 +83,9 @@ Esta lista es el checklist de quien toma las capturas. Si un cambio modifica una
 | `4-3-bloqueo-critico.png` | El Bloqueo Crítico pidiendo el PIN. | Pendiente |
 | `4-3-tara-autorizada.png` | La tara con "Autorizado por …". | Pendiente |
 | `4-4-ticket.png` | El modal **Imprimir ticket**. | Pendiente |
-| `4-5-crear-cliente.png` | El formulario de cliente nuevo. | Pendiente |
+| `4-5-crear-cliente.png` | El formulario de cliente nuevo. | Rehacer |
 | `4-5-crear-lote.png` | El formulario de lote nuevo. | Pendiente |
-| `4-6-inspeccion-clientes.png` | La tabla paginada de inspección de clientes. | Pendiente |
+| `4-6-inspeccion-clientes.png` | La tabla paginada de inspección de clientes. | Rehacer |
 | `4-6-inspeccion-pesajes.png` | Los pesajes de un lote. | Pendiente |
 | `4-8-historial.png` | El historial con filtros. | Pendiente |
 | `5-3-agri.png` | Agri con una pregunta y su respuesta. | Pendiente |
