@@ -97,15 +97,17 @@ export function CreateUserDialog({ open, onOpenChange }: CreateUserDialogProps) 
                         control={form.control}
                         name="complete_name"
                         label="Nombre completo"
-                        placeholder="Juan Pérez"
+                        placeholder="JESUS REYES"
+                        uppercase
                     />
                     <div className="grid gap-4 sm:grid-cols-2">
                         <ControlledInput
                             control={form.control}
                             name="username"
                             label="Usuario"
-                            placeholder="jperez"
+                            placeholder="JREYES"
                             autoComplete="off"
+                            uppercase
                         />
                         <ControlledInput
                             control={form.control}
