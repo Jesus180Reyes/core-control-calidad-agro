@@ -41,6 +41,12 @@ const COLUMNS: DataTableColumns<CatalogUser> = [
         ),
     },
     {
+        accessorKey: 'username',
+        header: 'Usuario',
+        enableSorting: true,
+        meta: { cellClassName: 'text-text-muted' },
+    },
+    {
         accessorKey: 'cedula',
         header: 'Cédula',
         meta: { cellClassName: 'tabular-nums text-text-muted' },
@@ -51,7 +57,7 @@ const COLUMNS: DataTableColumns<CatalogUser> = [
         header: 'Rol',
         enableSorting: true,
         cell: ({ row }) => (
-            <span className="inline-flex items-center rounded-full bg-muted px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-text-main">
+            <span className="inline-flex rounded-md bg-muted px-2 py-0.5 text-xs font-bold text-text-main">
                 {row.original.rol}
             </span>
         ),

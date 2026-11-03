@@ -34,7 +34,7 @@ export function ResetUserPasswordDialog({ user, open, onOpenChange }: ResetUserP
             title={data ? 'Contraseña restablecida' : 'Restablecer contraseña'}
             description={
                 data
-                    ? `Entréguele esta contraseña temporal a ${user.nombre}.`
+                    ? `Entréguele esta contraseña temporal a ${user.nombre} junto con su usuario "${user.username}".`
                     : `Se va a generar una contraseña temporal para ${user.nombre}. La contraseña actual deja de funcionar en ese momento.`
             }
             showCloseButton={!isPending}

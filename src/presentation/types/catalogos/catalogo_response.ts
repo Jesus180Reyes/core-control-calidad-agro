@@ -11,6 +11,7 @@ export interface CatalogoData {
 }
 
 export interface CatalogUser extends CatalogoData {
+    username: string
     cedula: string | null
     rol: string
 }

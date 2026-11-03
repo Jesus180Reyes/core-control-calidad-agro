@@ -1059,3 +1059,4 @@ Esta tabla muestra qué pantallas y acciones tiene cada rol en esta versión del
 - Sección 6.3: restablecer la contraseña de un usuario y asignar el PIN de un supervisor ya no son tareas fuera de pantalla: se hacen desde **Soporte**.
 - Sección 6.3: crear usuarios tampoco es ya una tarea fuera de pantalla: se hace con **Crear usuario**, en **Soporte**.
 - Sección 6.1: la lista de usuarios de **Soporte** se puede filtrar por nombre, cédula y rol, con **Buscar** y **Limpiar Filtros**.
+- Sección 6.1: la lista de usuarios de **Soporte** muestra el usuario con el que cada persona ingresa, y al restablecer una contraseña el aviso lo repite junto a la contraseña temporal.
