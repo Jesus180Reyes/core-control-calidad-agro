@@ -6,16 +6,15 @@ import { CustomDialog } from '#/presentation/components/shared/dialog/CustomDial
 import { ControlledInput } from '#/presentation/components/shared/inputs/ControlledInput'
 import { ControlledSelector } from '#/presentation/components/shared/inputs/ControlledSelector'
 import { GeneratedSecret } from '#/presentation/components/soporte/GeneratedSecret'
+import { useGetCatalogosRoles } from '#/presentation/hooks/catalogos/useGetCatalogosRoles'
 import { useCreateUser } from '#/presentation/hooks/soporte/useCreateUser'
 import {
     createUserSchema,
     type CreateUserSchema,
 } from '#/presentation/schema/crear-usuario/crearUsuarioSchema'
-import { USER_ROLES } from '#/presentation/types/soporte/soporte.types'
 
 const CREATE_USER_FORM_ID = 'form-crear-usuario'
 
-const ROLE_OPTIONS = USER_ROLES.map((role) => ({ value: role.id, label: role.nombre }))
 
 interface CreateUserDialogProps {
     open: boolean
@@ -28,6 +27,8 @@ export function CreateUserDialog({ open, onOpenChange }: CreateUserDialogProps) 
         defaultValues: { username: '', complete_name: '', cedula: '' },
     })
     const { mutate: createUser, data, variables, isPending, reset } = useCreateUser()
+    const { roles } = useGetCatalogosRoles()
+    const roleOptions = roles.map((role) => ({ value: role.id, label: role.nombre }))
 
     const handleOpenChange = (next: boolean) => {
         if (isPending) return
@@ -119,7 +120,7 @@ export function CreateUserDialog({ open, onOpenChange }: CreateUserDialogProps) 
                         name="rol"
                         label="Rol"
                         placeholder="Elija el rol"
-                        options={ROLE_OPTIONS}
+                        options={roleOptions}
                         valueAsNumber
                     />
                 </form>

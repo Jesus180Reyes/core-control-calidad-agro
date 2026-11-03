@@ -14,8 +14,9 @@ import { SupportUsersTable } from './SupportUsersTable'
  * Pantalla de soporte: el lugar del personal de soporte para gestionar los
  * usuarios del sistema, entre otras tareas.
  *
- * El `<Suspense>` y el `ErrorBoundary` envuelven sólo la tabla, para que el
- * encabezado quede puesto mientras carga o si falla.
+ * El `<Suspense>` y el `ErrorBoundary` envuelven la tabla y el diálogo de
+ * crear usuario (que pide los roles), para que el encabezado quede puesto
+ * mientras carga o si falla.
  */
 export function SupportView() {
     const { reset: limpiarErrorDeQuery } = useQueryErrorResetBoundary()
@@ -37,8 +38,6 @@ export function SupportView() {
                 }
             />
 
-            <CreateUserDialog open={createOpen} onOpenChange={setCreateOpen} />
-
             <ErrorBoundary
                 fallback={(error, reset) => (
                     <div className="space-y-4 rounded-[28px] border border-dashed border-border-ui p-12 text-center">
@@ -58,6 +57,7 @@ export function SupportView() {
                 )}
             >
                 <Suspense fallback={<LoadingState />}>
+                    <CreateUserDialog open={createOpen} onOpenChange={setCreateOpen} />
                     <SupportUsersTable />
                 </Suspense>
             </ErrorBoundary>

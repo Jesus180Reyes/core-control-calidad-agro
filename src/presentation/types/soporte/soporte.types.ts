@@ -16,15 +16,6 @@ export interface CreateUserResponse {
     password_temporal: string
 }
 
-export const USER_ROLES = [
-    { id: 1, nombre: 'OPERADOR' },
-    { id: 3, nombre: 'SUPERVISOR' },
-    { id: 4, nombre: 'APROBADOR' },
-    { id: 5, nombre: 'CONTADOR' },
-    { id: 6, nombre: 'SOPORTE' },
-    { id: 2, nombre: 'ADMIN' },
-] as const
-
 /**
  * Lo que devuelve `PATCH /auth/usuarios/:id/reset-password`. La contraseña
  * temporal viaja **una sola vez** y nace vencida: al ingresar con ella, el
