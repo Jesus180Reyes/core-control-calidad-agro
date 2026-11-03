@@ -6,10 +6,10 @@ import {
     type DataTableColumns,
 } from '#/presentation/components/shared/table/DataTable'
 import { SoporteRowActions } from '#/presentation/components/soporte/SoporteRowActions'
-import { useSupportUsers } from '#/presentation/hooks/soporte/useSupportUsers'
-import type { CatalogoData } from '#/presentation/types/catalogos/catalogo_response'
+import { useGetCatalogosUsuarios } from '#/presentation/hooks/catalogos/useGetCatalogosUsuarios'
+import type { CatalogUser } from '#/presentation/types/catalogos/catalogo_response'
 
-const COLUMNS: DataTableColumns<CatalogoData> = [
+const COLUMNS: DataTableColumns<CatalogUser> = [
     {
         id: 'acciones',
         header: 'Acciones',
@@ -43,11 +43,11 @@ const COLUMNS: DataTableColumns<CatalogoData> = [
 
 /** La tabla de usuarios activos de `/soporte`. Suspende mientras carga. */
 export function SupportUsersTable() {
-    const { users } = useSupportUsers()
+    const { usuarios } = useGetCatalogosUsuarios()
 
     return (
         <DataTable
-            data={users}
+            data={usuarios}
             columns={COLUMNS}
             getRowId={(user) => String(user.id)}
             defaultSorting={[{ id: 'nombre', desc: false }]}

@@ -12,10 +12,10 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { Can } from '#/presentation/components/shared/Can'
 import type { Permission } from '#/presentation/types/auth/permissions'
-import type { CatalogoData } from '#/presentation/types/catalogos/catalogo_response'
+import type { CatalogUser } from '#/presentation/types/catalogos/catalogo_response'
 
 interface SoporteRowActionsProps {
-    user: CatalogoData
+    user: CatalogUser
 }
 
 interface RowAction {
@@ -23,6 +23,8 @@ interface RowAction {
     icon: LucideIcon
     run: () => void
     permission?: Permission
+    /** `false` la saca del menú, por ejemplo según el `rol` del usuario de la fila. Por defecto, visible. */
+    isVisible?: boolean
     /** `destructive` la pinta en rojo. */
     variant?: 'default' | 'destructive'
     /** Abre un bloque nuevo con una línea encima. */
@@ -34,6 +36,7 @@ export function SoporteRowActions({ user }: SoporteRowActionsProps) {
     const [open, setOpen] = useState(false)
 
     const actions: RowAction[] = []
+    const visibleActions = actions.filter((action) => action.isVisible !== false)
 
     return (
         <DropdownMenu open={open} onOpenChange={setOpen}>
@@ -56,7 +59,7 @@ export function SoporteRowActions({ user }: SoporteRowActionsProps) {
                 sideOffset={6}
                 className="w-auto min-w-48 rounded-xl border border-border-ui p-1.5 shadow-lg ring-0 duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] data-closed:duration-100 data-closed:ease-in"
             >
-                {actions.map(({ label, icon: Icon, run, permission, variant, separatorBefore }) => (
+                {visibleActions.map(({ label, icon: Icon, run, permission, variant, separatorBefore }) => (
                     <Can key={label} permission={permission}>
                         {separatorBefore && (
                             <DropdownMenuSeparator className="-mx-1.5 bg-border-ui first:hidden" />
