@@ -27,6 +27,7 @@ import { Route as portalPortalInspeccionPesajesByLoteRouteImport } from './route
 import { Route as portalPortalLotesClientesRouteImport } from './routes/(portal)/_portal.lotes-clientes'
 import { Route as portalPortalMetricasRouteImport } from './routes/(portal)/_portal.metricas'
 import { Route as portalPortalMiradorRouteImport } from './routes/(portal)/_portal.mirador'
+import { Route as portalPortalSoporteRouteImport } from './routes/(portal)/_portal.soporte'
 import { Route as portalPortalVerDetallesDocumentoFiscalRouteImport } from './routes/(portal)/_portal.ver-detalles-documento-fiscal'
 
 const authAuthRoute = authAuthRouteImport.update({
@@ -124,6 +125,11 @@ const portalPortalMiradorRoute = portalPortalMiradorRouteImport.update({
   path: '/mirador',
   getParentRoute: () => portalPortalRoute,
 } as any)
+const portalPortalSoporteRoute = portalPortalSoporteRouteImport.update({
+  id: '/soporte',
+  path: '/soporte',
+  getParentRoute: () => portalPortalRoute,
+} as any)
 const portalPortalVerDetallesDocumentoFiscalRoute =
   portalPortalVerDetallesDocumentoFiscalRouteImport.update({
     id: '/ver-detalles-documento-fiscal',
@@ -147,6 +153,7 @@ export interface FileRoutesByFullPath {
   '/lotes-clientes': typeof portalPortalLotesClientesRoute
   '/metricas': typeof portalPortalMetricasRoute
   '/mirador': typeof portalPortalMiradorRoute
+  '/soporte': typeof portalPortalSoporteRoute
   '/ver-detalles-documento-fiscal': typeof portalPortalVerDetallesDocumentoFiscalRoute
   '/': typeof portalPortalIndexRoute
 }
@@ -166,6 +173,7 @@ export interface FileRoutesByTo {
   '/lotes-clientes': typeof portalPortalLotesClientesRoute
   '/metricas': typeof portalPortalMetricasRoute
   '/mirador': typeof portalPortalMiradorRoute
+  '/soporte': typeof portalPortalSoporteRoute
   '/ver-detalles-documento-fiscal': typeof portalPortalVerDetallesDocumentoFiscalRoute
   '/': typeof portalPortalIndexRoute
 }
@@ -188,6 +196,7 @@ export interface FileRoutesById {
   '/(portal)/_portal/lotes-clientes': typeof portalPortalLotesClientesRoute
   '/(portal)/_portal/metricas': typeof portalPortalMetricasRoute
   '/(portal)/_portal/mirador': typeof portalPortalMiradorRoute
+  '/(portal)/_portal/soporte': typeof portalPortalSoporteRoute
   '/(portal)/_portal/ver-detalles-documento-fiscal': typeof portalPortalVerDetallesDocumentoFiscalRoute
   '/(portal)/_portal/': typeof portalPortalIndexRoute
 }
@@ -209,6 +218,7 @@ export interface FileRouteTypes {
     | '/lotes-clientes'
     | '/metricas'
     | '/mirador'
+    | '/soporte'
     | '/ver-detalles-documento-fiscal'
     | '/'
   fileRoutesByTo: FileRoutesByTo
@@ -228,6 +238,7 @@ export interface FileRouteTypes {
     | '/lotes-clientes'
     | '/metricas'
     | '/mirador'
+    | '/soporte'
     | '/ver-detalles-documento-fiscal'
     | '/'
   id:
@@ -249,6 +260,7 @@ export interface FileRouteTypes {
     | '/(portal)/_portal/lotes-clientes'
     | '/(portal)/_portal/metricas'
     | '/(portal)/_portal/mirador'
+    | '/(portal)/_portal/soporte'
     | '/(portal)/_portal/ver-detalles-documento-fiscal'
     | '/(portal)/_portal/'
   fileRoutesById: FileRoutesById
@@ -386,6 +398,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof portalPortalMiradorRouteImport
       parentRoute: typeof portalPortalRoute
     }
+    '/(portal)/_portal/soporte': {
+      id: '/(portal)/_portal/soporte'
+      path: '/soporte'
+      fullPath: '/soporte'
+      preLoaderRoute: typeof portalPortalSoporteRouteImport
+      parentRoute: typeof portalPortalRoute
+    }
     '/(portal)/_portal/ver-detalles-documento-fiscal': {
       id: '/(portal)/_portal/ver-detalles-documento-fiscal'
       path: '/ver-detalles-documento-fiscal'
@@ -423,6 +442,7 @@ interface portalPortalRouteChildren {
   portalPortalLotesClientesRoute: typeof portalPortalLotesClientesRoute
   portalPortalMetricasRoute: typeof portalPortalMetricasRoute
   portalPortalMiradorRoute: typeof portalPortalMiradorRoute
+  portalPortalSoporteRoute: typeof portalPortalSoporteRoute
   portalPortalVerDetallesDocumentoFiscalRoute: typeof portalPortalVerDetallesDocumentoFiscalRoute
   portalPortalIndexRoute: typeof portalPortalIndexRoute
 }
@@ -445,6 +465,7 @@ const portalPortalRouteChildren: portalPortalRouteChildren = {
   portalPortalLotesClientesRoute: portalPortalLotesClientesRoute,
   portalPortalMetricasRoute: portalPortalMetricasRoute,
   portalPortalMiradorRoute: portalPortalMiradorRoute,
+  portalPortalSoporteRoute: portalPortalSoporteRoute,
   portalPortalVerDetallesDocumentoFiscalRoute:
     portalPortalVerDetallesDocumentoFiscalRoute,
   portalPortalIndexRoute: portalPortalIndexRoute,

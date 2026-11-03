@@ -1,5 +1,5 @@
 import { Link, useLocation } from '@tanstack/react-router'
-import { ChartNoAxesCombined, ChevronRight, ClipboardCheck, LogOut, Scale, ShieldCheck, SlidersHorizontal, Telescope, Users } from 'lucide-react'
+import { ChartNoAxesCombined, ChevronRight, ClipboardCheck, LifeBuoy, LogOut, Scale, ShieldCheck, SlidersHorizontal, Telescope, Users } from 'lucide-react'
 import { useState } from 'react'
 
 import { AgriAvatar } from '#/presentation/components/agri/AgriAvatar'
@@ -125,6 +125,12 @@ export function SidebarContent({ onNavigate }: SidebarContentProps) {
             to: '/metricas',
             permission: PERMISSIONS.VERMETRICAS,
             icon: <ChartNoAxesCombined className="size-4.5" strokeWidth={2.1} />,
+        },
+        {
+            label: 'Soporte',
+            to: '/soporte',
+            permission: PERMISSIONS.MODULOSOPORTE,
+            icon: <LifeBuoy className="size-4.5" strokeWidth={2.1} />,
         },
     ]
 

@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 import { Link } from '@tanstack/react-router'
-import { ArrowRight, ClipboardCheck, FileText, History, Printer, Scale, Sparkles, Telescope, Users } from 'lucide-react'
+import { ArrowRight, ClipboardCheck, FileText, History, LifeBuoy, Printer, Scale, Sparkles, Telescope, Users } from 'lucide-react'
 
 import { AgriAvatar } from '#/presentation/components/agri/AgriAvatar'
 import { getInitials } from '#/presentation/components/shared/getInitials'
@@ -52,6 +52,14 @@ const QUICK_ACTIONS: QuickAction[] = [
         icon: <FileText className="size-5" strokeWidth={2.2} />,
         permission: PERMISSIONS.MODULOADMINISTRACION,
         accent: 'bg-violet-500/12 text-violet-600 dark:text-violet-400',
+    },
+    {
+        title: 'Soporte',
+        description: 'Gestioná los usuarios del sistema y otras tareas de soporte.',
+        to: '/soporte',
+        icon: <LifeBuoy className="size-5" strokeWidth={2.2} />,
+        permission: PERMISSIONS.MODULOADMINISTRACION,
+        accent: 'bg-rose-500/12 text-rose-600 dark:text-rose-400',
     },
 ]
 

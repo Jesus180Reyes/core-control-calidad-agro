@@ -871,7 +871,7 @@ El administrador tiene acceso a todos los módulos del sistema. Para cada uno, s
 
 El administrador no puede autorizar un peso sobre el máximo: el PIN es solo de los supervisores (vea el [capítulo 5.1](#cap-5-1)).
 
-El menú lateral del administrador también muestra **Administración**. Ese módulo no está cubierto por este manual.
+El menú lateral del administrador también muestra **Administración** y **Soporte**. Esos módulos no están cubiertos por este manual.
 
 <a id="cap-6-2"></a>
 
@@ -1056,3 +1056,4 @@ Esta tabla muestra qué pantallas y acciones tiene cada rol en esta versión del
 - Sección 5.3: las tablas en las respuestas de Agri y en el resumen de lotes se muestran en un recuadro, con los títulos de las columnas resaltados y las filas alternadas.
 - Sección 5.4: el Mirador se actualiza cada 30 a 40 segundos, en vez de cada uno o dos minutos, y el indicador **En vivo** avisa a los 2 minutos sin actualizar, en vez de a los 4.
 - Secciones 4.5 y 4.6: el campo **RTN** del cliente ahora se llama **Identificación fiscal**, en el formulario de cliente nuevo y en los filtros de **Clientes**.
+- Sección 6.1: el menú lateral suma **Soporte**, también con su acceso en la portada. Por ahora muestra la lista de usuarios activos del sistema.

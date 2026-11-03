@@ -97,7 +97,11 @@ Dónde se aplican hoy:
 
 - **Navegación.** El `Sidebar` esconde cada item de `menuItems` (y cada hijo) cuyo `permission` no está en la sesión, y los items de Agri y del Mirador van envueltos en un `<Can>` (`USARCHATIA` y `VERMIRADOR3D`). La portada (`HomeView`) repite **los mismos destinos con los mismos permisos** en sus accesos rápidos y en las tarjetas de Agri y del Mirador: la portada no abre puertas que la barra lateral no muestra. Al agregar o mover un módulo, tocar los dos. La excepción es Métricas (`VER-METRICAS`), que está en el `Sidebar` y a propósito no en la portada (SPEC 15).
 - **Acciones.** Los botones de crear, aprobar y rechazar, y los menús de fila (`ClientRowActions`, `PesajeRowActions`, `DocumentoFiscalRowActions`), van detrás de un `<Can>`.
-- **Rutas, no.** No hay guard de permisos en ninguna ruta: quien escribe la URL a mano entra a la pantalla, y lo frena el backend.
+- **Rutas, casi nunca.** La única ruta con guard de permisos es `/soporte`, que llama a `requirePermission(PERMISSIONS.MODULOADMINISTRACION)` en su `beforeLoad` y sin el permiso rebota a `/`. En el resto, quien escribe la URL a mano entra a la pantalla, y lo frena el backend.
+
+### Soporte
+
+`/soporte` (`routes/(portal)/_portal.soporte.tsx` → `views/soporte/SupportView.tsx`) es la pantalla del personal de soporte para gestionar los usuarios del sistema. Por ahora pinta sólo la tabla de usuarios (`SupportUsersTable`, con su propio `<Suspense>` y `ErrorBoundary` dentro de `SupportView`). **La tabla lee `GET /catalogos/usuarios`** a través de `useSupportUsers` (`hooks/soporte/`), porque no hay un endpoint de gestión: trae sólo `{ id, nombre }` de los usuarios **activos**, sin username, rol ni estado, y comparte la caché de catálogo (`CATALOG_QUERY_OPTIONS`) con los selectores. Cuando exista el endpoint completo, se cambia en ese hook. Es un item propio de `menuItems` en el `Sidebar` (debajo de "Métricas"), **no** un hijo de Administración, y tiene su acceso en la portada; los dos piden `MODULO-ADMINISTRACION`. No existe un permiso propio de soporte; usar uno exige crearlo primero en el backend. El backend tampoco tiene un endpoint para listar usuarios, y los que ya existen (`POST /auth/register`, `PATCH /auth/usuarios/:id/reset-password` y `PATCH /auth/usuarios/:id/pin`) exigen el **rol** `ADMIN`, no un permiso: alguien con `MODULO-ADMINISTRACION` que no sea `ADMIN` recibe 403.
 
 ### Contraseña vencida (SPEC 14)
 
