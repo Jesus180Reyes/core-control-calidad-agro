@@ -7,6 +7,7 @@ import {
 } from '#/presentation/components/shared/table/DataTable'
 import { SoporteRowActions } from '#/presentation/components/soporte/SoporteRowActions'
 import { useGetCatalogosUsuarios } from '#/presentation/hooks/catalogos/useGetCatalogosUsuarios'
+import type { FiltrosUsuarios } from '#/presentation/schema/soporte/filtrosUsuariosSchema'
 import type { CatalogUser } from '#/presentation/types/catalogos/catalogo_response'
 
 const COLUMNS: DataTableColumns<CatalogUser> = [
@@ -57,9 +58,13 @@ const COLUMNS: DataTableColumns<CatalogUser> = [
     },
 ]
 
-/** La tabla de usuarios activos de `/soporte`. Suspende mientras carga. */
-export function SupportUsersTable() {
-    const { usuarios } = useGetCatalogosUsuarios()
+interface SupportUsersTableProps {
+    filtros: FiltrosUsuarios
+}
+
+export function SupportUsersTable({ filtros }: SupportUsersTableProps) {
+    const { usuarios } = useGetCatalogosUsuarios(filtros)
+    const isFiltered = Object.values(filtros).some((valor) => valor !== undefined)
 
     return (
         <DataTable
@@ -68,8 +73,12 @@ export function SupportUsersTable() {
             getRowId={(user) => String(user.id)}
             defaultSorting={[{ id: 'nombre', desc: false }]}
             maxHeight="36rem"
-            emptyTitle="No hay usuarios activos"
-            emptyDescription="Todavía no se registró ningún usuario en el sistema."
+            emptyTitle={isFiltered ? 'Ningún usuario coincide' : 'No hay usuarios activos'}
+            emptyDescription={
+                isFiltered
+                    ? 'Probá con otros filtros o limpialos para ver todos los usuarios.'
+                    : 'Todavía no se registró ningún usuario en el sistema.'
+            }
         />
     )
 }

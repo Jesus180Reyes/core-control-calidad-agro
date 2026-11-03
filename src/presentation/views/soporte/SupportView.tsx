@@ -8,6 +8,8 @@ import { CustomButton } from '#/presentation/components/shared/button/CustomButt
 import { ErrorBoundary } from '#/presentation/components/shared/ErrorBoundary'
 import { LoadingState } from '#/presentation/components/shared/LoadingState'
 import { CreateUserDialog } from '#/presentation/components/soporte/CreateUserDialog'
+import type { FiltrosUsuarios } from '#/presentation/schema/soporte/filtrosUsuariosSchema'
+import { SupportUsersFiltersBar } from './SupportUsersFiltersBar'
 import { SupportUsersTable } from './SupportUsersTable'
 
 /**
@@ -21,6 +23,7 @@ import { SupportUsersTable } from './SupportUsersTable'
 export function SupportView() {
     const { reset: limpiarErrorDeQuery } = useQueryErrorResetBoundary()
     const [createOpen, setCreateOpen] = useState(false)
+    const [filtros, setFiltros] = useState<FiltrosUsuarios>({})
 
     return (
         <div className="space-y-8">
@@ -37,6 +40,10 @@ export function SupportView() {
                     </CustomButton>
                 }
             />
+
+            <Suspense fallback={<LoadingState />}>
+                <SupportUsersFiltersBar filtros={filtros} onApply={setFiltros} />
+            </Suspense>
 
             <ErrorBoundary
                 fallback={(error, reset) => (
@@ -58,7 +65,7 @@ export function SupportView() {
             >
                 <Suspense fallback={<LoadingState />}>
                     <CreateUserDialog open={createOpen} onOpenChange={setCreateOpen} />
-                    <SupportUsersTable />
+                    <SupportUsersTable filtros={filtros} />
                 </Suspense>
             </ErrorBoundary>
         </div>
