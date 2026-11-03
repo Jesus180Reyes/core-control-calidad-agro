@@ -58,7 +58,7 @@ const QUICK_ACTIONS: QuickAction[] = [
         description: 'Gestioná los usuarios del sistema y otras tareas de soporte.',
         to: '/soporte',
         icon: <LifeBuoy className="size-5" strokeWidth={2.2} />,
-        permission: PERMISSIONS.MODULOADMINISTRACION,
+        permission: PERMISSIONS.MODULOSOPORTE,
         accent: 'bg-rose-500/12 text-rose-600 dark:text-rose-400',
     },
 ]

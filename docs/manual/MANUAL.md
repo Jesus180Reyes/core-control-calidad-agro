@@ -894,9 +894,9 @@ Rechazar un cliente lo saca de la inspección. Es una acción que solo tiene el 
 Algunas tareas de administración todavía no tienen pantalla en METRIKA 360. Las realiza el administrador del sistema, por fuera de las pantallas que describe este manual:
 
 - Crear usuarios y asignarles su rol.
-- Restablecer la contraseña de un usuario.
-- Asignar el PIN a cada supervisor.
 - Cambiar qué módulos ve cada rol.
+
+Restablecer la contraseña de un usuario y asignar el PIN a un supervisor se hacen desde el módulo **Soporte**, que no cubre este manual.
 
 Si necesita alguna de estas tareas, pídasela al administrador del sistema de su empresa.
 
@@ -1057,3 +1057,4 @@ Esta tabla muestra qué pantallas y acciones tiene cada rol en esta versión del
 - Sección 5.4: el Mirador se actualiza cada 30 a 40 segundos, en vez de cada uno o dos minutos, y el indicador **En vivo** avisa a los 2 minutos sin actualizar, en vez de a los 4.
 - Secciones 4.5 y 4.6: el campo **RTN** del cliente ahora se llama **Identificación fiscal**, en el formulario de cliente nuevo y en los filtros de **Clientes**.
 - Sección 6.1: el menú lateral suma **Soporte**, también con su acceso en la portada. Por ahora muestra la lista de usuarios activos del sistema, con su cédula y su rol.
+- Sección 6.3: restablecer la contraseña de un usuario y asignar el PIN de un supervisor ya no son tareas fuera de pantalla: se hacen desde **Soporte**.
