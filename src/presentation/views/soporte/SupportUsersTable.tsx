@@ -1,10 +1,25 @@
-import { getInitials } from '#/presentation/components/shared/getInitials'
-import { DataTable, type DataTableColumns } from '#/presentation/components/shared/table/DataTable'
+﻿import { getInitials } from '#/presentation/components/shared/getInitials'
+import {
+    DataTable,
+    STICKY_ACTIONS_CELL,
+    STICKY_ACTIONS_HEADER,
+    type DataTableColumns,
+} from '#/presentation/components/shared/table/DataTable'
+import { SoporteRowActions } from '#/presentation/components/soporte/SoporteRowActions'
 import { useSupportUsers } from '#/presentation/hooks/soporte/useSupportUsers'
 import type { CatalogoData } from '#/presentation/types/catalogos/catalogo_response'
 
 const COLUMNS: DataTableColumns<CatalogoData> = [
-
+    {
+        id: 'acciones',
+        header: 'Acciones',
+        meta: {
+            align: 'center',
+            headerClassName: STICKY_ACTIONS_HEADER,
+            cellClassName: `py-2 ${STICKY_ACTIONS_CELL}`,
+        },
+        cell: ({ row }) => <SoporteRowActions user={row.original} />,
+    },
     {
         accessorKey: 'id',
         header: 'ID',
