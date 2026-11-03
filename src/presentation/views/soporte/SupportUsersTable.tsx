@@ -39,6 +39,22 @@ const COLUMNS: DataTableColumns<CatalogUser> = [
             </span>
         ),
     },
+    {
+        accessorKey: 'cedula',
+        header: 'Cédula',
+        meta: { cellClassName: 'tabular-nums text-text-muted' },
+        cell: ({ row }) => row.original.cedula ?? '—',
+    },
+    {
+        accessorKey: 'rol',
+        header: 'Rol',
+        enableSorting: true,
+        cell: ({ row }) => (
+            <span className="inline-flex items-center rounded-full bg-muted px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-text-main">
+                {row.original.rol}
+            </span>
+        ),
+    },
 ]
 
 /** La tabla de usuarios activos de `/soporte`. Suspende mientras carga. */

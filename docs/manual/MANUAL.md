@@ -1056,4 +1056,4 @@ Esta tabla muestra qué pantallas y acciones tiene cada rol en esta versión del
 - Sección 5.3: las tablas en las respuestas de Agri y en el resumen de lotes se muestran en un recuadro, con los títulos de las columnas resaltados y las filas alternadas.
 - Sección 5.4: el Mirador se actualiza cada 30 a 40 segundos, en vez de cada uno o dos minutos, y el indicador **En vivo** avisa a los 2 minutos sin actualizar, en vez de a los 4.
 - Secciones 4.5 y 4.6: el campo **RTN** del cliente ahora se llama **Identificación fiscal**, en el formulario de cliente nuevo y en los filtros de **Clientes**.
-- Sección 6.1: el menú lateral suma **Soporte**, también con su acceso en la portada. Por ahora muestra la lista de usuarios activos del sistema.
+- Sección 6.1: el menú lateral suma **Soporte**, también con su acceso en la portada. Por ahora muestra la lista de usuarios activos del sistema, con su cédula y su rol.
