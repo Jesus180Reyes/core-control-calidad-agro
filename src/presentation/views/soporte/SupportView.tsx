@@ -1,10 +1,13 @@
-import { Suspense } from 'react'
+import { Suspense, useState } from 'react'
 import { useQueryErrorResetBoundary } from '@tanstack/react-query'
+import { UserPlus } from 'lucide-react'
 
 import { Button } from '#/components/ui/button'
 import { ClientesHeader } from '#/presentation/components/clientes/ClientesHeader'
+import { CustomButton } from '#/presentation/components/shared/button/CustomButton'
 import { ErrorBoundary } from '#/presentation/components/shared/ErrorBoundary'
 import { LoadingState } from '#/presentation/components/shared/LoadingState'
+import { CreateUserDialog } from '#/presentation/components/soporte/CreateUserDialog'
 import { SupportUsersTable } from './SupportUsersTable'
 
 /**
@@ -16,13 +19,25 @@ import { SupportUsersTable } from './SupportUsersTable'
  */
 export function SupportView() {
     const { reset: limpiarErrorDeQuery } = useQueryErrorResetBoundary()
+    const [createOpen, setCreateOpen] = useState(false)
 
     return (
         <div className="space-y-8">
             <ClientesHeader
                 titulo="Soporte"
                 descripcion="Usuarios activos del sistema."
+                actions={
+                    <CustomButton
+                        fullWidth={false}
+                        icon={<UserPlus className="size-4" />}
+                        onClick={() => setCreateOpen(true)}
+                    >
+                        Crear usuario
+                    </CustomButton>
+                }
             />
+
+            <CreateUserDialog open={createOpen} onOpenChange={setCreateOpen} />
 
             <ErrorBoundary
                 fallback={(error, reset) => (
