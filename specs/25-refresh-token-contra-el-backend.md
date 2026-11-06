@@ -1,6 +1,6 @@
 # SPEC 25 — Refresh token contra el backend real
 
-> **Estado:** Approved
+> **Estado:** Implemented
 > **Depende de:** SPEC 06 (capa HTTP con refresh y reintento del 401), SPEC 14 (contraseña vencida), SPEC 50 del backend (`core-control-calidad-agro-backend/specs/50-refresh-token.md`), implementado en la rama `spec-50-refresh-token` del backend
 > **Fecha:** 2026-11-06
 > **Objetivo:** Alinear el refresh que dejó listo el SPEC 06 con el contrato real de `POST /auth/refresh` del SPEC 50 del backend, para que la sesión se renueve sola y el operario no vuelva a ingresar cada 8 horas.
@@ -122,17 +122,17 @@ Quien hizo la petición original recibe **su** 401, no el error del refresh. Eso
 
 ## Criterios de aceptación
 
-- [ ] `npx tsc --noEmit` y `npm run test` pasan.
-- [ ] Contra el backend con el SPEC 50 y `JWT_REFRESH_SECRET` configurada, después de ingresar existe `auth_refresh` en `localStorage`.
-- [ ] Con la pantalla abierta, cambiar a mano `auth_token` por un texto cualquiera y navegar a otra pantalla: en la pestaña Red de DevTools se ve un solo `POST /auth/refresh`, la pantalla carga sin volver al ingreso, y `auth_token` y `auth_refresh` tienen valores nuevos.
-- [ ] Ese `POST /auth/refresh` lleva el body `{ "refreshToken": ... }` y **no** lleva cabecera `Authorization`.
-- [ ] Con dos peticiones en paralelo y el token roto (por ejemplo, la portada), sale un solo `POST /auth/refresh`.
-- [ ] Una descarga o impresión de PDF del servicio de reportes con el token roto renueva la sesión contra el API y se reintenta.
-- [ ] Poniendo `isActive = 0` al usuario en la base y rompiendo `auth_token`, la siguiente navegación lleva a `/login` con la sesión limpia.
-- [ ] Ingresar con ese usuario inactivo y la contraseña correcta muestra *"El usuario esta inactivo"* en el banner del login.
-- [ ] Contra un backend sin `JWT_REFRESH_SECRET`, el ingreso funciona, `auth_refresh` no existe, y romper `auth_token` lleva a `/login` sin llamar a `/auth/refresh`.
-- [ ] Contra un backend sin el SPEC 50 (sin el endpoint), el ingreso funciona igual que antes de este spec.
-- [ ] El manual tiene las dos entradas de solución de problemas y la línea en **Sin publicar**.
+- [X] `npx tsc --noEmit` y `npm run test` pasan.
+- [X] Contra el backend con el SPEC 50 y `JWT_REFRESH_SECRET` configurada, después de ingresar existe `auth_refresh` en `localStorage`.
+- [X] Con la pantalla abierta, cambiar a mano `auth_token` por un texto cualquiera y navegar a otra pantalla: en la pestaña Red de DevTools se ve un solo `POST /auth/refresh`, la pantalla carga sin volver al ingreso, y `auth_token` y `auth_refresh` tienen valores nuevos.
+- [X] Ese `POST /auth/refresh` lleva el body `{ "refreshToken": ... }` y **no** lleva cabecera `Authorization`.
+- [X] Con dos peticiones en paralelo y el token roto (por ejemplo, la portada), sale un solo `POST /auth/refresh`.
+- [X] Una descarga o impresión de PDF del servicio de reportes con el token roto renueva la sesión contra el API y se reintenta.
+- [X] Poniendo `isActive = 0` al usuario en la base y rompiendo `auth_token`, la siguiente navegación lleva a `/login` con la sesión limpia.
+- [X] Ingresar con ese usuario inactivo y la contraseña correcta muestra *"El usuario esta inactivo"* en el banner del login.
+- [X] Contra un backend sin `JWT_REFRESH_SECRET`, el ingreso funciona, `auth_refresh` no existe, y romper `auth_token` lleva a `/login` sin llamar a `/auth/refresh`.
+- [X] Contra un backend sin el SPEC 50 (sin el endpoint), el ingreso funciona igual que antes de este spec.
+- [X] El manual tiene las dos entradas de solución de problemas y la línea en **Sin publicar**.
 
 ## Decisiones
 

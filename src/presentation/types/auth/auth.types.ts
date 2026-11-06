@@ -15,8 +15,8 @@ export interface LoginResponse {
     msg: string
     user: Usuario
     accessToken: string
-    /** Opcional hasta que el backend lo emita (ver SPEC 06). */
-    refreshToken?: string
+    /** SPEC 50 del backend. `null` si el servidor no tiene JWT_REFRESH_SECRET: no hay renovación. */
+    refreshToken?: string | null
     /** SPEC 33 del backend. Siempre false en el 200; el caso true llega como 403. */
     passwordVencida?: boolean
 }
@@ -47,8 +47,10 @@ export interface Sesion {
     permisos: string[]
 }
 
-/** Lo que devuelve `POST /auth/refresh`. Con rotación: el refresh viejo queda invalidado. */
+/** `POST /auth/refresh`. Rota el par, pero el refresh anterior sigue valiendo hasta su vencimiento. */
 export interface RefreshResponse {
+    ok: boolean
+    msg: string
     accessToken: string
-    refreshToken?: string
+    refreshToken: string
 }

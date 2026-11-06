@@ -21,7 +21,7 @@ export function useAuth(): UseAuthResult {
         guardarSesion({
             accessToken: respuesta.accessToken,
             usuario: respuesta.user,
-            refreshToken: respuesta.refreshToken ?? '',
+            refreshToken: respuesta.refreshToken ?? undefined,
             permisos: [],
         })
         return true

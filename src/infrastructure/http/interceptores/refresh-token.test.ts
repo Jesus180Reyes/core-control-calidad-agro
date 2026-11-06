@@ -38,9 +38,19 @@ type Handler = (url: string, init: RequestInit) => RespuestaFalsa | Promise<Resp
 interface Llamada {
     url: string
     autorizacion: string | null
+    body: unknown
 }
 
-/** Reemplaza a `globalThis.fetch` y registra cada petición con su Authorization. */
+function leerBody(body: RequestInit['body']): unknown {
+    if (typeof body !== 'string') return body ?? null
+    try {
+        return JSON.parse(body)
+    } catch {
+        return body
+    }
+}
+
+/** Reemplaza a `globalThis.fetch` y registra cada petición con su Authorization y su body. */
 function instalarFetchFalso(handler: Handler) {
     const llamadas: Llamada[] = []
 
@@ -49,6 +59,7 @@ function instalarFetchFalso(handler: Handler) {
         llamadas.push({
             url,
             autorizacion: new Headers(init.headers).get('Authorization'),
+            body: leerBody(init.body),
         })
         return construirRespuesta(await handler(url, init))
     })
@@ -126,6 +137,28 @@ describe('refresh del access token', () => {
         expect(irALogin).not.toHaveBeenCalled()
     })
 
+    it('el refresh manda el token sólo en el body, sin Authorization (SPEC 50 del backend)', async () => {
+        sembrarSesion()
+        let intentosPesajes = 0
+
+        const { deEndpoint } = instalarFetchFalso((url) => {
+            if (url.includes('/auth/refresh')) {
+                return { status: 200, body: { accessToken: 'access-nuevo', refreshToken: 'refresh-nuevo' } }
+            }
+            intentosPesajes += 1
+            return intentosPesajes === 1
+                ? { status: 401, body: { message: 'Token expirado' } }
+                : { status: 200, body: { ok: true } }
+        })
+
+        const { httpGet } = await importarFachada()
+        await httpGet('/pesajes')
+
+        const [refresh] = deEndpoint('/auth/refresh')
+        expect(refresh.body).toEqual({ refreshToken: 'refresh-viejo' })
+        expect(refresh.autorizacion).toBeNull()
+    })
+
     it('dos 401 simultáneos disparan un solo refresh', async () => {
         sembrarSesion()
         const intentos: Record<string, number> = {}
@@ -181,6 +214,55 @@ describe('refresh del access token', () => {
 
         expect(localStorage.getItem(CLAVE_TOKEN)).toBeNull()
         expect(localStorage.getItem(CLAVE_USUARIO)).toBeNull()
+        expect(localStorage.getItem(CLAVE_REFRESH)).toBeNull()
+        expect(irALogin).toHaveBeenCalledWith('/login')
+    })
+
+    it.each([
+        { caso: '403 por contraseña vencida', status: 403, body: { message: 'La contraseña venció', passwordVencida: true } },
+        { caso: '503 por refresh no configurado', status: 503, body: { message: 'Refresh no configurado' } },
+    ])('si el refresh responde $caso cierra sesión y devuelve el 401 original', async ({ status, body }) => {
+        sembrarSesion()
+
+        const { deEndpoint } = instalarFetchFalso((url) => {
+            if (url.includes('/auth/refresh')) return { status, body }
+            return { status: 401, body: { message: 'Token expirado' } }
+        })
+
+        const { httpGet, esHttpError } = await importarFachada()
+        const error = await httpGet('/pesajes').catch((e: unknown) => e)
+
+        expect(esHttpError(error)).toBe(true)
+        expect((error as { status: number }).status).toBe(401)
+        expect((error as { body: { message: string } }).body.message).toBe('Token expirado')
+
+        expect(deEndpoint('/auth/refresh')).toHaveLength(1)
+        expect(deEndpoint('/pesajes')).toHaveLength(1)
+        expect(localStorage.getItem(CLAVE_TOKEN)).toBeNull()
+        expect(localStorage.getItem(CLAVE_REFRESH)).toBeNull()
+        expect(irALogin).toHaveBeenCalledWith('/login')
+    })
+
+    it('si el refresh falla por red cierra sesión y devuelve el 401 original', async () => {
+        // Decisión del SPEC 25: todo fallo del refresh cierra la sesión, también
+        // los de red. Conservarla ante un fallo de red queda para otro spec.
+        sembrarSesion()
+
+        const { deEndpoint } = instalarFetchFalso((url) => {
+            if (url.includes('/auth/refresh')) throw new TypeError('Failed to fetch')
+            return { status: 401, body: { message: 'Token expirado' } }
+        })
+
+        const { httpGet, esHttpError } = await importarFachada()
+        const error = await httpGet('/pesajes').catch((e: unknown) => e)
+
+        expect(esHttpError(error)).toBe(true)
+        expect((error as { status: number }).status).toBe(401)
+        expect((error as { body: { message: string } }).body.message).toBe('Token expirado')
+
+        expect(deEndpoint('/auth/refresh')).toHaveLength(1)
+        expect(deEndpoint('/pesajes')).toHaveLength(1)
+        expect(localStorage.getItem(CLAVE_TOKEN)).toBeNull()
         expect(localStorage.getItem(CLAVE_REFRESH)).toBeNull()
         expect(irALogin).toHaveBeenCalledWith('/login')
     })

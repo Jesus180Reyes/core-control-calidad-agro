@@ -59,8 +59,10 @@ registrarInterceptoresAuth(apiReportes)
  * Envuelve a un cliente con la política del 401.
  *
  * Ante un 401 de una petición autenticada por la sesión: renueva el access
- * token y reintenta **una sola vez**. Si el refresh falla —o no hay refresh
- * token, que es el estado de hoy— cierra sesión y manda a `/login`.
+ * token y reintenta **una sola vez**. Si el refresh falla, por el motivo que
+ * sea, cierra sesión y manda a `/login`. Lo mismo si no hay refresh token, que
+ * es el caso de un servidor sin `JWT_REFRESH_SECRET` o de una sesión iniciada
+ * antes del SPEC 25.
  *
  * Vive acá y no en `create-http-client.ts` a propósito: ese módulo declara que
  * sus interceptores observan pero nunca cortocircuitan, y así sigue siendo

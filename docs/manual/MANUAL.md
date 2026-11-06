@@ -986,6 +986,16 @@ Mientras no hay conexión **no se pueden guardar pesajes**. No anote pesos a man
 
 Su sesión terminó. Vuelva a ingresar con su usuario y su contraseña. Los pesajes que ya había guardado no se pierden.
 
+Mientras use el sistema, la sesión se mantiene abierta sola. El sistema lo devuelve a la pantalla de ingreso cuando:
+
+- pasó más de 30 días sin usar el sistema en ese equipo;
+- el administrador del sistema desactivó su usuario o restableció su contraseña;
+- su contraseña venció. Al ingresar, el sistema le pide elegir una nueva (vea el [capítulo 3.2](#cap-3-2)).
+
+**Al ingresar aparece "El usuario esta inactivo".**
+
+Su usuario fue desactivado y no puede ingresar al sistema. Hable con el administrador del sistema para que lo vuelva a activar.
+
 <div style="page-break-after: always"></div>
 
 <a id="cap-9"></a>
@@ -1060,3 +1070,4 @@ Esta tabla muestra qué pantallas y acciones tiene cada rol en esta versión del
 - Sección 6.3: crear usuarios tampoco es ya una tarea fuera de pantalla: se hace con **Crear usuario**, en **Soporte**.
 - Sección 6.1: la lista de usuarios de **Soporte** se puede filtrar por nombre, cédula y rol, con **Buscar** y **Limpiar Filtros**.
 - Sección 6.1: la lista de usuarios de **Soporte** muestra el usuario con el que cada persona ingresa, y al restablecer una contraseña el aviso lo repite junto a la contraseña temporal.
+- Capítulo 8: la sesión se mantiene abierta mientras se use el sistema, sin volver a ingresar cada jornada. Se explican los motivos por los que el sistema lo devuelve a la pantalla de ingreso, y qué hacer si al ingresar aparece "El usuario esta inactivo".
