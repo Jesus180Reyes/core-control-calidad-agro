@@ -218,6 +218,55 @@ describe('refresh del access token', () => {
         expect(irALogin).toHaveBeenCalledWith('/login')
     })
 
+    it.each([
+        { caso: '403 por contraseña vencida', status: 403, body: { message: 'La contraseña venció', passwordVencida: true } },
+        { caso: '503 por refresh no configurado', status: 503, body: { message: 'Refresh no configurado' } },
+    ])('si el refresh responde $caso cierra sesión y devuelve el 401 original', async ({ status, body }) => {
+        sembrarSesion()
+
+        const { deEndpoint } = instalarFetchFalso((url) => {
+            if (url.includes('/auth/refresh')) return { status, body }
+            return { status: 401, body: { message: 'Token expirado' } }
+        })
+
+        const { httpGet, esHttpError } = await importarFachada()
+        const error = await httpGet('/pesajes').catch((e: unknown) => e)
+
+        expect(esHttpError(error)).toBe(true)
+        expect((error as { status: number }).status).toBe(401)
+        expect((error as { body: { message: string } }).body.message).toBe('Token expirado')
+
+        expect(deEndpoint('/auth/refresh')).toHaveLength(1)
+        expect(deEndpoint('/pesajes')).toHaveLength(1)
+        expect(localStorage.getItem(CLAVE_TOKEN)).toBeNull()
+        expect(localStorage.getItem(CLAVE_REFRESH)).toBeNull()
+        expect(irALogin).toHaveBeenCalledWith('/login')
+    })
+
+    it('si el refresh falla por red cierra sesión y devuelve el 401 original', async () => {
+        // Decisión del SPEC 25: todo fallo del refresh cierra la sesión, también
+        // los de red. Conservarla ante un fallo de red queda para otro spec.
+        sembrarSesion()
+
+        const { deEndpoint } = instalarFetchFalso((url) => {
+            if (url.includes('/auth/refresh')) throw new TypeError('Failed to fetch')
+            return { status: 401, body: { message: 'Token expirado' } }
+        })
+
+        const { httpGet, esHttpError } = await importarFachada()
+        const error = await httpGet('/pesajes').catch((e: unknown) => e)
+
+        expect(esHttpError(error)).toBe(true)
+        expect((error as { status: number }).status).toBe(401)
+        expect((error as { body: { message: string } }).body.message).toBe('Token expirado')
+
+        expect(deEndpoint('/auth/refresh')).toHaveLength(1)
+        expect(deEndpoint('/pesajes')).toHaveLength(1)
+        expect(localStorage.getItem(CLAVE_TOKEN)).toBeNull()
+        expect(localStorage.getItem(CLAVE_REFRESH)).toBeNull()
+        expect(irALogin).toHaveBeenCalledWith('/login')
+    })
+
     it('sin refresh token guardado cierra sesión sin intentar renovar', async () => {
         sembrarSesion({ conRefresh: false })
 
