@@ -38,9 +38,19 @@ type Handler = (url: string, init: RequestInit) => RespuestaFalsa | Promise<Resp
 interface Llamada {
     url: string
     autorizacion: string | null
+    body: unknown
 }
 
-/** Reemplaza a `globalThis.fetch` y registra cada petición con su Authorization. */
+function leerBody(body: RequestInit['body']): unknown {
+    if (typeof body !== 'string') return body ?? null
+    try {
+        return JSON.parse(body)
+    } catch {
+        return body
+    }
+}
+
+/** Reemplaza a `globalThis.fetch` y registra cada petición con su Authorization y su body. */
 function instalarFetchFalso(handler: Handler) {
     const llamadas: Llamada[] = []
 
@@ -49,6 +59,7 @@ function instalarFetchFalso(handler: Handler) {
         llamadas.push({
             url,
             autorizacion: new Headers(init.headers).get('Authorization'),
+            body: leerBody(init.body),
         })
         return construirRespuesta(await handler(url, init))
     })
@@ -124,6 +135,28 @@ describe('refresh del access token', () => {
         expect(localStorage.getItem(CLAVE_TOKEN)).toBe('access-nuevo')
         expect(localStorage.getItem(CLAVE_REFRESH)).toBe('refresh-nuevo')
         expect(irALogin).not.toHaveBeenCalled()
+    })
+
+    it('el refresh manda el token sólo en el body, sin Authorization (SPEC 50 del backend)', async () => {
+        sembrarSesion()
+        let intentosPesajes = 0
+
+        const { deEndpoint } = instalarFetchFalso((url) => {
+            if (url.includes('/auth/refresh')) {
+                return { status: 200, body: { accessToken: 'access-nuevo', refreshToken: 'refresh-nuevo' } }
+            }
+            intentosPesajes += 1
+            return intentosPesajes === 1
+                ? { status: 401, body: { message: 'Token expirado' } }
+                : { status: 200, body: { ok: true } }
+        })
+
+        const { httpGet } = await importarFachada()
+        await httpGet('/pesajes')
+
+        const [refresh] = deEndpoint('/auth/refresh')
+        expect(refresh.body).toEqual({ refreshToken: 'refresh-viejo' })
+        expect(refresh.autorizacion).toBeNull()
     })
 
     it('dos 401 simultáneos disparan un solo refresh', async () => {
