@@ -108,6 +108,8 @@ function ControlCalidadPage() {
                         isStabilizing={scale.isStabilizing}
                         unidad={parametros.unidad}
                         guardando={guardando}
+                        hasReadings={scale.hayFlujoDatos}
+                        awaitingEmptyPlatform={scale.awaitingEmptyPlatform}
                         onGuardar={tara.solicitar}
                     />
                 </div>

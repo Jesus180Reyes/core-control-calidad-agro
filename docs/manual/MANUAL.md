@@ -363,9 +363,13 @@ La pantalla de pesaje tiene tres partes:
 
 Cuando el pesaje se guarda, aparece un aviso en verde y se abre el diálogo del ticket. Siga el [capítulo 4.4](#cap-4-4).
 
+10. Retire el producto de la plataforma. El pesaje siguiente empieza recién cuando la báscula vuelve a marcar vacío, así un mismo bulto no se registra dos veces.
+
 **Qué pasa si…**
 
-- **El botón Registrar pesaje no se puede pulsar.** El peso todavía no está estable, la plataforma está vacía o el peso está fuera del rango. El texto debajo del botón le dice cuál de los tres casos es.
+- **El botón Registrar pesaje no se puede pulsar.** El peso todavía no está estable, la plataforma está vacía, el peso está fuera del rango, la báscula no está enviando lecturas o falta retirar el producto del pesaje anterior. El texto debajo del botón le dice cuál de los casos es.
+- **Aparece *"Retirá el producto de la báscula para registrar el siguiente."*** El pesaje anterior ya se guardó y el producto sigue sobre la plataforma. Retírelo y coloque el siguiente.
+- **Aparece *"La báscula no está enviando lecturas."*** El indicador dejó de enviar el peso. La muestra que estaba en pantalla se descarta, porque ya no se puede confirmar. Cuando la señal vuelve, el peso se estabiliza de nuevo. Vea el [capítulo 2.2](#cap-2-2).
 - **El peso está por debajo del mínimo.** La lectura dice **Desviado** y aparece *"Falta producto: el peso está por debajo del mínimo del lote."* Agregue producto hasta entrar en el rango.
 - **El peso está por encima del máximo.** Se abre el **Bloqueo Crítico**. Siga el [capítulo 4.3](#cap-4-3).
 - **La tara no es válida.** El diálogo lo indica: *"Tara requerida"*, *"La tara no puede ser negativa"* o *"La tara debe ser menor al peso bruto"*.
@@ -1071,3 +1075,4 @@ Esta tabla muestra qué pantallas y acciones tiene cada rol en esta versión del
 - Sección 6.1: la lista de usuarios de **Soporte** se puede filtrar por nombre, cédula y rol, con **Buscar** y **Limpiar Filtros**.
 - Sección 6.1: la lista de usuarios de **Soporte** muestra el usuario con el que cada persona ingresa, y al restablecer una contraseña el aviso lo repite junto a la contraseña temporal.
 - Capítulo 8: la sesión se mantiene abierta mientras se use el sistema, sin volver a ingresar cada jornada. Se explican los motivos por los que el sistema lo devuelve a la pantalla de ingreso, y qué hacer si al ingresar aparece "El usuario esta inactivo".
+- Sección 4.1: después de guardar un pesaje, el siguiente empieza recién cuando se retira el producto de la báscula. Si el indicador deja de enviar el peso, la muestra en pantalla se descarta y no se puede registrar hasta que la señal vuelva.

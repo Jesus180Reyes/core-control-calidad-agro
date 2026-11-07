@@ -58,6 +58,8 @@ export interface UseSerialScaleProps {
      * indicadores que envían `US` de forma permanente.
      */
     usarFlagEstabilidad?: boolean
+    minStableReadings?: number
+    maxReadingAgeMs?: number
     /** Se dispara una sola vez por muestra, cuando el peso quedó estable. */
     onPesajeEstable?: (peso: number) => void | Promise<void>
     /** Se dispara en cada corte de comunicación (incluida la pérdida de señal). */
@@ -156,6 +158,8 @@ export function useSerialScale({
     autoReconectar = true,
     maxIntentosReconexion = 6,
     usarFlagEstabilidad = false,
+    minStableReadings = 3,
+    maxReadingAgeMs = 2000,
     resolverPuertoAutorizado,
     onPesajeEstable,
     onDesconexion,
@@ -173,6 +177,7 @@ export function useSerialScale({
     const [desconexion, setDesconexion] = useState<InfoDesconexion | null>(null)
     const [senalRestablecida, setSenalRestablecida] = useState<boolean>(false)
     const [intentoReconexion, setIntentoReconexion] = useState<number>(0)
+    const [awaitingEmptyPlatform, setAwaitingEmptyPlatform] = useState<boolean>(false)
 
     // ── Configuración viva (evita closures obsoletos en el bucle de lectura) ──
     const configRef = useRef({
@@ -180,6 +185,7 @@ export function useSerialScale({
         umbralCero, segundosEstabilizacion, toleranciaEstabilidad,
         factorConversion, normalizarCero, timeoutSinDatosMs,
         autoReconectar, maxIntentosReconexion, usarFlagEstabilidad,
+        minStableReadings, maxReadingAgeMs,
         resolverPuertoAutorizado,
     })
     const callbacksRef = useRef({ onPesajeEstable, onDesconexion, onConexion })
@@ -190,6 +196,7 @@ export function useSerialScale({
             umbralCero, segundosEstabilizacion, toleranciaEstabilidad,
             factorConversion, normalizarCero, timeoutSinDatosMs,
             autoReconectar, maxIntentosReconexion, usarFlagEstabilidad,
+            minStableReadings, maxReadingAgeMs,
             resolverPuertoAutorizado,
         }
         callbacksRef.current = { onPesajeEstable, onDesconexion, onConexion }
@@ -214,6 +221,9 @@ export function useSerialScale({
     const pesoConfirmadoRef = useRef<number | null>(null)
     const referenciaEstabilidadRef = useRef<number>(0)
     const inicioEstabilidadRef = useRef<number | null>(null)
+    const windowReadingsRef = useRef<number>(0)
+    const lastReadingAtRef = useRef<number>(0)
+    const awaitingEmptyRef = useRef<boolean>(false)
 
     const ultimaTramaRef = useRef<number>(0)
     const avisoSinSenalRef = useRef<boolean>(false)
@@ -254,6 +264,7 @@ export function useSerialScale({
         pesoConfirmadoRef.current = null
         inicioEstabilidadRef.current = null
         referenciaEstabilidadRef.current = 0
+        windowReadingsRef.current = 0
         setIsStabilizing(false)
         setTiempoRestante(configRef.current.segundosEstabilizacion)
     }, [detenerTicker])
@@ -263,6 +274,16 @@ export function useSerialScale({
         const peso = pesoFlujoRef.current
         if (Math.abs(peso) <= configRef.current.umbralCero) {
             reiniciarEstabilizacion()
+            return
+        }
+
+        const { minStableReadings: minReadings, maxReadingAgeMs: maxAge, segundosEstabilizacion: segundos } = configRef.current
+        const staleReading = Date.now() - lastReadingAtRef.current > maxAge
+        if (windowReadingsRef.current < minReadings || staleReading) {
+            referenciaEstabilidadRef.current = peso
+            inicioEstabilidadRef.current = Date.now()
+            windowReadingsRef.current = 0
+            setTiempoRestante(segundos)
             return
         }
 
@@ -309,6 +330,7 @@ export function useSerialScale({
         objetoEnBasculaRef.current = true
         referenciaEstabilidadRef.current = peso
         inicioEstabilidadRef.current = Date.now()
+        windowReadingsRef.current = 1
         setIsStabilizing(true)
         setTiempoRestante(configRef.current.segundosEstabilizacion)
         iniciarTicker()
@@ -326,9 +348,16 @@ export function useSerialScale({
 
         const peso = Math.round(pesoCrudo * factor * 100) / 100
         pesoFlujoRef.current = peso
+        lastReadingAtRef.current = Date.now()
 
         const basculaVacia = Math.abs(peso) <= umbral
         setPesoActual(basculaVacia && normalizar ? 0 : peso)
+
+        if (awaitingEmptyRef.current) {
+            if (!basculaVacia) return
+            awaitingEmptyRef.current = false
+            setAwaitingEmptyPlatform(false)
+        }
 
         if (basculaVacia) {
             if (objetoEnBasculaRef.current || pesajeCompletadoRef.current) reiniciarEstabilizacion()
@@ -361,9 +390,13 @@ export function useSerialScale({
             // El peso se movió: la ventana de estabilización empieza de nuevo.
             referenciaEstabilidadRef.current = peso
             inicioEstabilidadRef.current = Date.now()
+            windowReadingsRef.current = 1
             setTiempoRestante(segundos)
             if (!tickerRef.current) iniciarTicker()
+            return
         }
+
+        windowReadingsRef.current += 1
     }, [abrirVentana, reiniciarEstabilizacion])
 
     // ── Avisos de desconexión ─────────────────────────────────────────────────
@@ -385,11 +418,11 @@ export function useSerialScale({
             pesoAlDesconectar: pesoFlujoRef.current,
         }
 
+        // El pesaje en curso ya no es confiable: se invalida.
+        reiniciarEstabilizacion()
+        setPesoEstable(null)
         if (!recuperable) {
-            // El pesaje en curso ya no es confiable: se invalida.
-            reiniciarEstabilizacion()
             setPesoActual(0)
-            setPesoEstable(null)
             pesoFlujoRef.current = 0
         }
 
@@ -743,8 +776,18 @@ export function useSerialScale({
         setPesoEstable(null)
 
         const peso = pesoFlujoRef.current
+        if (awaitingEmptyRef.current) return
         if (portRef.current && Math.abs(peso) > configRef.current.umbralCero) abrirVentana(peso)
     }, [abrirVentana, reiniciarEstabilizacion])
+
+    const requireEmptyPlatform = useCallback(() => {
+        reiniciarEstabilizacion()
+        setPesoEstable(null)
+
+        if (Math.abs(pesoFlujoRef.current) <= configRef.current.umbralCero) return
+        awaitingEmptyRef.current = true
+        setAwaitingEmptyPlatform(true)
+    }, [reiniciarEstabilizacion])
 
     /** Cierra el aviso de desconexión sin cambiar el estado del puerto. */
     const descartarAviso = useCallback(() => {
@@ -852,12 +895,14 @@ export function useSerialScale({
         // --- Acciones ---
         reconectar,
         reiniciarPesaje,
+        requireEmptyPlatform,
         descartarAviso,
 
         // --- Datos de pesaje ---
         /** Peso confirmado como estable (null mientras no haya muestra válida). */
         pesoEstable,
         pesajeConfirmado: pesoEstable !== null,
+        awaitingEmptyPlatform,
     }
 }
 

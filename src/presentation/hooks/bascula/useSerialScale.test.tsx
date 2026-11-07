@@ -81,6 +81,12 @@ const emitir = async (texto: string, ms = 100) => {
     })
 }
 
+const emitirDurante = async (texto: string, ms: number, cadaMs = 250) => {
+    for (let transcurrido = 0; transcurrido < ms; transcurrido += cadaMs) {
+        await emitir(texto, cadaMs)
+    }
+}
+
 beforeEach(() => {
     vi.useFakeTimers()
     puerto = new PuertoFalso()
@@ -124,7 +130,7 @@ describe('useSerialScale', () => {
         expect(result.current.pesoActual).toBe(230.1)
         expect(result.current.isStabilizing).toBe(true)
 
-        await avanzar(5000)
+        await emitirDurante('ST,GS,+00230.10kg\r\n', 5000)
         expect(onPesajeEstable).toHaveBeenCalledTimes(1)
         expect(onPesajeEstable).toHaveBeenCalledWith(230.1)
         expect(result.current.isStabilizing).toBe(false)
@@ -137,18 +143,17 @@ describe('useSerialScale', () => {
 
         await act(async () => { await result.current.connectSerial() })
 
-        await emitir('230,00\r\n')
-        await avanzar(3000)
+        await emitirDurante('230,00\r\n', 3000)
         expect(result.current.tiempoRestante).toBeLessThan(5)
 
         // Salto de 10 g: la ventana debe empezar de nuevo.
         await emitir('240,00\r\n')
         expect(result.current.tiempoRestante).toBe(5)
 
-        await avanzar(3000)
+        await emitirDurante('240,00\r\n', 3000)
         expect(onPesajeEstable).not.toHaveBeenCalled()
 
-        await avanzar(2100)
+        await emitirDurante('240,00\r\n', 2100)
         expect(onPesajeEstable).toHaveBeenCalledWith(240)
     })
 
@@ -158,8 +163,7 @@ describe('useSerialScale', () => {
 
         await act(async () => { await result.current.connectSerial() })
 
-        await emitir('57,34\r\n')
-        await avanzar(5100)
+        await emitirDurante('57,34\r\n', 5100)
         expect(result.current.pesoEstable).toBe(57.34)
 
         // Ruido dentro de la tolerancia sobre la muestra ya confirmada: no toca nada.
@@ -173,10 +177,82 @@ describe('useSerialScale', () => {
         expect(result.current.isStabilizing).toBe(true)
         expect(result.current.tiempoRestante).toBe(5)
 
-        await avanzar(5100)
+        await emitirDurante('119,02\r\n', 5100)
         expect(result.current.pesoEstable).toBe(119.02)
         expect(onPesajeEstable).toHaveBeenLastCalledWith(119.02)
         expect(onPesajeEstable).toHaveBeenCalledTimes(2)
+    })
+
+    it('no confirma la muestra si las lecturas se cortan dentro de la ventana', async () => {
+        const onPesajeEstable = vi.fn()
+        const { result } = montarHook({ onPesajeEstable, timeoutSinDatosMs: 0 })
+
+        await act(async () => { await result.current.connectSerial() })
+
+        await emitir('230.00\r\n')
+        await avanzar(5100)
+        expect(onPesajeEstable).not.toHaveBeenCalled()
+        expect(result.current.pesoEstable).toBeNull()
+        expect(result.current.isStabilizing).toBe(true)
+
+        await emitirDurante('230.00\r\n', 5100)
+        expect(result.current.pesoEstable).toBe(230)
+        expect(onPesajeEstable).toHaveBeenCalledTimes(1)
+    })
+
+    it('invalida la muestra confirmada cuando la báscula queda muda', async () => {
+        const { result } = montarHook({ autoReconectar: false })
+
+        await act(async () => { await result.current.connectSerial() })
+
+        await emitirDurante('230.00\r\n', 5100)
+        expect(result.current.pesoEstable).toBe(230)
+
+        await avanzar(4500)
+        expect(result.current.estado).toBe('sin-senal')
+        expect(result.current.pesoEstable).toBeNull()
+        expect(result.current.isStabilizing).toBe(false)
+
+        await emitirDurante('230.00\r\n', 5100)
+        expect(result.current.estado).toBe('conectada')
+        expect(result.current.pesoEstable).toBe(230)
+    })
+
+    it('después de un pesaje guardado espera que la plataforma vuelva a vacío', async () => {
+        const onPesajeEstable = vi.fn()
+        const { result } = montarHook({ onPesajeEstable })
+
+        await act(async () => { await result.current.connectSerial() })
+
+        await emitirDurante('230.00\r\n', 5100)
+        expect(result.current.pesoEstable).toBe(230)
+
+        act(() => { result.current.requireEmptyPlatform() })
+        expect(result.current.awaitingEmptyPlatform).toBe(true)
+        expect(result.current.pesoEstable).toBeNull()
+
+        act(() => { result.current.reiniciarPesaje() })
+        await emitirDurante('230.00\r\n', 6000)
+        expect(result.current.isStabilizing).toBe(false)
+        expect(result.current.pesoEstable).toBeNull()
+        expect(onPesajeEstable).toHaveBeenCalledTimes(1)
+
+        await emitir('0.00\r\n')
+        expect(result.current.awaitingEmptyPlatform).toBe(false)
+
+        await emitirDurante('180.00\r\n', 5100)
+        expect(result.current.pesoEstable).toBe(180)
+        expect(onPesajeEstable).toHaveBeenCalledTimes(2)
+    })
+
+    it('no espera el vacío si la plataforma ya está vacía al guardar', async () => {
+        const { result } = montarHook()
+
+        await act(async () => { await result.current.connectSerial() })
+        await emitir('0.00\r\n')
+
+        act(() => { result.current.requireEmptyPlatform() })
+        expect(result.current.awaitingEmptyPlatform).toBe(false)
     })
 
     it('interpreta el signo negativo aunque venga separado del número', async () => {

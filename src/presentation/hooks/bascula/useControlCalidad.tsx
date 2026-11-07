@@ -211,7 +211,7 @@ export function useControlCalidad(cliente: Cliente | null, lote: Lote | null) {
         setFallosDeImpresion(0)
         setImpresionIniciada(false)
 
-        scale.reiniciarPesaje()
+        scale.requireEmptyPlatform()
         setTaraAbierta(false)
         setAutorizacion(null)
     }
@@ -235,9 +235,9 @@ export function useControlCalidad(cliente: Cliente | null, lote: Lote | null) {
     }
 
     /**
-     * Con el modal abierto la báscula siguió leyendo y el producto que no se
-     * retiró ya reestabilizó por detrás. Al cerrar el ticket la ventana corre
-     * de nuevo, a la vista del operario, para el pesaje siguiente.
+     * Con el modal abierto la báscula siguió leyendo. Si el operario ya retiró
+     * el bulto y puso el siguiente, la ventana corre de nuevo a su vista; si el
+     * bulto guardado sigue arriba, la báscula espera a que vuelva a vacío.
      */
     const cerrarTicket = (): void => {
         setPesajeRegistrado(null)

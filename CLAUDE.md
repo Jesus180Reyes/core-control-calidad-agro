@@ -132,6 +132,12 @@ Grupos `(auth)` y `(portal)` con layouts pathless: `(portal)/_portal.tsx` monta 
 
 `presentation/hooks/bascula/useSerialScale.tsx` es el núcleo del producto: abre el puerto con la Web Serial API, parsea las tramas del indicador, corre la ventana de estabilización (un solo ticker gobierna cuenta regresiva y confirmación), un watchdog de "sin señal" con el puerto abierto, y reconexión automática con backoff exponencial. La configuración viva y los callbacks se leen por `configRef`/`callbacksRef` para evitar closures obsoletos en el bucle de lectura; los timers y refs se limpian en el desmontaje. Al tocar este hook, cuidar el orden de cierre: cancelar el reader → esperar `bucleRef` → `port.close()`, o `close()` falla con "port is already locked".
 
+Tres reglas de la muestra, con tests en `useSerialScale.test.tsx`:
+
+- **Una muestra sólo se confirma con lecturas a la vista.** Al cerrar la ventana tienen que haber llegado `minStableReadings` (3) lecturas válidas y la última no puede tener más de `maxReadingAgeMs` (2 s); si no, la ventana corre de nuevo. El ticker mide tiempo, y sin esta regla una báscula que se calla a mitad de la ventana confirmaba el último peso.
+- **El watchdog invalida la muestra.** Un corte recuperable (`'sin-senal'`) conserva `pesoActual` y el puerto, pero descarta `pesoEstable` y la ventana: con la báscula muda nadie ve ese peso. `MonitoreoBasculaCard` deshabilita **Registrar pesaje** sin `hayFlujoDatos`.
+- **Entre dos pesajes guardados la plataforma pasa por cero.** `confirmarTara` llama a `requireEmptyPlatform()` y no a `reiniciarPesaje()`: mientras `awaitingEmptyPlatform`, las lecturas no abren ventana y `reiniciarPesaje` no la arranca. Se libera con la primera lectura dentro de `umbralCero`. Cancelar la tara y rechazar el pesaje siguen con `reiniciarPesaje`, porque ahí no se guardó nada. Los tests mandan tramas continuas (`emitirDurante`): una trama suelta ya no confirma.
+
 Los tipos de la Web Serial API están declarados a mano en `src/global.d.ts` (no hay `@types/w3c-web-serial`). Sólo funciona en Chrome/Edge de escritorio; `estado === 'no-soportada'` cubre el resto.
 
 `useControlCalidad` envuelve a `useSerialScale` y añade las reglas de negocio (rango min/ideal/max, bloqueo crítico con PIN de supervisor). El rango sale del lote que devuelve el backend (`peso_minimo` / `peso_ideal` / `peso_maximo`); no hay parámetros cargados en el front.
@@ -153,7 +159,7 @@ Todo `POST /pesajes` exitoso abre el `PrintTicketDialog` (`components/control-ca
 Dos reglas que van juntas:
 
 - **La salida de emergencia aparece recién con dos fallos** (`FALLOS_PARA_OMITIR` en `useControlCalidad`). Si el servicio de reportes se cae, un modal sin salida frena la planta con el producto sobre la plataforma; exigir un reintento antes evita que un timeout suelto enseñe el atajo. El contador se reinicia con cada pesaje: que la etiqueta anterior fallara dos veces no habilita el atajo en el bulto siguiente.
-- **`mostrarBloqueo` exige `pesajeRegistrado === null`.** Con el modal abierto la báscula sigue leyendo, y un producto que no se retiró reestabiliza en 5 s: sin esa guarda el `BloqueoCriticoDialog` aparecería encima del ticket, sobre un pesaje que ya está guardado.
+- **`mostrarBloqueo` exige `pesajeRegistrado === null`.** Con el modal abierto la báscula sigue leyendo, y si el operario ya retiró el bulto y puso el siguiente, ese reestabiliza en 5 s: sin esa guarda el `BloqueoCriticoDialog` aparecería encima del ticket. El bulto guardado que no se retiró no reestabiliza (ver el paso por cero en Báscula).
 
 Por eso `guardarPesaje` devuelve el `PesajeCreado` y no un `boolean`, y tanto `imprimirEtiqueta` como `descargarEtiqueta` piden un `{ id: number }` —no un `PesajeData`— y devuelven `boolean`: el modal necesita saber si contar un fallo, y el toast rojo del error ya lo pone `useExecutePdfMutation`. La reimpresión sigue saliendo del historial (`PesajeRowActions`); `/control-calidad` no reimprime.
 

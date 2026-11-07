@@ -12,6 +12,8 @@ interface MonitoreoBasculaCardProps {
     unidad: string
     /** Hay un `POST /pesajes` en vuelo. */
     guardando: boolean
+    hasReadings: boolean
+    awaitingEmptyPlatform: boolean
     onGuardar?: () => void
 }
 
@@ -22,6 +24,8 @@ export function MonitoreoBasculaCard({
     isStabilizing,
     unidad,
     guardando,
+    hasReadings,
+    awaitingEmptyPlatform,
     onGuardar,
 }: MonitoreoBasculaCardProps) {
 
@@ -42,9 +46,9 @@ export function MonitoreoBasculaCard({
             </div>
 
             <PanelAcciones
-                disabledGuardar={esPesoCero || requiereReajuste || isStabilizing || guardando}
+                disabledGuardar={!hasReadings || awaitingEmptyPlatform || esPesoCero || requiereReajuste || isStabilizing || guardando}
                 guardando={guardando}
-                hint={guardando ? null : saveHint({ esPesoCero, requiereReajuste, isStabilizing, diferencia })}
+                hint={guardando ? null : saveHint({ hasReadings, awaitingEmptyPlatform, esPesoCero, requiereReajuste, isStabilizing, diferencia })}
                 onGuardar={onGuardar}
             />
 
@@ -62,12 +66,18 @@ interface SaveHint {
  * de la prioridad: sin carga no hay nada que medir, y fuera de rango no
  * importa si el peso todavía se mueve.
  */
-function saveHint({ esPesoCero, requiereReajuste, isStabilizing, diferencia }: {
+function saveHint({ hasReadings, awaitingEmptyPlatform, esPesoCero, requiereReajuste, isStabilizing, diferencia }: {
+    hasReadings: boolean
+    awaitingEmptyPlatform: boolean
     esPesoCero: boolean
     requiereReajuste: boolean
     isStabilizing: boolean
     diferencia: number
 }): SaveHint {
+    if (!hasReadings) return { text: 'La báscula no está enviando lecturas.', tone: 'warning' }
+
+    if (awaitingEmptyPlatform) return { text: 'Retirá el producto de la báscula para registrar el siguiente.', tone: 'muted' }
+
     if (esPesoCero) return { text: 'Colocá el producto sobre la báscula para empezar.', tone: 'muted' }
 
     // Fuera de rango, el signo respecto del ideal dice de qué lado se salió.
