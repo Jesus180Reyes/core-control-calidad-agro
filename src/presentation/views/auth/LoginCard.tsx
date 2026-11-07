@@ -149,9 +149,10 @@ function BrandPanel() {
             </div>
 
             <ul className="relative space-y-3.5">
-                <FeatureItem>Pesaje en vivo desde el indicador</FeatureItem>
-                <FeatureItem>Parámetros de calidad por producto</FeatureItem>
-                <FeatureItem>Historial y reportes de cada lote</FeatureItem>
+                <FeatureItem>Pesaje en vivo desde la báscula</FeatureItem>
+                <FeatureItem>Rango de calidad por lote, con aval del supervisor</FeatureItem>
+                <FeatureItem>Ticket por bulto e historial de cada lote</FeatureItem>
+                <FeatureItem>Planta en vivo, métricas y asistente IA</FeatureItem>
             </ul>
         </aside>
     )
