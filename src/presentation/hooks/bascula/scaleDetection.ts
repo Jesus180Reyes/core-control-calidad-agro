@@ -124,7 +124,29 @@ const winningFormat = (frames: ClassifiedFrame[]): FrameFormat | null => {
     return best
 }
 
-export const scoreSample = (bytes: Uint8Array, byteFormat: ByteFormat): SampleScore | null => {
+export interface ReplyReading {
+    frameFormat: FrameFormat
+    terminator: FrameTerminator
+    peso: number
+    unit: WeightUnit | null
+}
+
+export const readReply = (bytes: Uint8Array, byteFormat: ByteFormat): ReplyReading | null => {
+    if (bytes.length === 0) return null
+
+    const text = decodeBytes(bytes, byteFormat)
+    if (printableRatio(text) < UMBRAL_CONFIANZA) return null
+
+    for (const terminator of FRAME_TERMINATORS) {
+        for (const frame of splitFrames(text, terminator).frames) {
+            const { frameFormat, peso, unidad } = classifyFrame(frame)
+            if (frameFormat && peso !== null) return { frameFormat, terminator, peso, unit: unidad }
+        }
+    }
+    return null
+}
+
+export const scoreSample =(bytes: Uint8Array, byteFormat: ByteFormat): SampleScore | null => {
     if (bytes.length === 0) return null
 
     const text = decodeBytes(bytes, byteFormat)
