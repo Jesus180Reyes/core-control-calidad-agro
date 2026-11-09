@@ -1,7 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type {
     ByteFormat,
+    ManualProfileInput,
     PollCommandId,
+    ProbeResult,
     ScaleProfile,
 } from '#/presentation/types/control-calidad/perfil-bascula.types'
 import {
@@ -9,15 +11,21 @@ import {
     POLL_COMMANDS,
     UMBRAL_CONFIANZA,
     UMBRAL_MINIMO,
+    decodeBytes,
+    pickTerminator,
     readReply,
     scoreSample,
     toSerialOptions,
 } from './scaleDetection'
 import type { ReplyReading, SampleScore } from './scaleDetection'
+import { parseFrame } from './scaleFrameParser'
 
 export const LISTEN_MS = 1200
 export const POLL_REPLY_MS = 400
 export const DETECTION_TIMEOUT_MS = 45_000
+export const PROBE_MS = 3000
+export const PROBE_POLL_INTERVAL_MS = 250
+export const PROBE_VISIBLE_LINES = 3
 
 const ALTERNATE_BYTE_FORMATS: ByteFormat[] = ['7E1', '7O1']
 const POLL_BAUD_RATES = [9600, 2400, 4800, 19200] as const
@@ -313,6 +321,49 @@ export const detectScaleProfile = async (
     }
 }
 
+export const probeScaleProfile = async (
+    port: SerialPort,
+    input: ManualProfileInput,
+    signal: AbortSignal,
+): Promise<ProbeResult | null> => {
+    const session = await openSession(port, toSerialOptions(input))
+    let polling: ReturnType<typeof setInterval> | null = null
+    try {
+        if (input.mode === 'consulta' && input.pollCommand) {
+            const command = POLL_COMMANDS[input.pollCommand]
+            let sending = false
+            const ask = () => {
+                if (sending) return
+                sending = true
+                session.send(command).catch(() => undefined).finally(() => { sending = false })
+            }
+            ask()
+            polling = setInterval(ask, PROBE_POLL_INTERVAL_MS)
+        }
+
+        await sleep(PROBE_MS, signal)
+        if (signal.aborted) return null
+
+        const text = decodeBytes(session.takeBytes(), input.byteFormat)
+        const { terminator, frames } = pickTerminator(text)
+        const readings = frames
+            .map((frame) => parseFrame(frame, input.frameFormat))
+            .filter((reading) => reading.peso !== null)
+        const last = readings.at(-1) ?? null
+        const lines = frames.length > 0 ? frames : text ? [text] : []
+
+        return {
+            lines: lines.slice(-PROBE_VISIBLE_LINES),
+            peso: last?.peso ?? null,
+            unidad: last?.unidad ?? null,
+            terminator,
+        }
+    } finally {
+        if (polling) clearInterval(polling)
+        await session.close()
+    }
+}
+
 export function useScaleDetection() {
     const [progress, setProgress] = useState(0)
     const [isDetecting, setIsDetecting] = useState(false)
@@ -324,6 +375,10 @@ export function useScaleDetection() {
 
     const cancel = useCallback(() => {
         controllerRef.current?.abort()
+    }, [])
+
+    const waitIdle = useCallback(async () => {
+        await runningRef.current
     }, [])
 
     const detect = useCallback(async (puerto: SerialPort): Promise<ScaleProfile | null> => {
@@ -364,5 +419,5 @@ export function useScaleDetection() {
         }
     }, [])
 
-    return { detect, cancel, progress, isDetecting, lastWeight }
+    return { detect, cancel, waitIdle, progress, isDetecting, lastWeight }
 }

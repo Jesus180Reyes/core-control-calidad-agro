@@ -81,7 +81,7 @@ const printableRatio = (text: string): number => {
     return printable / text.length
 }
 
-const pickTerminator = (text: string): { terminator: FrameTerminator; frames: string[] } =>
+export const pickTerminator = (text: string): { terminator: FrameTerminator; frames: string[] } =>
     FRAME_TERMINATORS
         .map((terminator) => ({ terminator, frames: splitFrames(text, terminator).frames }))
         .reduce((best, candidate) => (candidate.frames.length > best.frames.length ? candidate : best))

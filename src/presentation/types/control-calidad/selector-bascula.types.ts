@@ -17,6 +17,8 @@
  */
 export type ClaveBascula = string
 
+export type SelectorStep = 'lista' | 'alias' | 'detectando' | 'resultado' | 'fallo' | 'manual'
+
 export interface BasculaDisponible {
     clave: ClaveBascula
     /** Nombre que puso el operario. `null` si la báscula nunca recibió alias. */

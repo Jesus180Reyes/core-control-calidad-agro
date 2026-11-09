@@ -2,7 +2,7 @@
 import { act, cleanup, renderHook } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { ByteFormat } from '#/presentation/types/control-calidad/perfil-bascula.types'
-import { DETECTION_TIMEOUT_MS, useScaleDetection } from './useScaleDetection'
+import { DETECTION_TIMEOUT_MS, PROBE_MS, probeScaleProfile, useScaleDetection } from './useScaleDetection'
 
 interface ConfigBascula {
     baudRate: number
@@ -224,6 +224,52 @@ describe('useScaleDetection', () => {
         expect(result.current.isDetecting).toBe(false)
 
         await expect(puerto.open({ baudRate: 9600 })).resolves.toBeUndefined()
+    })
+
+    it('probar a mano devuelve las últimas tres líneas crudas y el peso, y deja el puerto cerrado', async () => {
+        const puerto = new PuertoDetectable({ baudRate: 4800, byteFormat: '8N1', trama: '  7.50 lb\r' })
+        let resultado: unknown
+        const promesa = probeScaleProfile(puerto as unknown as SerialPort, {
+            baudRate: 4800, byteFormat: '8N1', mode: 'continuo', pollCommand: null, frameFormat: 'texto',
+        }, new AbortController().signal).then((valor) => { resultado = valor })
+
+        await vi.advanceTimersByTimeAsync(PROBE_MS + 100)
+        await promesa
+
+        expect(resultado).toEqual({
+            lines: ['  7.50 lb', '  7.50 lb', '  7.50 lb'], peso: 7.5, unidad: 'lb', terminator: '\r',
+        })
+        expect(puerto.abierto).toBe(false)
+    })
+
+    it('probar a mano en modo consulta manda el comando y lee la respuesta', async () => {
+        const puerto = new PuertoDetectable({
+            baudRate: 9600, byteFormat: '8N1', trama: 'S S      3.20 kg\r\n', comando: 'SI\r\n',
+        })
+        let resultado: unknown
+        const promesa = probeScaleProfile(puerto as unknown as SerialPort, {
+            baudRate: 9600, byteFormat: '8N1', mode: 'consulta', pollCommand: 'sics', frameFormat: 'texto',
+        }, new AbortController().signal).then((valor) => { resultado = valor })
+
+        await vi.advanceTimersByTimeAsync(PROBE_MS + 100)
+        await promesa
+
+        expect(resultado).toMatchObject({ peso: 3.2, unidad: 'kg', terminator: '\r\n' })
+        expect(puerto.comandosRecibidos.length).toBeGreaterThan(1)
+        expect(puerto.abierto).toBe(false)
+    })
+
+    it('probar a mano con datos equivocados no lee peso pero muestra lo que llegó', async () => {
+        const puerto = new PuertoDetectable({ baudRate: 9600, byteFormat: '8N1', trama: '#@!&%\r\n' })
+        let resultado: unknown
+        const promesa = probeScaleProfile(puerto as unknown as SerialPort, {
+            baudRate: 9600, byteFormat: '8N1', mode: 'continuo', pollCommand: null, frameFormat: 'texto',
+        }, new AbortController().signal).then((valor) => { resultado = valor })
+
+        await vi.advanceTimersByTimeAsync(PROBE_MS + 100)
+        await promesa
+
+        expect(resultado).toMatchObject({ peso: null, lines: ['#@!&%', '#@!&%', '#@!&%'] })
     })
 
     it('al desmontar cancela la detección y cierra el puerto', async () => {

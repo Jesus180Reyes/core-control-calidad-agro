@@ -18,3 +18,12 @@ export interface ScaleProfile {
     source: ScaleProfileSource
     detectedAt: string
 }
+
+export type ManualProfileInput = Pick<ScaleProfile, 'baudRate' | 'byteFormat' | 'mode' | 'pollCommand' | 'frameFormat'>
+
+export interface ProbeResult {
+    lines: string[]
+    peso: number | null
+    unidad: WeightUnit | null
+    terminator: FrameTerminator
+}
