@@ -1,6 +1,6 @@
 # SPEC 26 — Autodetección de básculas
 
-> **Estado:** Approved
+> **Estado:** Implemented
 > **Depende de:** SPEC 01 (selector de báscula con dialog propio)
 > **Fecha:** 2026-11-07
 > **Objetivo:** Que al autorizar una báscula el sistema descubra solo cómo hablarle (velocidad, formato del byte, si transmite sola o hay que pedirle el peso, formato de la trama y unidad) y lo guarde como perfil, para que cualquier indicador funcione sin que nadie en planta configure nada.
