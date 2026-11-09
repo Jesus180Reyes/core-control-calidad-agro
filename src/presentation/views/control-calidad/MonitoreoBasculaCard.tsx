@@ -2,6 +2,14 @@ import { Scale } from "lucide-react"
 
 import { EstadoAprobado, EstadoDesviado, EstadoEspera } from "#/presentation/components/control-calidad/BasculaStates"
 import { CustomButton } from "#/presentation/components/shared/button/CustomButton"
+import type { WeightUnit } from "#/presentation/types/control-calidad/perfil-bascula.types"
+
+const UNIT_NAMES: Record<WeightUnit, string> = {
+    kg: 'kilogramos',
+    lb: 'libras',
+    g: 'gramos',
+    oz: 'onzas',
+}
 
 interface MonitoreoBasculaCardProps {
     pesoActual: number
@@ -14,6 +22,8 @@ interface MonitoreoBasculaCardProps {
     guardando: boolean
     hasReadings: boolean
     awaitingEmptyPlatform: boolean
+    scaleUnit: WeightUnit | null
+    unitMismatch: boolean
     onGuardar?: () => void
 }
 
@@ -26,10 +36,15 @@ export function MonitoreoBasculaCard({
     guardando,
     hasReadings,
     awaitingEmptyPlatform,
+    scaleUnit,
+    unitMismatch,
     onGuardar,
 }: MonitoreoBasculaCardProps) {
 
     const esPesoCero = pesoActual === 0
+    const unitMismatchText = unitMismatch && scaleUnit
+        ? `La báscula pesa en ${UNIT_NAMES[scaleUnit]} y el lote está en ${unidad.toLowerCase()}. Cambie la unidad en la báscula o elija otro lote.`
+        : null
 
     return (
         <div className="relative w-full min-w-95 md:min-w-120 max-w-xl lg:max-w-2xl mx-auto h-full bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800/80 rounded-[3rem] p-10 lg:p-14 shadow-xl shadow-slate-100/50 dark:shadow-none flex flex-col justify-between transition-all space-y-8 lg:space-y-12">
@@ -46,9 +61,9 @@ export function MonitoreoBasculaCard({
             </div>
 
             <PanelAcciones
-                disabledGuardar={!hasReadings || awaitingEmptyPlatform || esPesoCero || requiereReajuste || isStabilizing || guardando}
+                disabledGuardar={!hasReadings || unitMismatch || awaitingEmptyPlatform || esPesoCero || requiereReajuste || isStabilizing || guardando}
                 guardando={guardando}
-                hint={guardando ? null : saveHint({ hasReadings, awaitingEmptyPlatform, esPesoCero, requiereReajuste, isStabilizing, diferencia })}
+                hint={guardando ? null : saveHint({ hasReadings, unitMismatchText, awaitingEmptyPlatform, esPesoCero, requiereReajuste, isStabilizing, diferencia })}
                 onGuardar={onGuardar}
             />
 
@@ -66,8 +81,9 @@ interface SaveHint {
  * de la prioridad: sin carga no hay nada que medir, y fuera de rango no
  * importa si el peso todavía se mueve.
  */
-function saveHint({ hasReadings, awaitingEmptyPlatform, esPesoCero, requiereReajuste, isStabilizing, diferencia }: {
+function saveHint({ hasReadings, unitMismatchText, awaitingEmptyPlatform, esPesoCero, requiereReajuste, isStabilizing, diferencia }: {
     hasReadings: boolean
+    unitMismatchText: string | null
     awaitingEmptyPlatform: boolean
     esPesoCero: boolean
     requiereReajuste: boolean
@@ -75,6 +91,8 @@ function saveHint({ hasReadings, awaitingEmptyPlatform, esPesoCero, requiereReaj
     diferencia: number
 }): SaveHint {
     if (!hasReadings) return { text: 'La báscula no está enviando lecturas.', tone: 'warning' }
+
+    if (unitMismatchText) return { text: unitMismatchText, tone: 'warning' }
 
     if (awaitingEmptyPlatform) return { text: 'Retirá el producto de la báscula para registrar el siguiente.', tone: 'muted' }
 

@@ -3,6 +3,8 @@ import type { OperacionData, ParametrosData } from "#/presentation/types/control
 import type { Cliente } from "#/presentation/types/clientes/clientes.types"
 import type { Lote } from "#/presentation/types/lotes/lotes.types"
 import type { AutorizacionSupervisor, PesajeCreado } from "#/presentation/types/pesajes/pesajes.types"
+import type { ScaleProfile } from "#/presentation/types/control-calidad/perfil-bascula.types"
+import type { ClaveBascula } from "#/presentation/types/control-calidad/selector-bascula.types"
 import { useEffect, useMemo, useRef, useState } from "react"
 import { esSolicitudInvalida } from "#/infrastructure/http/http-client"
 import { usePesajes } from "#/presentation/hooks/pesajes/usePesajes"
@@ -11,11 +13,16 @@ import { usePrintEtiqueta } from "#/presentation/hooks/pesajes/usePrintEtiqueta"
 import { useSerialScale } from "./useSerialScale"
 import { useSelectorBascula } from "./useSelectorBascula"
 import { leerAlias, leerPreferida } from "./almacenamientoBasculas"
+import { DEFAULT_SCALE_PROFILE } from "./scaleDetection"
+import { isUnitMismatch, unitFromLote } from "./scaleUnits"
 
 /** Descargas fallidas que habilitan la salida de emergencia del ticket. */
 const FALLOS_PARA_OMITIR = 2
 
-const BAUD_RATE = 9600
+interface PendingConnection {
+    puerto: SerialPort
+    resolve: (conectado: boolean) => void
+}
 
 /**
  * Lo que dura a la vista el aviso de "báscula conectada". Menos que la ventana
@@ -50,17 +57,23 @@ export function useControlCalidad(cliente: Cliente | null, lote: Lote | null) {
      * para saber a cuál reconectar. La conexión se pasa por ref para romper esa
      * dependencia circular, igual que hace `useSerialScale` con su reconexión.
      */
-    const conectarPuertoRef = useRef<(puerto: SerialPort) => Promise<boolean>>(async () => false)
+    const conectarPuertoRef = useRef<(puerto: SerialPort, perfil: ScaleProfile) => Promise<boolean>>(async () => false)
 
     const selector = useSelectorBascula({
-        onSeleccionar: (puerto) => conectarPuertoRef.current(puerto),
+        onSeleccionar: (puerto, perfil) => conectarPuertoRef.current(puerto, perfil),
     })
 
     /** El aviso animado de conexión exitosa, con el alias de la báscula que abrió. */
     const [avisoConexion, setAvisoConexion] = useState<{ alias: string | null } | null>(null)
 
+    const [perfilActivo, setPerfilActivo] = useState<ScaleProfile>(DEFAULT_SCALE_PROFILE)
+    const [conexionPendiente, setConexionPendiente] = useState<PendingConnection | null>(null)
+    const [redeteccionPendiente, setRedeteccionPendiente] = useState<boolean>(false)
+    const basculasRedetectadasRef = useRef<Set<ClaveBascula>>(new Set())
+
     const scale = useSerialScale({
-        baudRate: BAUD_RATE,
+        perfil: perfilActivo,
+        onTramaIlegible: () => setRedeteccionPendiente(true),
         umbralCero: 2,
         segundosEstabilizacion: 5,
         // Tolerancia de ruido durante la ventana de estabilización.
@@ -97,8 +110,18 @@ export function useControlCalidad(cliente: Cliente | null, lote: Lote | null) {
     }, [scale.isConnected])
 
     useEffect(() => {
-        conectarPuertoRef.current = (puerto) => scale.connectSerial({ puerto })
+        conectarPuertoRef.current = (puerto, perfil) => new Promise<boolean>((resolve) => {
+            setPerfilActivo(perfil)
+            setConexionPendiente({ puerto, resolve })
+        })
     })
+
+    const { connectSerial } = scale
+    useEffect(() => {
+        if (conexionPendiente === null) return
+        setConexionPendiente(null)
+        void connectSerial({ puerto: conexionPendiente.puerto }).then(conexionPendiente.resolve)
+    }, [conexionPendiente, connectSerial])
 
     /** Evita un segundo intento con el doble montaje de React en desarrollo. */
     const autoConexionIntentadaRef = useRef<boolean>(false)
@@ -113,9 +136,11 @@ export function useControlCalidad(cliente: Cliente | null, lote: Lote | null) {
         void (async () => {
             const puerto = await selector.resolverPuertoPreferido()
             if (!puerto) return
-            await conectarPuertoRef.current(puerto)
+            await conectarPuertoRef.current(puerto, selector.resolverPerfilPreferido())
         })()
-    }, [selector.resolverPuertoPreferido])
+    }, [selector.resolverPuertoPreferido, selector.resolverPerfilPreferido])
+
+    const unitMismatch = isUnitMismatch(scale.unidadLeida, unitFromLote(lote?.unidad_medida))
 
     const diferencia = scale.pesoActual - parametros.ideal
     const esBajoRango = scale.pesoActual < parametros.minimo
@@ -164,12 +189,13 @@ export function useControlCalidad(cliente: Cliente | null, lote: Lote | null) {
         setMostrarBloqueo(
             autorizacion === null &&
             pesajeRegistrado === null &&
+            !unitMismatch &&
             esAltoRango &&
             scale.hayFlujoDatos &&
             !scale.isStabilizing &&
             scale.pesoEstable !== null,
         )
-    }, [autorizacion, pesajeRegistrado, esAltoRango, scale.hayFlujoDatos, scale.isStabilizing, scale.pesoEstable])
+    }, [autorizacion, pesajeRegistrado, unitMismatch, esAltoRango, scale.hayFlujoDatos, scale.isStabilizing, scale.pesoEstable])
 
     const pesajes = usePesajes(lote)
     const { validarPin } = useValidateSupervisorPin()
@@ -179,9 +205,31 @@ export function useControlCalidad(cliente: Cliente | null, lote: Lote | null) {
     const [taraAbierta, setTaraAbierta] = useState<boolean>(false)
 
     const solicitarTara = () => {
-        if (scale.pesoEstable === null) return
+        if (scale.pesoEstable === null || unitMismatch) return
         setTaraAbierta(true)
     }
+
+    const { disconnectSerial } = scale
+    const { volverADetectar, mostrarFallo, abrir: abrirSelector } = selector
+    useEffect(() => {
+        if (!redeteccionPendiente || taraAbierta || pesajeRegistrado !== null) return
+        setRedeteccionPendiente(false)
+
+        void (async () => {
+            await disconnectSerial()
+            const clave = leerPreferida()
+            if (!clave) {
+                abrirSelector()
+                return
+            }
+            if (basculasRedetectadasRef.current.has(clave)) {
+                await mostrarFallo(clave)
+                return
+            }
+            basculasRedetectadasRef.current.add(clave)
+            await volverADetectar(clave)
+        })()
+    }, [redeteccionPendiente, taraAbierta, pesajeRegistrado, disconnectSerial, abrirSelector, mostrarFallo, volverADetectar])
 
     /**
      * Guarda la muestra ya confirmada —no la lectura viva— y solo si el
@@ -303,10 +351,11 @@ export function useControlCalidad(cliente: Cliente | null, lote: Lote | null) {
             requiereReajuste,
         },
         guardando: pesajes.guardando,
+        unitMismatch,
         conexion: {
             abierta: avisoConexion !== null,
             alias: avisoConexion?.alias ?? null,
-            baudRate: BAUD_RATE,
+            baudRate: perfilActivo.baudRate,
             autoCloseMs: AVISO_CONEXION_MS,
             cerrar: () => setAvisoConexion(null),
         },
