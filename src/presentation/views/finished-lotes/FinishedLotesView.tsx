@@ -4,13 +4,18 @@ import { EmptyState } from '#/presentation/components/shared/EmptyState'
 import { useAiSummary } from '#/presentation/hooks/finished-lotes/useAiSummary'
 import { useDownloadActa } from '#/presentation/hooks/finished-lotes/useDownloadActa'
 import { useFinishedLotes } from '#/presentation/hooks/finished-lotes/useFinishedLotes'
+import {
+    countActiveFilters,
+    type FiltrosLotesFinalizados,
+} from '#/presentation/schema/finished-lotes/filtrosLotesFinalizadosSchema'
 
 interface FinishedLotesViewProps {
     clienteId: number
+    filtros: FiltrosLotesFinalizados
 }
 
-export function FinishedLotesView({ clienteId }: FinishedLotesViewProps) {
-    const { lotes } = useFinishedLotes({ clienteId })
+export function FinishedLotesView({ clienteId, filtros }: FinishedLotesViewProps) {
+    const { lotes } = useFinishedLotes({ clienteId, filtros })
     const { descargarActa, loteDescargando } = useDownloadActa()
     const {
         lote: loteDelResumen,
@@ -21,6 +26,15 @@ export function FinishedLotesView({ clienteId }: FinishedLotesViewProps) {
         reintentarResumen,
         cerrarResumen,
     } = useAiSummary()
+
+    if (lotes.length === 0 && countActiveFilters(filtros) > 0) {
+        return (
+            <EmptyState
+                title="Ningún lote coincide con los filtros"
+                description="Probá con otros filtros o limpialos para ver todos los lotes finalizados."
+            />
+        )
+    }
 
     if (lotes.length === 0) {
         return (

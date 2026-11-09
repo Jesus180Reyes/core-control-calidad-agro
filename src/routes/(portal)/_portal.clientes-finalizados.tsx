@@ -1,9 +1,11 @@
-import { Suspense } from 'react'
+import { Suspense, useState } from 'react'
 import { createFileRoute, redirect, useLocation } from '@tanstack/react-router'
 
 import { ClientesHeader } from '#/presentation/components/clientes/ClientesHeader'
 import { FinishedLotesReportButton } from '#/presentation/components/lotes/FinishedLotesReportButton'
 import { LoadingState } from '#/presentation/components/shared/LoadingState'
+import type { FiltrosLotesFinalizados } from '#/presentation/schema/finished-lotes/filtrosLotesFinalizadosSchema'
+import { FinishedLotesFiltersBar } from '#/presentation/views/finished-lotes/FinishedLotesFiltersBar'
 import { FinishedLotesView } from '#/presentation/views/finished-lotes/FinishedLotesView'
 
 export const Route = createFileRoute('/(portal)/_portal/clientes-finalizados')({
@@ -21,6 +23,7 @@ export const Route = createFileRoute('/(portal)/_portal/clientes-finalizados')({
 function RouteComponent() {
     const { clienteId } = Route.useSearch()
     const cliente = useLocation({ select: (location) => location.state.cliente })
+    const [filtros, setFiltros] = useState<FiltrosLotesFinalizados>({})
 
     return (
         <div className="space-y-8">
@@ -42,7 +45,11 @@ function RouteComponent() {
             />
 
             <Suspense fallback={<LoadingState />}>
-                <FinishedLotesView clienteId={clienteId} />
+                <FinishedLotesFiltersBar filtros={filtros} onApply={setFiltros} />
+            </Suspense>
+
+            <Suspense fallback={<LoadingState />}>
+                <FinishedLotesView clienteId={clienteId} filtros={filtros} />
             </Suspense>
         </div>
     )
