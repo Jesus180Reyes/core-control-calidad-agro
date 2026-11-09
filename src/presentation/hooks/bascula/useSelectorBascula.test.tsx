@@ -394,6 +394,20 @@ describe('useSelectorBascula con detección', () => {
         expect(result.current.abierto).toBe(true)
     })
 
+    it('mostrarFallo abre el dialog directo en el fallo, sin detectar', async () => {
+        instalarSerial([puertoA()])
+
+        const { result } = montarHook()
+        await waitFor(() => { expect(result.current.soportado).toBe(true) })
+
+        await act(async () => { await result.current.mostrarFallo('0403:6001') })
+
+        expect(result.current.abierto).toBe(true)
+        expect(result.current.paso).toBe('fallo')
+        expect(result.current.enDeteccion?.clave).toBe('0403:6001')
+        expect(deteccion.detect).not.toHaveBeenCalled()
+    })
+
     it('Configurar a mano sólo guarda después de una prueba que leyó un peso', async () => {
         const a = puertoA()
         instalarSerial([a])

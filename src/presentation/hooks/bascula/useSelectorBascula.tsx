@@ -251,6 +251,18 @@ export function useSelectorBascula({ onSeleccionar }: UseSelectorBasculaProps) {
         await correrDeteccion(bascula)
     }, [buscarBascula, correrDeteccion])
 
+    const mostrarFallo = useCallback(async (clave: ClaveBascula): Promise<void> => {
+        const bascula = await buscarBascula(clave)
+        if (!bascula || !montadoRef.current) return
+        detenerTrabajo()
+        setEnDeteccion(bascula)
+        setPerfilDetectado(null)
+        setPruebaManual(null)
+        setPendienteDeAlias(null)
+        setPaso('fallo')
+        setAbierto(true)
+    }, [buscarBascula, detenerTrabajo])
+
     const usarResultado = useCallback(async (): Promise<boolean> => {
         if (!enDeteccion || !perfilDetectado) return false
         saveProfile(enDeteccion.clave, perfilDetectado)
@@ -370,6 +382,7 @@ export function useSelectorBascula({ onSeleccionar }: UseSelectorBasculaProps) {
         perfilDetectado,
         lecturaDetectada: deteccion.lastWeight,
         volverADetectar,
+        mostrarFallo,
         cancelarDeteccion: volverALista,
         usarResultado,
         reintentar,
