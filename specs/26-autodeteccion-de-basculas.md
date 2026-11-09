@@ -271,27 +271,27 @@ Ocurre **como mucho una vez por báscula por carga de pantalla**: si después de
 
 ## Criterios de aceptación
 
-- [ ] `npx tsc --noEmit` y `npm run test` pasan, con los tests nuevos de `scaleFrameParser`, `scaleUnits`, `scaleDetection` y `useScaleDetection`.
-- [ ] Autorizar una báscula nueva y ponerle alias pasa a "Detectando la báscula…" sin ningún paso más.
-- [ ] Con un indicador configurado a 2400 baud (o cualquier velocidad de la lista distinta de 9600), la detección termina en "Báscula reconocida" y, al usarla, el peso en `/control-calidad` coincide con el display del indicador.
-- [ ] Con un indicador en 7E1, lo mismo.
-- [ ] Con una báscula que manda tramas invertidas (`=0.0510`), el peso que se pinta es el del display (105.0), no 0.051.
-- [ ] Con una báscula Toledo en salida continua, el peso que se pinta es el del display, con su punto decimal.
-- [ ] Con una báscula que sólo contesta a un comando (por ejemplo SICS `SI`), la detección termina en modo consulta y el peso se actualiza en pantalla sin tocar nada.
-- [ ] La detección con la plataforma vacía reconoce la báscula.
-- [ ] Con la báscula apagada, la detección termina en el paso de fallo en 45 s como mucho, con **Reintentar**.
-- [ ] **Cancelar** durante la detección vuelve a la lista, no guarda perfil y deja el puerto cerrado: elegir la báscula de nuevo no falla con "port is already open".
-- [ ] En el paso de fallo, cualquier usuario ve **Configurar a mano**; **Probar** muestra las líneas crudas, y **Guardar** queda deshabilitado hasta una prueba con peso.
-- [ ] Recargar `/control-calidad` con una báscula que ya tiene perfil la conecta sola, sin detectar ni abrir el dialog.
-- [ ] Una báscula autorizada antes de este spec, a 9600 8N1, sigue conectándose sola al recargar, como antes.
-- [ ] Cambiar la velocidad del indicador con la báscula conectada dispara, a los ~5 s, la desconexión y el dialog en "Detectando la báscula…". Al terminar, el peso vuelve.
-- [ ] Si la re-detección automática no resuelve la basura, la segunda vez aparece el paso de fallo y no se vuelve a detectar en bucle.
-- [ ] Desenchufar el cable de datos con el puerto abierto muestra "sin señal" como hoy y **no** dispara la re-detección.
-- [ ] Con una báscula que informa `kg` y un lote en `LIBRAS`, **Registrar pesaje** está deshabilitado, aparece el aviso de unidad, y una muestra estable no abre ni la tara ni el `BloqueoCriticoDialog`.
-- [ ] Con una báscula que no informa unidad, un lote en `LIBRAS` permite registrar como hoy.
-- [ ] **Volver a detectar** en una fila de la lista corre la detección y reemplaza el perfil guardado.
-- [ ] Los perfiles sobreviven al cierre del navegador (`bascula-perfil:v1` en `localStorage`).
-- [ ] El manual tiene las secciones nuevas y la línea en **Sin publicar**, y el README marca las capturas como **Rehacer**.
+- [X] `npx tsc --noEmit` y `npm run test` pasan, con los tests nuevos de `scaleFrameParser`, `scaleUnits`, `scaleDetection` y `useScaleDetection`.
+- [X] Autorizar una báscula nueva y ponerle alias pasa a "Detectando la báscula…" sin ningún paso más.
+- [X] Con un indicador configurado a 2400 baud (o cualquier velocidad de la lista distinta de 9600), la detección termina en "Báscula reconocida" y, al usarla, el peso en `/control-calidad` coincide con el display del indicador.
+- [X] Con un indicador en 7E1, lo mismo.
+- [X] Con una báscula que manda tramas invertidas (`=0.0510`), el peso que se pinta es el del display (105.0), no 0.051.
+- [X] Con una báscula Toledo en salida continua, el peso que se pinta es el del display, con su punto decimal.
+- [X] Con una báscula que sólo contesta a un comando (por ejemplo SICS `SI`), la detección termina en modo consulta y el peso se actualiza en pantalla sin tocar nada.
+- [X] La detección con la plataforma vacía reconoce la báscula.
+- [X] Con la báscula apagada, la detección termina en el paso de fallo en 45 s como mucho, con **Reintentar**.
+- [X] **Cancelar** durante la detección vuelve a la lista, no guarda perfil y deja el puerto cerrado: elegir la báscula de nuevo no falla con "port is already open".
+- [X] En el paso de fallo, cualquier usuario ve **Configurar a mano**; **Probar** muestra las líneas crudas, y **Guardar** queda deshabilitado hasta una prueba con peso.
+- [X] Recargar `/control-calidad` con una báscula que ya tiene perfil la conecta sola, sin detectar ni abrir el dialog.
+- [X] Una báscula autorizada antes de este spec, a 9600 8N1, sigue conectándose sola al recargar, como antes.
+- [X] Cambiar la velocidad del indicador con la báscula conectada dispara, a los ~5 s, la desconexión y el dialog en "Detectando la báscula…". Al terminar, el peso vuelve.
+- [X] Si la re-detección automática no resuelve la basura, la segunda vez aparece el paso de fallo y no se vuelve a detectar en bucle.
+- [X] Desenchufar el cable de datos con el puerto abierto muestra "sin señal" como hoy y **no** dispara la re-detección.
+- [X] Con una báscula que informa `kg` y un lote en `LIBRAS`, **Registrar pesaje** está deshabilitado, aparece el aviso de unidad, y una muestra estable no abre ni la tara ni el `BloqueoCriticoDialog`.
+- [X] Con una báscula que no informa unidad, un lote en `LIBRAS` permite registrar como hoy.
+- [X] **Volver a detectar** en una fila de la lista corre la detección y reemplaza el perfil guardado.
+- [X] Los perfiles sobreviven al cierre del navegador (`bascula-perfil:v1` en `localStorage`).
+- [X] El manual tiene las secciones nuevas y la línea en **Sin publicar**, y el README marca las capturas como **Rehacer**.
 
 ---
 
