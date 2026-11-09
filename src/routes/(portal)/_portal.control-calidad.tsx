@@ -152,6 +152,21 @@ function ControlCalidadPage() {
                 onSeleccionar={(clave) => void selector.seleccionar(clave)}
                 onAutorizarNueva={selector.autorizarNueva}
                 onConfirmarAlias={(alias) => void selector.confirmarAlias(alias)}
+                step={selector.paso}
+                detectionProgress={selector.progresoDeteccion}
+                detectedProfile={selector.perfilDetectado}
+                detectedWeight={selector.lecturaDetectada}
+                probing={selector.probando}
+                manualProbe={selector.pruebaManual}
+                onRedetect={(clave) => void selector.volverADetectar(clave)}
+                onCancelDetection={selector.cancelarDeteccion}
+                onUseResult={() => void selector.usarResultado()}
+                onRetry={() => void selector.reintentar()}
+                onConfigureManually={selector.configurarAMano}
+                onProbe={(input) => void selector.probarManual(input)}
+                onDiscardProbe={selector.descartarPrueba}
+                onSaveManual={() => void selector.guardarManual()}
+                onLeaveManual={selector.salirDelManual}
             />
 
             <ScaleConnectedDialog
