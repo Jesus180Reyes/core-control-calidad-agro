@@ -4,6 +4,12 @@ import type {
     InfoDesconexion,
     MotivoDesconexion,
 } from '#/presentation/types/control-calidad/bascula.types'
+import type { ScaleProfile, WeightUnit } from '#/presentation/types/control-calidad/perfil-bascula.types'
+import { POLL_COMMANDS, decodeBytes, toSerialOptions } from './scaleDetection'
+import { parseFrame, splitFrames } from './scaleFrameParser'
+
+export const TRAMA_ILEGIBLE_MS = 5000
+export const INTERVALO_CONSULTA_MS = 250
 
 type Temporizador = ReturnType<typeof setTimeout>
 type Paridad = 'none' | 'even' | 'odd'
@@ -66,6 +72,8 @@ export interface UseSerialScaleProps {
     onDesconexion?: (info: InfoDesconexion) => void
     /** Se dispara al abrir el puerto correctamente. */
     onConexion?: () => void
+    perfil?: ScaleProfile
+    onTramaIlegible?: () => void
 }
 
 /**
@@ -164,6 +172,8 @@ export function useSerialScale({
     onPesajeEstable,
     onDesconexion,
     onConexion,
+    perfil,
+    onTramaIlegible,
 }: UseSerialScaleProps = {}) {
 
     // ── Estado expuesto a la vista ────────────────────────────────────────────
@@ -178,6 +188,7 @@ export function useSerialScale({
     const [senalRestablecida, setSenalRestablecida] = useState<boolean>(false)
     const [intentoReconexion, setIntentoReconexion] = useState<number>(0)
     const [awaitingEmptyPlatform, setAwaitingEmptyPlatform] = useState<boolean>(false)
+    const [unidadLeida, setUnidadLeida] = useState<WeightUnit | null>(null)
 
     // ── Configuración viva (evita closures obsoletos en el bucle de lectura) ──
     const configRef = useRef({
@@ -186,9 +197,9 @@ export function useSerialScale({
         factorConversion, normalizarCero, timeoutSinDatosMs,
         autoReconectar, maxIntentosReconexion, usarFlagEstabilidad,
         minStableReadings, maxReadingAgeMs,
-        resolverPuertoAutorizado,
+        resolverPuertoAutorizado, perfil,
     })
-    const callbacksRef = useRef({ onPesajeEstable, onDesconexion, onConexion })
+    const callbacksRef = useRef({ onPesajeEstable, onDesconexion, onConexion, onTramaIlegible })
 
     useEffect(() => {
         configRef.current = {
@@ -197,14 +208,17 @@ export function useSerialScale({
             factorConversion, normalizarCero, timeoutSinDatosMs,
             autoReconectar, maxIntentosReconexion, usarFlagEstabilidad,
             minStableReadings, maxReadingAgeMs,
-            resolverPuertoAutorizado,
+            resolverPuertoAutorizado, perfil,
         }
-        callbacksRef.current = { onPesajeEstable, onDesconexion, onConexion }
+        callbacksRef.current = { onPesajeEstable, onDesconexion, onConexion, onTramaIlegible }
     })
 
     // ── Referencias de trabajo ────────────────────────────────────────────────
     const portRef = useRef<SerialPort | null>(null)
     const readerRef = useRef<ReadableStreamDefaultReader<Uint8Array> | null>(null)
+    const writerRef = useRef<WritableStreamDefaultWriter<Uint8Array> | null>(null)
+    const consultaTimerRef = useRef<ReturnType<typeof setInterval> | null>(null)
+    const tramaIlegibleAvisadaRef = useRef<boolean>(false)
     const huellaRef = useRef<HuellaPuerto | null>(null)
 
     /** Promesa del bucle de lectura activo (se espera antes de cerrar el puerto). */
@@ -477,10 +491,47 @@ export function useSerialScale({
     }, [marcarSenalRestablecida])
 
     // ── Cierre del puerto ─────────────────────────────────────────────────────
+    const detenerConsulta = useCallback(() => {
+        if (consultaTimerRef.current) {
+            clearInterval(consultaTimerRef.current)
+            consultaTimerRef.current = null
+        }
+    }, [])
+
+    const liberarWriter = useCallback(() => {
+        const writer = writerRef.current
+        writerRef.current = null
+        if (!writer) return
+        try { writer.releaseLock() } catch { return }
+    }, [])
+
+    const iniciarConsulta = useCallback((puerto: SerialPort, comando: string) => {
+        detenerConsulta()
+        const escribible = puerto.writable
+        if (!escribible) return
+
+        const writer = escribible.getWriter()
+        writerRef.current = writer
+        const bytes = Uint8Array.from(comando, (caracter) => caracter.charCodeAt(0) & 0xff)
+        let escribiendo = false
+
+        const consultar = () => {
+            if (escribiendo || writerRef.current !== writer) return
+            escribiendo = true
+            writer.write(bytes)
+                .catch(() => undefined)
+                .finally(() => { escribiendo = false })
+        }
+
+        consultar()
+        consultaTimerRef.current = setInterval(consultar, INTERVALO_CONSULTA_MS)
+    }, [detenerConsulta])
+
     const cerrarPuerto = useCallback(async () => {
         seguirLeyendoRef.current = false
         detenerWatchdog()
         detenerTicker()
+        detenerConsulta()
 
         const reader = readerRef.current
         if (reader) {
@@ -503,13 +554,16 @@ export function useSerialScale({
                 try { readerRef.current.releaseLock() } catch { /* ya liberado */ }
                 readerRef.current = null
             }
+            liberarWriter()
             try {
                 await puerto.close()
             } catch (err) {
                 console.warn('No se pudo cerrar el puerto limpiamente:', err)
             }
+        } else {
+            liberarWriter()
         }
-    }, [detenerTicker, detenerWatchdog])
+    }, [detenerConsulta, detenerTicker, detenerWatchdog, liberarWriter])
 
     // ── Reconexión automática ─────────────────────────────────────────────────
     const buscarPuertoAutorizado = useCallback(async (): Promise<SerialPort | null> => {
@@ -577,9 +631,41 @@ export function useSerialScale({
     // ── Bucle de lectura ──────────────────────────────────────────────────────
     const bucleLectura = useCallback(async (puerto: SerialPort) => {
         const decoder = new TextDecoder()
+        const perfilConexion = configRef.current.perfil
         let buffer = ''
         let motivo: MotivoDesconexion | null = null
         let mensaje = ''
+        let ilegibleDesde: number | null = null
+
+        const leerConPerfil = (perfilActivo: ScaleProfile, bytes: Uint8Array) => {
+            buffer += decodeBytes(bytes, perfilActivo.byteFormat)
+            const { frames, rest } = splitFrames(buffer, perfilActivo.terminator)
+            buffer = rest.length > 1024 ? rest.slice(-256) : rest
+
+            let huboTramaValida = false
+            for (const trama of frames) {
+                const { peso, unidad } = parseFrame(trama, perfilActivo.frameFormat)
+                if (peso === null) continue
+                huboTramaValida = true
+                setUnidadLeida(unidad)
+                procesarLectura(peso, null)
+            }
+
+            if (huboTramaValida) {
+                ilegibleDesde = null
+                return
+            }
+            const ahora = Date.now()
+            ilegibleDesde ??= ahora
+            if (tramaIlegibleAvisadaRef.current || ahora - ilegibleDesde < TRAMA_ILEGIBLE_MS) return
+
+            tramaIlegibleAvisadaRef.current = true
+            try {
+                callbacksRef.current.onTramaIlegible?.()
+            } catch (err) {
+                console.error('Error en onTramaIlegible:', err)
+            }
+        }
 
         try {
             const legible = puerto.readable
@@ -601,6 +687,10 @@ export function useSerialScale({
                     if (!value) continue
 
                     registrarTrama()
+                    if (perfilConexion) {
+                        leerConPerfil(perfilConexion, value)
+                        continue
+                    }
                     buffer += decoder.decode(value, { stream: true })
 
                     // El indicador puede terminar líneas con \r\n, \r o \n.
@@ -659,10 +749,14 @@ export function useSerialScale({
             setEstado(silencioso ? 'reconectando' : 'conectando')
 
             const puerto = puertoPrevio ?? await navigator.serial.requestPort()
-            const { baudRate: br, dataBits: db, stopBits: sb, parity: pr, flowControl: fc } = configRef.current
-            await puerto.open({ baudRate: br, dataBits: db, stopBits: sb, parity: pr, flowControl: fc })
+            const { baudRate: br, dataBits: db, stopBits: sb, parity: pr, flowControl: fc, perfil: perfilActivo } = configRef.current
+            await puerto.open(perfilActivo
+                ? toSerialOptions(perfilActivo)
+                : { baudRate: br, dataBits: db, stopBits: sb, parity: pr, flowControl: fc })
 
             portRef.current = puerto
+            tramaIlegibleAvisadaRef.current = false
+            setUnidadLeida(null)
             const info = puerto.getInfo()
             huellaRef.current = { usbVendorId: info.usbVendorId, usbProductId: info.usbProductId }
 
@@ -689,6 +783,9 @@ export function useSerialScale({
             // Sin await: el bucle vive mientras el puerto esté abierto y no debe
             // bloquear a quien llamó a conectar().
             bucleRef.current = bucleLectura(puerto)
+            if (perfilActivo?.mode === 'consulta' && perfilActivo.pollCommand) {
+                iniciarConsulta(puerto, POLL_COMMANDS[perfilActivo.pollCommand])
+            }
             return true
         } catch (err) {
             if (esCancelacionDelUsuario(err) && !puertoPrevio) {
@@ -702,7 +799,7 @@ export function useSerialScale({
             return false
         }
     }, [
-        bucleLectura, cancelarReconexionProgramada, cerrarPuerto,
+        bucleLectura, cancelarReconexionProgramada, cerrarPuerto, iniciarConsulta,
         iniciarWatchdog, marcarSenalRestablecida, reiniciarEstabilizacion,
     ])
 
@@ -739,6 +836,7 @@ export function useSerialScale({
         setDesconexion(null)
         setError(null)
         setSenalRestablecida(false)
+        setUnidadLeida(null)
         setEstado(soportaWebSerial() ? 'desconectada' : 'no-soportada')
     }, [cancelarReconexionProgramada, cerrarPuerto, reiniciarEstabilizacion])
 
@@ -903,6 +1001,7 @@ export function useSerialScale({
         pesoEstable,
         pesajeConfirmado: pesoEstable !== null,
         awaitingEmptyPlatform,
+        unidadLeida,
     }
 }
 

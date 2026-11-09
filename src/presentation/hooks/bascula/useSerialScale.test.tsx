@@ -1,6 +1,8 @@
 // @vitest-environment jsdom
 import { act, cleanup, renderHook } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import type { ScaleProfile } from '#/presentation/types/control-calidad/perfil-bascula.types'
+import { DEFAULT_SCALE_PROFILE } from './scaleDetection'
 import { useSerialScale } from './useSerialScale'
 
 /** Puerto serial simulado: permite inyectar tramas y forzar la pérdida del dispositivo. */
@@ -10,21 +12,27 @@ class PuertoFalso {
     readable: ReadableStream<Uint8Array> | null = null
     writable: WritableStream<Uint8Array> | null = null
     aperturas = 0
+    escrituras: string[] = []
 
     private controlador: ReadableStreamDefaultController<Uint8Array> | null = null
 
-    open = vi.fn(async () => {
+    open = vi.fn(async (_opciones?: SerialOptions) => {
         this.abierto = true
         this.aperturas += 1
         this.readable = new ReadableStream<Uint8Array>({
             start: (controlador) => { this.controlador = controlador },
             cancel: () => { this.controlador = null },
         })
+        this.writable = new WritableStream<Uint8Array>({
+            write: (chunk) => { this.escrituras.push(String.fromCharCode(...chunk)) },
+        })
     })
 
     close = vi.fn(async () => {
+        if (this.writable?.locked) throw new TypeError('The port is already locked.')
         this.abierto = false
         this.readable = null
+        this.writable = null
     })
 
     forget = vi.fn(async () => { })
@@ -414,5 +422,140 @@ describe('useSerialScale', () => {
         expect(result.current.isSupported).toBe(false)
         expect(result.current.estado).toBe('no-soportada')
         expect(result.current.error).toContain('Web Serial')
+    })
+})
+
+describe('useSerialScale con perfil', () => {
+    const perfilConsulta: ScaleProfile = {
+        ...DEFAULT_SCALE_PROFILE,
+        baudRate: 2400,
+        byteFormat: '7E1',
+        mode: 'consulta',
+        pollCommand: 'sics',
+    }
+
+    it('abre el puerto con la velocidad y el formato del perfil', async () => {
+        const { result } = montarHook({ perfil: perfilConsulta })
+
+        await act(async () => { await result.current.connectSerial() })
+
+        expect(puerto.open).toHaveBeenCalledWith({
+            baudRate: 2400, dataBits: 7, parity: 'even', stopBits: 1, flowControl: 'none',
+        })
+    })
+
+    it('en modo consulta escribe el comando periódicamente y lee la respuesta', async () => {
+        const { result } = montarHook({ perfil: perfilConsulta })
+
+        await act(async () => { await result.current.connectSerial() })
+        await avanzar(1000)
+
+        const consultas = puerto.escrituras.filter((escrito) => escrito === 'SI\r\n')
+        expect(consultas.length).toBeGreaterThanOrEqual(4)
+        expect(puerto.escrituras.every((escrito) => escrito === 'SI\r\n')).toBe(true)
+
+        await emitir('S S     230.10 kg\r\n')
+        expect(result.current.pesoActual).toBe(230.1)
+        expect(result.current.unidadLeida).toBe('kg')
+    })
+
+    it('en modo consulta libera el writer antes de cerrar el puerto y deja de consultar', async () => {
+        const { result } = montarHook({ perfil: perfilConsulta })
+
+        await act(async () => { await result.current.connectSerial() })
+        await avanzar(500)
+
+        await act(async () => { await result.current.disconnectSerial() })
+        expect(puerto.abierto).toBe(false)
+
+        const escritas = puerto.escrituras.length
+        await avanzar(1000)
+        expect(puerto.escrituras.length).toBe(escritas)
+    })
+
+    it('en modo continuo no escribe nada en el puerto', async () => {
+        const { result } = montarHook({ perfil: DEFAULT_SCALE_PROFILE })
+
+        await act(async () => { await result.current.connectSerial() })
+        await emitirDurante('  12.00 kg\r\n', 1000)
+
+        expect(puerto.escrituras).toEqual([])
+    })
+
+    it('lee el formato de trama del perfil', async () => {
+        const { result } = montarHook({ perfil: { ...DEFAULT_SCALE_PROFILE, frameFormat: 'invertido' } })
+
+        await act(async () => { await result.current.connectSerial() })
+        await emitir('=0.0510\r\n')
+
+        expect(result.current.pesoActual).toBe(150)
+        expect(result.current.unidadLeida).toBeNull()
+    })
+
+    it('unidadLeida refleja la unidad de la última trama válida', async () => {
+        const { result } = montarHook({ perfil: DEFAULT_SCALE_PROFILE })
+
+        await act(async () => { await result.current.connectSerial() })
+        expect(result.current.unidadLeida).toBeNull()
+
+        await emitir('  12.34 lb\r\n')
+        expect(result.current.unidadLeida).toBe('lb')
+
+        await emitir('  12.34 kg\r\n')
+        expect(result.current.unidadLeida).toBe('kg')
+
+        await act(async () => { await result.current.disconnectSerial() })
+        expect(result.current.unidadLeida).toBeNull()
+    })
+
+    it('onTramaIlegible se dispara una sola vez con basura continua', async () => {
+        const onTramaIlegible = vi.fn()
+        const { result } = montarHook({ perfil: DEFAULT_SCALE_PROFILE, onTramaIlegible })
+
+        await act(async () => { await result.current.connectSerial() })
+        await emitirDurante('#@!&%\r\n', 4500)
+        expect(onTramaIlegible).not.toHaveBeenCalled()
+
+        await emitirDurante('#@!&%\r\n', 1000)
+        expect(onTramaIlegible).toHaveBeenCalledTimes(1)
+
+        await emitirDurante('#@!&%\r\n', 10000)
+        expect(onTramaIlegible).toHaveBeenCalledTimes(1)
+    })
+
+    it('una trama válida reinicia la cuenta de basura', async () => {
+        const onTramaIlegible = vi.fn()
+        const { result } = montarHook({ perfil: DEFAULT_SCALE_PROFILE, onTramaIlegible })
+
+        await act(async () => { await result.current.connectSerial() })
+        await emitirDurante('#@!&%\r\n', 4000)
+        await emitir('  12.00 kg\r\n')
+        await emitirDurante('#@!&%\r\n', 4000)
+
+        expect(onTramaIlegible).not.toHaveBeenCalled()
+    })
+
+    it('onTramaIlegible no se dispara con silencio', async () => {
+        const onTramaIlegible = vi.fn()
+        const { result } = montarHook({ perfil: DEFAULT_SCALE_PROFILE, onTramaIlegible })
+
+        await act(async () => { await result.current.connectSerial() })
+        await avanzar(12000)
+
+        expect(result.current.estado).toBe('sin-senal')
+        expect(onTramaIlegible).not.toHaveBeenCalled()
+    })
+
+    it('sin perfil, la basura no dispara onTramaIlegible', async () => {
+        const onTramaIlegible = vi.fn()
+        const { result } = montarHook({ onTramaIlegible })
+
+        await act(async () => { await result.current.connectSerial() })
+        await emitirDurante('#@!&%\r\n', 8000)
+
+        expect(onTramaIlegible).not.toHaveBeenCalled()
+        expect(puerto.open).toHaveBeenCalledWith({
+            baudRate: 9600, dataBits: 8, stopBits: 1, parity: 'none', flowControl: 'none',
+        })
     })
 })
