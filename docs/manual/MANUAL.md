@@ -42,6 +42,7 @@ Control de calidad de pesajes en planta
    6. [Inspección de clientes, lotes y pesajes](#cap-4-6)
    7. [Aprobar o rechazar un lote](#cap-4-7)
    8. [Historial de pesajes](#cap-4-8)
+   9. [Configurar la báscula a mano](#cap-4-9)
 5. [Supervisor](#cap-5)
    1. [Autorizar un peso con el PIN](#cap-5-1)
    2. [Inspección y rechazo de pesajes](#cap-5-2)
@@ -143,15 +144,27 @@ El indicador de la báscula se conecta a la computadora por un cable USB o por u
 4. Pulse **Autorizar báscula nueva**. El navegador muestra su propia lista de dispositivos.
 5. Elija el puerto de la báscula en la lista del navegador y pulse **Conectar**.
 6. El sistema le pide un nombre para reconocerla después, por ejemplo *Báscula Piso 1*. Escríbalo y pulse **Guardar**.
+7. El diálogo pasa a **Detectando la báscula…**, con una barra de avance. El sistema prueba solo cómo habla esa báscula. **Mantenga la báscula encendida** y no desconecte el cable mientras tanto. Tarda unos segundos, y nunca más de 45. No hace falta poner peso: con la plataforma vacía también funciona.
+8. Cuando termina, aparece **Báscula reconocida** con la **Última lectura**. Compárela con el número que muestra el indicador de la báscula: tienen que coincidir. Si debajo dice *"Unidad no informada"*, la báscula sólo envía el número, sin la unidad.
+9. Pulse **Usar esta báscula**.
+
+Si quiere detener la detección, pulse **Cancelar**: vuelve a la lista y no se guarda nada.
+
+Si la báscula no se pudo reconocer, aparece *"No se pudo reconocer la báscula"*. Revise que esté encendida y conectada, y pulse **Reintentar**. Si sigue igual, llame a soporte o configúrela a mano (vea el [capítulo 4.9](#cap-4-9)).
 
 Cuando la báscula se conecta, aparece el aviso **Báscula conectada**, con la lectura en vivo, el cliente y el lote. Se cierra solo en unos segundos, o con **Empezar a pesar**.
 
-**Las veces siguientes** no hace falta repetir el permiso:
+**Las veces siguientes** no hace falta repetir el permiso ni la detección:
 
 - Al entrar a la pantalla de pesaje, el sistema se conecta solo a la última báscula que usó en ese equipo.
 - Si no se conecta sola, pulse **Conectar Báscula** y elija la báscula de la lista. La última que usó aparece marcada como **Preferida**.
+- Si elige una báscula de la lista que todavía no se detectó en ese equipo, el diálogo pasa a **Detectando la báscula…**, como la primera vez.
 
-El permiso y el nombre de la báscula quedan guardados en ese navegador y en ese equipo. En otro equipo, o en otro navegador, hay que autorizarla de nuevo.
+**Si cambian la configuración de la báscula** (por ejemplo, un técnico la reprogramó), pulse **Conectar Báscula** y, en la fila de esa báscula, **Volver a detectar**. El sistema la detecta de nuevo y reemplaza lo que había guardado.
+
+Si el sistema nota que la báscula envía datos que no puede leer, la desconecta y abre solo el diálogo en **Detectando la báscula…**. Si tiene abiertos el diálogo de tara o el del ticket, espera a que los cierre. Si después de esa nueva detección la báscula sigue enviando datos que no puede leer, el diálogo muestra directamente *"No se pudo reconocer la báscula"*.
+
+El permiso, el nombre de la báscula y lo que el sistema detectó quedan guardados en ese navegador y en ese equipo. En otro equipo, o en otro navegador, hay que autorizarla de nuevo.
 
 <a id="cap-2-3"></a>
 
@@ -367,7 +380,8 @@ Cuando el pesaje se guarda, aparece un aviso en verde y se abre el diálogo del 
 
 **Qué pasa si…**
 
-- **El botón Registrar pesaje no se puede pulsar.** El peso todavía no está estable, la plataforma está vacía, el peso está fuera del rango, la báscula no está enviando lecturas o falta retirar el producto del pesaje anterior. El texto debajo del botón le dice cuál de los casos es.
+- **El botón Registrar pesaje no se puede pulsar.** El peso todavía no está estable, la plataforma está vacía, el peso está fuera del rango, la báscula no está enviando lecturas, la báscula pesa en otra unidad que el lote o falta retirar el producto del pesaje anterior. El texto debajo del botón le dice cuál de los casos es.
+- **Aparece *"La báscula pesa en kilogramos y el lote está en libras. Cambie la unidad en la báscula o elija otro lote."*** (o con otras unidades). La báscula informa una unidad distinta de la del lote, y el sistema no deja registrar para no guardar un peso en la unidad equivocada. Cambie la unidad en el indicador de la báscula, o vuelva atrás y elija el lote que corresponde. Mientras dure el aviso, un peso estable no abre la tara ni el Bloqueo Crítico. Si la báscula sólo envía el número, sin unidad, el sistema usa la del lote y este aviso no aparece.
 - **Aparece *"Retirá el producto de la báscula para registrar el siguiente."*** El pesaje anterior ya se guardó y el producto sigue sobre la plataforma. Retírelo y coloque el siguiente.
 - **Aparece *"La báscula no está enviando lecturas."*** El indicador dejó de enviar el peso. La muestra que estaba en pantalla se descarta, porque ya no se puede confirmar. Cuando la señal vuelve, el peso se estabiliza de nuevo. Vea el [capítulo 2.2](#cap-2-2).
 - **El peso está por debajo del mínimo.** La lectura dice **Desviado** y aparece *"Falta producto: el peso está por debajo del mínimo del lote."* Agregue producto hasta entrar en el rango.
@@ -597,6 +611,26 @@ El lote pasa a **cliente final** y ya no recibe pesajes. El sistema vuelve a la 
 - Se muestran 20 pesajes por página. Use **Anterior** y **Siguiente** para pasar de página.
 
 Para volver a descargar el ticket de un pesaje, búsquelo desde **Clientes**, en los pesajes de su lote (vea el [capítulo 4.6](#cap-4-6)).
+
+<a id="cap-4-9"></a>
+
+### 4.9 Configurar la báscula a mano
+
+Casi todas las básculas se reconocen solas (vea el [capítulo 2.2](#cap-2-2)). Si una no se pudo reconocer, puede indicarle al sistema cómo leerla. Necesita los datos que figuran en el manual de la báscula, o que le dé el técnico que la instaló.
+
+1. En el diálogo *"No se pudo reconocer la báscula"*, pulse **Configurar a mano**.
+2. Complete los datos tal como figuran en el manual de la báscula:
+   - **Velocidad**: un número como 9600 o 2400.
+   - **Formato del byte**: 8N1, 7E1 o 7O1.
+   - **Modo**: **Transmite sola** si la báscula envía el peso todo el tiempo, o **Hay que pedirle el peso** si sólo lo envía cuando se lo piden.
+   - **Comando**: sólo aparece si eligió **Hay que pedirle el peso**. Es la orden con la que se le pide el peso a la báscula.
+   - **Formato de trama**: **Texto** en la mayoría de los casos; **Texto invertido** o **Toledo continuo** si el manual de la báscula lo indica.
+3. Pulse **Probar**. El sistema escucha la báscula unos segundos con esos datos y muestra **Lo que llegó de la báscula**, y debajo el **Peso leído**.
+4. Compare el peso leído con el número que muestra el indicador. Si coinciden, pulse **Guardar**: la báscula se conecta y la próxima vez lo hace sola.
+
+**Guardar** sólo se puede pulsar después de una prueba que leyó un peso. Si cambia cualquier dato después de probar, hay que probar de nuevo.
+
+Si aparece *"No se leyó ningún peso. Revise los datos y pruebe de nuevo."*, alguno de los datos no corresponde a esa báscula. Revíselos y pulse **Probar** otra vez. **Volver** regresa al diálogo anterior, donde puede **Reintentar** la detección automática.
 
 <div style="page-break-after: always"></div>
 
@@ -950,6 +984,20 @@ El aprobador no trabaja en las pantallas que describe este manual, sino en la **
 
 Vea el detalle de cada estado en el [capítulo 2.3](#cap-2-3).
 
+**El sistema dice "No se pudo reconocer la báscula".**
+
+- Verifique que el indicador de la báscula esté encendido y que el cable esté conectado a la computadora.
+- Pulse **Reintentar**. La detección tarda como mucho 45 segundos.
+- Si sigue igual, llame a soporte. Si tiene a mano el manual de la báscula, también puede usar **Configurar a mano** (vea el [capítulo 4.9](#cap-4-9)).
+
+**La báscula pesa en otra unidad.**
+
+Debajo de **Registrar pesaje** aparece *"La báscula pesa en … y el lote está en …"* y el botón no se puede pulsar.
+
+- Cambie la unidad en el indicador de la báscula para que coincida con la del lote. El aviso desaparece en cuanto la báscula envía el peso en la unidad del lote.
+- Si la báscula está bien y el lote es el equivocado, vuelva atrás y elija el lote correcto.
+- El sistema no convierte un peso de una unidad a otra: un peso en kilogramos guardado como libras sería un error de calidad.
+
 **Al ingresar, el sistema dice que la contraseña venció.**
 
 Es normal la primera vez que ingresa un usuario nuevo, y cada vez que la contraseña vence. Elija una contraseña nueva en el diálogo **Tu contraseña venció** y luego ingrese con ella (vea el [capítulo 3.2](#cap-3-2)).
@@ -1076,3 +1124,4 @@ Esta tabla muestra qué pantallas y acciones tiene cada rol en esta versión del
 - Sección 6.1: la lista de usuarios de **Soporte** muestra el usuario con el que cada persona ingresa, y al restablecer una contraseña el aviso lo repite junto a la contraseña temporal.
 - Capítulo 8: la sesión se mantiene abierta mientras se use el sistema, sin volver a ingresar cada jornada. Se explican los motivos por los que el sistema lo devuelve a la pantalla de ingreso, y qué hacer si al ingresar aparece "El usuario esta inactivo".
 - Sección 4.1: después de guardar un pesaje, el siguiente empieza recién cuando se retira el producto de la báscula. Si el indicador deja de enviar el peso, la muestra en pantalla se descarta y no se puede registrar hasta que la señal vuelva.
+- Sección 2.2: al autorizar una báscula nueva, el sistema la detecta solo (**Detectando la báscula…**) y muestra la lectura para compararla con el indicador antes de **Usar esta báscula**. Cada báscula de la lista tiene **Volver a detectar**. Sección 4.1: si la báscula pesa en otra unidad que el lote, no se puede registrar el pesaje. Nueva sección 4.9: **Configurar a mano**, para una báscula que no se reconoce sola. Capítulo 8: "No se pudo reconocer la báscula" y "La báscula pesa en otra unidad".

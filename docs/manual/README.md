@@ -77,8 +77,8 @@ Esta lista es el checklist de quien toma las capturas. Si un cambio modifica una
 | `3-4-ajustes.png` | Ajustes: perfil, apariencia y sesión. | Pendiente |
 | `4-1-seleccion-cliente.png` | La grilla de clientes de **Registrar Pesaje**. | Pendiente |
 | `4-1-seleccion-lote.png` | Los lotes del cliente elegido. | Pendiente |
-| `4-1-bascula-conectar.png` | La báscula antes de conectar, con el selector de puerto. | Pendiente |
-| `4-1-bascula-estable.png` | Un peso estable dentro del rango. | Pendiente |
+| `4-1-bascula-conectar.png` | La báscula antes de conectar, con el selector de puerto. | Rehacer |
+| `4-1-bascula-estable.png` | Un peso estable dentro del rango. | Rehacer |
 | `4-1-tara.png` | El diálogo de tara. | Pendiente |
 | `4-3-bloqueo-critico.png` | El Bloqueo Crítico pidiendo el PIN. | Pendiente |
 | `4-3-tara-autorizada.png` | La tara con "Autorizado por …". | Pendiente |

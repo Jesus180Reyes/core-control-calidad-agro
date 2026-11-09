@@ -130,13 +130,41 @@ Grupos `(auth)` y `(portal)` con layouts pathless: `(portal)/_portal.tsx` monta 
 
 ### Báscula (Web Serial)
 
-`presentation/hooks/bascula/useSerialScale.tsx` es el núcleo del producto: abre el puerto con la Web Serial API, parsea las tramas del indicador, corre la ventana de estabilización (un solo ticker gobierna cuenta regresiva y confirmación), un watchdog de "sin señal" con el puerto abierto, y reconexión automática con backoff exponencial. La configuración viva y los callbacks se leen por `configRef`/`callbacksRef` para evitar closures obsoletos en el bucle de lectura; los timers y refs se limpian en el desmontaje. Al tocar este hook, cuidar el orden de cierre: cancelar el reader → esperar `bucleRef` → `port.close()`, o `close()` falla con "port is already locked".
+`presentation/hooks/bascula/useSerialScale.tsx` es el núcleo del producto: abre el puerto con la Web Serial API, parsea las tramas del indicador, corre la ventana de estabilización (un solo ticker gobierna cuenta regresiva y confirmación), un watchdog de "sin señal" con el puerto abierto, y reconexión automática con backoff exponencial. La configuración viva y los callbacks se leen por `configRef`/`callbacksRef` para evitar closures obsoletos en el bucle de lectura; los timers y refs se limpian en el desmontaje. Al tocar este hook, cuidar el orden de cierre: cancelar el reader → esperar `bucleRef` → liberar el writer del modo consulta → `port.close()`, o `close()` falla con "port is already locked".
 
 Tres reglas de la muestra, con tests en `useSerialScale.test.tsx`:
 
 - **Una muestra sólo se confirma con lecturas a la vista.** Al cerrar la ventana tienen que haber llegado `minStableReadings` (3) lecturas válidas y la última no puede tener más de `maxReadingAgeMs` (2 s); si no, la ventana corre de nuevo. El ticker mide tiempo, y sin esta regla una báscula que se calla a mitad de la ventana confirmaba el último peso.
 - **El watchdog invalida la muestra.** Un corte recuperable (`'sin-senal'`) conserva `pesoActual` y el puerto, pero descarta `pesoEstable` y la ventana: con la báscula muda nadie ve ese peso. `MonitoreoBasculaCard` deshabilita **Registrar pesaje** sin `hayFlujoDatos`.
 - **Entre dos pesajes guardados la plataforma pasa por cero.** `confirmarTara` llama a `requireEmptyPlatform()` y no a `reiniciarPesaje()`: mientras `awaitingEmptyPlatform`, las lecturas no abren ventana y `reiniciarPesaje` no la arranca. Se libera con la primera lectura dentro de `umbralCero`. Cancelar la tara y rechazar el pesaje siguen con `reiniciarPesaje`, porque ahí no se guardó nada. Los tests mandan tramas continuas (`emitirDurante`): una trama suelta ya no confirma.
+
+#### Perfil por báscula y autodetección (SPEC 26)
+
+Velocidad, formato del byte, modo, trama y unidad ya no están fijos en el código: cada báscula tiene un `ScaleProfile` (`types/control-calidad/perfil-bascula.types.ts`) guardado en `localStorage` bajo `bascula-perfil:v1`, indexado por la misma `ClaveBascula` del alias y la preferida (`readProfiles`/`readProfile`/`saveProfile` en `almacenamientoBasculas.ts`). La lectura se valida entrada por entrada: una `version` distinta o un campo inválido descarta ese perfil y la báscula queda "sin perfil".
+
+- **Sin perfil se usa `DEFAULT_SCALE_PROFILE`** —9600, 8N1, continuo, `texto`, `\r\n`—, que es exactamente el comportamiento anterior. Lo devuelve `resolverPerfilPreferido()` y con él auto-conecta `useControlCalidad` al montar: una báscula autorizada antes del spec no pasa por una detección que no necesita.
+- **Las piezas puras tienen tests propios.** `scaleFrameParser.ts` (`splitFrames`/`parseFrame`: `texto` con la etiqueta de bruto `G`/`GS`/`GROSS`/`B`, `invertido` estilo XK3190 y `toledo-continuo` con el decimal y el signo en los bytes de estado), `scaleDetection.ts` (catálogos, `toSerialOptions`, `decodeBytes`, `scoreSample`, `readReply`) y `scaleUnits.ts`. `decodeBytes` convierte cada byte a un carácter, no usa UTF-8, y en 7 bits enmascara la paridad; `useSerialScale` con perfil lee con él, igual que la detección.
+- **`useSerialScale` con `perfil`** abre con `toSerialOptions(perfil)`, corta con el terminador y parsea con el formato del perfil, y expone `unidadLeida`. En modo `consulta` toma un writer y manda `POLL_COMMANDS[pollCommand]` cada `INTERVALO_CONSULTA_MS` (250 ms); el orden de cierre suma un paso: cancelar el reader → esperar `bucleRef` → **liberar el writer** → `port.close()`. Sin `perfil` nada cambia (ni aviso ni `unidadLeida`). El perfil se toma al abrir: cambiarlo con el puerto abierto cuenta recién en la próxima conexión.
+- **Por eso `useControlCalidad` no conecta en el mismo tick que guarda el perfil**: el `configRef` del hook se actualiza en un efecto, y conectar en el acto abriría con el perfil anterior. La conexión queda en un estado (`conexionPendiente`) que dispara un efecto declarado después de `useSerialScale`.
+
+**La detección** (`useScaleDetection.tsx`) corre en el `SelectorBasculaDialog`, como un paso visible, con el puerto cerrado. Cada combinación abre y cierra el puerto con el mismo orden de cierre, en un solo helper (`openSession`).
+
+1. Escucha cada velocidad de `DETECTION_BAUD_RATES` (9600 primero) en 8N1, 1200 ms. Corta en cuanto una muestra supera `UMBRAL_CONFIANZA` (0,9).
+2. En las velocidades que recibieron bytes (o errores de lectura), prueba 7E1 y 7O1. Si nada supera la confianza, gana la mejor por encima de `UMBRAL_MINIMO` (0,6).
+3. **Sólo si todo estuvo mudo**, modo consulta: 9600/2400/4800/19200 × 8N1/7E1 × cada comando de `POLL_COMMANDS`, 400 ms por respuesta, y un comando gana con dos respuestas válidas seguidas. Nunca se manda un comando a una báscula que transmite: algunos indicadores toman un byte suelto como tara o cero.
+4. Tope total `DETECTION_TIMEOUT_MS` (45 s).
+
+`scoreSample` exige 3 tramas válidas del mismo formato; el puntaje es la proporción de tramas válidas por la de imprimibles, y una primera trama cortada no cuenta. La plataforma vacía detecta igual (`0.00` es una trama válida).
+
+El selector (`useSelectorBascula`) suma los pasos `detectando` / `resultado` / `fallo` / `manual`, y `onSeleccionar` recibe `(puerto, perfil)`. Una báscula nueva pasa del alias a `detectando`; elegir una sin perfil, también; una con perfil conecta sin detectar. **Cerrar el dialog equivale a Cancelar**: corta la detección y no guarda nada, y antes de conectar se espera a que la detección o la prueba en curso suelten el puerto (`waitIdle`). **Configurar a mano** (`ManualScaleProfileForm`) escucha 3 s con los valores del formulario (`probeScaleProfile`), deduce el terminador, y **Guardar** sólo se habilita tras una prueba que leyó un peso; guarda lo que se probó, con `source: 'manual'`, y cambiar un campo descarta la prueba.
+
+**La re-detección automática** sale de `onTramaIlegible`: bytes sin ninguna trama válida durante `TRAMA_ILEGIBLE_MS` (5 s), una vez por conexión. El silencio no cuenta —es báscula apagada o cable suelto, y sigue el "sin señal" de siempre—. `useControlCalidad` desconecta y abre el dialog en `detectando` con la preferida, esperando a que se cierren la tara o el ticket. **Como mucho una vez por báscula por carga de pantalla** (`basculasRedetectadasRef`): la segunda vez abre directo el `fallo` (`mostrarFallo`), sin bucle.
+
+**El bloqueo por unidad**, con tres reglas:
+
+- `unitMismatch = isUnitMismatch(scale.unidadLeida, unitFromLote(lote.unidad_medida))` es `true` sólo si **las dos** unidades se conocen y no coinciden.
+- **Sin unidad en la trama se asume la del lote**, como antes; y un `unidad_medida` que `unitFromLote` no reconoce devuelve `null` y **no bloquea**: un texto nuevo del catálogo no puede frenar la planta. Se agrega en `LOT_UNITS`.
+- Con `unitMismatch`, `MonitoreoBasculaCard` deshabilita **Registrar pesaje** y pinta el aviso en su línea de ayuda, `solicitarTara` no hace nada y `mostrarBloqueo` exige `!unitMismatch`. No se convierte kg ↔ lb, a propósito.
 
 Los tipos de la Web Serial API están declarados a mano en `src/global.d.ts` (no hay `@types/w3c-web-serial`). Sólo funciona en Chrome/Edge de escritorio; `estado === 'no-soportada'` cubre el resto.
 

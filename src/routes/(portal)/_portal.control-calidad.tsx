@@ -58,6 +58,7 @@ function ControlCalidadPage() {
         guardando,
         impresion,
         conexion,
+        unitMismatch,
     } = useControlCalidad(cliente, lote)
 
     return (
@@ -110,6 +111,8 @@ function ControlCalidadPage() {
                         guardando={guardando}
                         hasReadings={scale.hayFlujoDatos}
                         awaitingEmptyPlatform={scale.awaitingEmptyPlatform}
+                        scaleUnit={scale.unidadLeida}
+                        unitMismatch={unitMismatch}
                         onGuardar={tara.solicitar}
                     />
                 </div>
