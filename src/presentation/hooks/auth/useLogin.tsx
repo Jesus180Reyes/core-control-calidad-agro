@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useForm, type Control } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useNavigate } from '@tanstack/react-router'
@@ -8,6 +8,7 @@ import { useAuth } from '#/presentation/hooks/auth/useAuth'
 import { guardarPermisos } from '#/presentation/hooks/auth/almacenamientoSesion'
 import { loginSchema, type LoginFormValues } from '#/presentation/hooks/auth/loginSchema'
 import { isExpiredPasswordError } from '#/presentation/hooks/auth/passwordVencida'
+import { readRememberedUsername, saveRememberedUsername } from '#/presentation/hooks/auth/rememberedUsername'
 import { httpGet, mensajeDeError } from '#/infrastructure/http/http-client'
 import type { LoginResponse, PermisosResponse } from '#/presentation/types/auth/auth.types'
 import { advertirPermisosDesconocidos } from '#/presentation/types/auth/permissions'
@@ -25,6 +26,9 @@ interface UseLoginResult {
     errorLogin: string | null
     verPassword: boolean
     alternarVerPassword: () => void
+    rememberUsername: boolean
+    toggleRememberUsername: () => void
+    focusPassword: () => void
     /** Con valor, el `ExpiredPasswordDialog` está abierto. */
     expiredCredentials: ExpiredCredentials | null
     closeExpiredDialog: () => void
@@ -42,18 +46,34 @@ export function useLogin(): UseLoginResult {
     // Se borran al cerrar el diálogo y al renovar.
     const [expiredCredentials, setExpiredCredentials] = useState<ExpiredCredentials | null>(null)
 
-    const { control, handleSubmit, resetField } = useForm<LoginFormValues>({
+    const [rememberUsername, setRememberUsername] = useState(false)
+
+    const { control, handleSubmit, resetField, setValue, setFocus } = useForm<LoginFormValues>({
         resolver: zodResolver(loginSchema),
         mode: 'onChange',
         reValidateMode: 'onChange',
+        defaultValues: { username: '', password: '' },
     })
 
+    useEffect(() => {
+        const savedUsername = readRememberedUsername()
+        if (!savedUsername) {
+            setFocus('username')
+            return
+        }
+        setValue('username', savedUsername)
+        setRememberUsername(true)
+        setFocus('password')
+    }, [setFocus, setValue])
+
     const mutation = useExecuteMutation<LoginResponse, LoginFormValues>('/auth/login', {
-        onSuccess: async (data) => {
+        onSuccess: async (data, variables) => {
             if (!iniciarSesion(data)) {
                 setErrorLogin('No se pudo iniciar sesión. Intentá de nuevo.')
                 return
             }
+
+            saveRememberedUsername(rememberUsername ? variables.username : null)
 
             // Después de `iniciarSesion`: el `Bearer` lo inyecta el interceptor
             // leyendo el token de `localStorage`, que recién ahora existe.
@@ -98,6 +118,7 @@ export function useLogin(): UseLoginResult {
         setExpiredCredentials(null)
         setErrorLogin(null)
         resetField('password')
+        setFocus('password')
     }
 
     return {
@@ -107,6 +128,9 @@ export function useLogin(): UseLoginResult {
         errorLogin,
         verPassword,
         alternarVerPassword: () => setVerPassword((valor) => !valor),
+        rememberUsername,
+        toggleRememberUsername: () => setRememberUsername((valor) => !valor),
+        focusPassword: () => setFocus('password'),
         expiredCredentials,
         closeExpiredDialog: () => setExpiredCredentials(null),
         handlePasswordRenewed,

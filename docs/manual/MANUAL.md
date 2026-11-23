@@ -208,12 +208,15 @@ Este capítulo vale para todos los roles.
 
 *La pantalla de ingreso.*
 
-1. Abra en el navegador la dirección de METRIKA 360 que le dio su empresa.
-2. En **Usuario**, escriba su usuario. Se convierte a mayúsculas solo.
+1. Abra en el navegador la dirección de METRIKA 360 que le dio su empresa. La pantalla dice *"Hola de nuevo"*.
+2. En **Usuario**, escriba su usuario. Se convierte a mayúsculas solo. Pulse Enter o Tab para pasar a la contraseña.
 3. En **Contraseña**, escriba su contraseña. Con el ícono del ojo puede verla mientras la escribe.
-4. Pulse **Ingresar**.
+4. Si trabaja siempre en el mismo equipo, marque **Recordar usuario**. La próxima vez su usuario ya estará escrito y solo tendrá que poner la contraseña.
+5. Pulse **Ingresar**, o la tecla Enter.
 
 Al ingresar, el sistema lo lleva a la portada.
+
+El usuario se recuerda solo si el ingreso sale bien. Para que el equipo lo olvide, desmarque **Recordar usuario** e ingrese. No marque esta casilla en un equipo que comparten varias personas.
 
 **Qué pasa si…**
 
@@ -1112,6 +1115,7 @@ Esta tabla muestra qué pantallas y acciones tiene cada rol en esta versión del
 - Nueva sección 5.7: el supervisor y el administrador pueden agregar o quitar los operadores de un cliente desde **Clientes**, con **Editar Operadores Vinculados**.
 - Las tarjetas de lote muestran el origen del lote, o "Sin origen" si no se cargó.
 - El diálogo **Tara del envase** tiene un campo opcional **Observaciones**, debajo de **Tara**, para anotar lo que mida la planta en cada pesaje.
+- Sección 3.1: la pantalla de ingreso tiene un diseño nuevo, igual al de la aplicación del celular, y una casilla **Recordar usuario** para no escribir el usuario cada vez.
 - Sección 5.4: el Mirador tiene un botón **Modo TV**, que lo pone en pantalla completa y recorre solo cada cliente con lotes activos, mostrando enseguida cada pesaje fuera de rango.
 - Sección 5.3: si Agri no entiende del todo una pregunta, propone dos o tres preguntas más concretas debajo de su respuesta, que se envían con solo pulsarlas.
 - Sección 5.3: mientras Agri responde, la flecha de enviar se convierte en un cuadrado que detiene la respuesta y devuelve la pregunta al recuadro; si la respuesta tarda, Agri avisa que está consultando los datos.

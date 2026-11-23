@@ -15,6 +15,9 @@ function LoginPage() {
         errorLogin,
         verPassword,
         alternarVerPassword,
+        rememberUsername,
+        toggleRememberUsername,
+        focusPassword,
         expiredCredentials,
         closeExpiredDialog,
         handlePasswordRenewed,
@@ -28,6 +31,9 @@ function LoginPage() {
             errorLogin={errorLogin}
             verPassword={verPassword}
             alternarVerPassword={alternarVerPassword}
+            rememberUsername={rememberUsername}
+            onToggleRememberUsername={toggleRememberUsername}
+            onUsernameEnter={focusPassword}
             expiredCredentials={expiredCredentials}
             closeExpiredDialog={closeExpiredDialog}
             handlePasswordRenewed={handlePasswordRenewed}

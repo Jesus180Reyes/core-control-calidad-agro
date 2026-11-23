@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Poppins:wght@400;500;600&family=Chivo+Mono:wght@400;500&display=swap');
 @import "tailwindcss";
 /* Las clases `prose` del plugin son lo que le da forma al markdown que devuelve
    el backend (resumen IA): sin él, `MarkdownContent` pinta títulos y listas sin
@@ -291,6 +291,12 @@
   --color-agri-from: var(--agri-from);
   --color-agri-to: var(--agri-to);
 
+  --color-brand-alt: var(--brand-alt);
+  --color-brand-soft: var(--brand-soft);
+  --color-brand-deep: var(--brand-deep);
+  --font-poppins: 'Poppins', sans-serif;
+  --font-chivo-mono: 'Chivo Mono', monospace;
+
   /* Paleta base de shadcn. Las primitivas de `components/ui/` están escritas
      contra estos nombres (`bg-popover`, `bg-muted`, `border-input`…) y sin
      definirlos la clase se genera vacía: un popover con fondo transparente
@@ -395,6 +401,10 @@
   --agri-from: var(--brand);
   --agri-to: var(--color-indigo-500);
 
+  --brand-alt: #3F8A5C;
+  --brand-soft: #E3F1E8;
+  --brand-deep: #2E6B45;
+
   /* Sólo para la paleta de shadcn: el fondo de los estados hover/selected de
      las primitivas, el color de error y el texto sobre `brand`. */
   --brand-foreground: #ffffff;
@@ -420,6 +430,10 @@
      ícono blanco del avatar se perdería. */
   --agri-from: var(--color-indigo-500);
   --agri-to: var(--brand);
+
+  --brand-alt: #3F8A5C;
+  --brand-soft: #13291C;
+  --brand-deep: #2E6B45;
 
   --brand-foreground: #0C1410;
   --muted: #1f2937;
