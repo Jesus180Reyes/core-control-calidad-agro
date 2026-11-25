@@ -1116,6 +1116,7 @@ Esta tabla muestra qué pantallas y acciones tiene cada rol en esta versión del
 - Las tarjetas de lote muestran el origen del lote, o "Sin origen" si no se cargó.
 - El diálogo **Tara del envase** tiene un campo opcional **Observaciones**, debajo de **Tara**, para anotar lo que mida la planta en cada pesaje.
 - Sección 3.1: la pantalla de ingreso tiene un diseño nuevo, igual al de la aplicación del celular, y una casilla **Recordar usuario** para no escribir el usuario cada vez.
+- La pestaña del navegador muestra el logo de METRIKA 360, el mismo de la pantalla de ingreso.
 - Sección 5.4: el Mirador tiene un botón **Modo TV**, que lo pone en pantalla completa y recorre solo cada cliente con lotes activos, mostrando enseguida cada pesaje fuera de rango.
 - Sección 5.3: si Agri no entiende del todo una pregunta, propone dos o tres preguntas más concretas debajo de su respuesta, que se envían con solo pulsarlas.
 - Sección 5.3: mientras Agri responde, la flecha de enviar se convierte en un cuadrado que detiene la respuesta y devuelve la pregunta al recuadro; si la respuesta tarda, Agri avisa que está consultando los datos.
